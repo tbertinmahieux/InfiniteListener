@@ -216,7 +216,6 @@ def get_beats_bars(track_id,elem):
     url += _api_dev_key
     url += '&id=music://id.echonest.com/~/TR/' + track_id
     url += '&version=3'
-    print url
     # call, get XML
     xmldoc = do_xml_call(url)
     # check success
@@ -230,6 +229,62 @@ def get_beats_bars(track_id,elem):
     return result
 
 
+def get_duration(track_id):
+    """
+    Get the duration of a given track id
+    RETURN
+       float or None
+    """
+    # build call
+    url = 'http://developer.echonest.com/api/get_duration?api_key='
+    url += _api_dev_key
+    url += '&id=music://id.echonest.com/~/TR/' + track_id
+    url += '&version=3'
+    # call, get XML
+    xmldoc = do_xml_call(url)
+    # check success
+    if not check_xml_success(xmldoc):
+        return None
+    duration = xmldoc.getElementsByTagName('duration')[0].firstChild.data
+    return float(duration)
+
+
+def get_segments(track_id):
+    """
+    Get the segments of a given track id
+    RETURN
+      segstart, chroma     array, np.array 12x1    or None, None
+    """
+    # build call
+    url = 'http://developer.echonest.com/api/get_segments?api_key='
+    url += _api_dev_key
+    url += '&id=music://id.echonest.com/~/TR/' + track_id
+    url += '&version=3'
+    # call, get XML
+    xmldoc = do_xml_call(url)
+    # check success
+    if not check_xml_success(xmldoc):
+        return None, None
+    # get all segments
+    segments = xmldoc.getElementsByTagName('segment')
+    if len(segments) == 0:
+        return None, None
+    # to return
+    segstart = []
+    chromas = np.zeros([12,len(segments)])
+    for segidx in range(len(segments)):
+        segment = segments[segidx]
+        # get start time
+        segstart.append(float(segment.getAttribute('start')))
+        # get chromas
+        pitches = segment.getElementsByTagName('pitch')
+        assert len(pitches) == 12
+        for k in range(12):
+            chromas[k,segidx] = float(pitches[k].firstChild.data)
+    # done
+    return segstart, chromas
+
+
 def get_our_analysis(track_id):
     """
     Get the analysis we need from a given track ID:
@@ -241,7 +296,24 @@ def get_our_analysis(track_id):
 
     Return them in order, or 5 None if one of them fails
     """
-    raise NotImplementedError
+    # duration
+    duration = get_duration(track_id)
+    if duration == None:
+        return None,None,None,None,None
+    # beats
+    beatstart = get_beats(track_id)
+    if beatstart == None:
+        return None,None,None,None,None
+    # bars
+    barstart = get_bars(track_id)
+    if barstart == None:
+        return None,None,None,None,None
+    # segments
+    segstart, chromas = get_segments(track_id)
+    if segstart == None or chromas == None:
+        return None,None,None,None,None
+    # done, return
+    return segstart, chromas, beatstart, barstart, duration
 
     
 
@@ -287,3 +359,12 @@ if __name__ == '__main__' :
     print get_bars(tids[0])
     # get beats with that id
     print get_beats(tids[0])
+    # get duration with that id
+    print 'duration:',get_duration(tids[0])
+    # get segments with that id
+    segstart, chromas = get_segments(tids[0])
+    print 'some chromas:',chromas[:,int(chromas.shape[1]/2)]
+    # get our analysis with that id
+    a,b,c,d,e = get_our_analysis(tids[0])
+    print 'duration still:', e
+    
