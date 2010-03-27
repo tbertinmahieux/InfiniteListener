@@ -61,7 +61,7 @@ def do_dict_call(url):
     Returns dictionary
     """
     # call the url, save the output to file
-    filename,httpmesage = urllib.urlretrieve(url)
+    filename,httpmessage = urllib.urlretrieve(url)
     # open the file
     f = open(filename,'r')
     # read the line (hope there is only one...)
@@ -156,12 +156,14 @@ def search_tracks(artist,title='',max_results=100):
     # build call
     url = 'http://developer.echonest.com/api/alpha_search_tracks?'
     url += 'api_key=' + _api_dev_key
-    url += '&artist='+urllib.quote(artist)
+    try:
+        url += '&artist='+urllib.quote(artist)
+    except TypeError:
+        url += '&artist='+artist
     if title != '':
         url += '&title='+urllib.quote(title)
     url += '&version=3'
     url += '&results=' + str(int(max_results))
-    print url
     # call, get XML
     d = do_dict_call(url)
     # check success

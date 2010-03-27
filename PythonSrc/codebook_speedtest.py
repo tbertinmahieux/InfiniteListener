@@ -58,7 +58,9 @@ class Codebook:
         self._kdtree = scipy.spatial.KDTree(self._codebook,leafsize=100)
         self._ckdtree = scipy.spatial.cKDTree(self._codebook,leafsize=100)
         # test ann kdtree
+        tstart = time.time()
         self._ann = ann.kdtree(self._codebook)
+        print 'time to build ann tree:',time.time()-tstart,'seconds.'
         
     def _init_bounds(self):
         """
@@ -117,13 +119,13 @@ class Codebook:
         res = self._ann.knn(sample,1)
         return res[0][0][0]
 
-    def closest_code_ann_approx(self,sample,eps=.1):
+    def closest_code_ann_approx(self,sample,eps=.001):
         """
         Finds the closest code to a given sample.
         Do it using a kd-tree
         Returns the index of the closest code.
         """
-        res = self._ann.knn(sample,1,eps=.1)
+        res = self._ann.knn(sample,1,eps=eps)
         return res[0][0][0]
         
 
@@ -201,9 +203,12 @@ if __name__ == '__main__':
     timekd = 0
     timeckd = 0
     timeann = 0
+    timeannapprox = 0
+    timeann2 = 0
     tstart = time.time()
     cb = Codebook(codebook)
     print 'initialized codebook in',time.time()-tstart,'seconds.'
+
     for sample in samples:
         # debug
         tstart = time.time()
@@ -221,11 +226,27 @@ if __name__ == '__main__':
         tstart = time.time()
         idx5 = cb.closest_code_ann(sample)
         timeann += time.time() - tstart
+        # ann approx.
+        tstart = time.time()
+        idx6 = cb.closest_code_ann_approx(sample,0.0000001)
+        timeannapprox += time.time() - tstart
+        # ann redoing codebook
+        tstart = time.time()
+        cb._ann = ann.kdtree(cb._codebook)
+        idx7 = cb.closest_code_ann(sample)
+        timeann2 += time.time() - tstart
+        # checking
         assert idx2 == idx3 or (cb[idx2] == cb[idx3]).all()
         assert idx2 == idx4 or (cb[idx2] == cb[idx4]).all()
         assert idx2 == idx5 or (cb[idx2] == cb[idx5]).all()
+        assert idx2 == idx7 or (cb[idx2] == cb[idx5]).all()
+        annapprox_p = 0
+        if idx2 == idx6 or (cb[idx2] == cb[idx6]).all():
+            annapprox_p += 1
     #print 'time for fast algo:',timefast,'seconds.'
-    print 'time for slow algo:',timeslow,'seconds.'
-    print 'time for kd algo:  ',timekd,'seconds.'
-    print 'time for ckd algo: ',timeckd,'seconds.'
-    print 'time for ann algo: ',timeann,'seconds.'
+    print 'time for slow algo:        ',timeslow,'seconds.'
+    print 'time for kd algo:          ',timekd,'seconds.'
+    print 'time for ckd algo:         ',timeckd,'seconds.'
+    print 'time for ann algo:         ',timeann,'seconds.'
+    print 'time for ann approx. algo: ',timeannapprox,'seconds, accuracy:',annapprox_p*1./samples.shape[0]
+    print 'time for ann2 algo:        ',timeann2,'seconds.'

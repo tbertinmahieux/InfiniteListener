@@ -17,7 +17,7 @@ import numpy as np
 from pyechonest import config
 from pyechonest import track as trackEN
 from pyechonest import artist as artistEN
-
+import en_extras
 
 
 
@@ -51,22 +51,23 @@ def _thread_en(artist_list=[]):
         else:
             idx = np.random.randint(len(artist_list))
             artist = artist_list[idx]
-        artists = artistEN.search_artists(artist)
-        if len(artists) == 0:
-            continue
-        artist = artists[np.random.randint(len(artists))]
+
+        #artists = artistEN.search_artists(artist)
+        #if len(artists) == 0:
+        #    continue
+        #artist = artists[np.random.randint(len(artists))]
+
         # get song
-        audio = artist.audio()
-        if len(audio) == 0:
+        tids,titles,aids,artists = en_extras.search_tracks(artist)
+        if tids == None or len(tids) == 0:
             continue
-        songid = audio[np.random.randint(len(audio))]['id']
-        # save stuff to queue
-        entrack = trackEN.Track(songid)
-        d = dict()
-        d['segments'] = entrack.segments
-        d['duration'] = entrack.duration
-        d['beats'] = entrack.beats
-        d['bars'] = entrack.bars
+        trackid = tids[np.random.randint(len(tids))]
+        # save EchoNest data to queue
+        segstart,chromas,beatstart,barstart,duration = en_extras.get_our_analysis(trackid)
+        if segstart == None:
+            continue
+        d = {'segstart':segstart,'chromas':chromas,
+             'beatstart':beatstart,'barstart':barstart,'duration':duration}
         # put data in queue
         #_thread_en_lock.acquire() # deque is supposed to be thread safe
         _thread_en_song_data.appendleft(d)
@@ -86,12 +87,15 @@ class OracleEN():
     Class to get EchoNest features
     """
 
-    def __init__(self,artist_list=[]):
+    def __init__(self,artist_list=[],nThreads = 1):
         """
         Constructor
         """
-        # start EN thread
-        thread.start_new_thread(_thread_en,(),{'artist_list':artist_list})
+        # start a number of EN threads
+        assert nThreads > 0,'you need at least one thread'
+        assert nThreads <= 15,'15 threads is the limit, that is a lot!'
+        for k in range(nThreads):
+            thread.start_new_thread(_thread_en,(),{'artist_list':artist_list})
 
     def __del__(self):
         """
@@ -112,7 +116,7 @@ def die_with_usage():
     """
     print 'Class and function to serve as an EchoNest oracle'
     print 'for simple test/debug, launch:'
-    print '    python OracleEN.py -go'
+    print '    python oracle_en.py -go'
     sys.exit(0)
 
 
@@ -124,7 +128,7 @@ if __name__ == '__main__':
 
     # DEBUG
 
-    oracle = OracleEN(['The Beatles','Weezer','ABBA'])
+    oracle = OracleEN(['The Beatles','Weezer','ABBA'],nThreads=4)
 
     # check if queue fills up
     tstart = time.time()
