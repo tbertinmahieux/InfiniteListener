@@ -365,6 +365,7 @@ if __name__ == '__main__' :
     segstart, chromas = get_segments(tids[0])
     print 'some chromas:',chromas[:,int(chromas.shape[1]/2)]
     # get our analysis with that id
+    tstart = time.time()
     a,b,c,d,e = get_our_analysis(tids[0])
-    print 'duration still:', e
+    print 'duration still:', e, ', obtained in',time.time()-tstart,'seconds.'
     
