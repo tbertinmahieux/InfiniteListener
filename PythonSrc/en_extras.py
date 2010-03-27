@@ -56,6 +56,26 @@ def do_xml_call(url):
     return xmldoc
 
 
+def do_dict_call(url):
+    """
+    Calls EchoNest with a given command, expect the string
+    representation of a python dictionary.
+    Used by alpha API calls like search_tracks
+    Returns dictionary
+    """
+    # call the url, save the output to file
+    filename,httpmesage = urllib.urlretrieve(url)
+    # open the file
+    f = open(filename,'r')
+    # read the line (hope there is only one...)
+    data = f.readline().strip()
+    # close the file
+    f.close()
+    # eval
+    d = eval(data)
+    # return dictionary
+    return d
+
 
 def check_xml_success(xmldoc):
     """
@@ -72,19 +92,19 @@ def check_xml_success(xmldoc):
 
     
 
-def get_audio(artist_id,max_result=15):
+def get_audio(artist_id,max_results=15):
     """
     Get the audio given an artist EchoNest id.
     artist_id example: ARH6W4X1187B99274F
 
     INPUT:
     - artist_id    something like: ARH6W4X1187B99274F
-    - max_result   max number  of results (must be <= 15)
+    - max_results  max number  of results (must be <= 15)
 
     Returns two list, or two None if error
     RETURN:
-       ids,titles,artist    two lists + one string
-       None,None,?          if problem, two none + none or artist
+       titles,artist    one list + one string
+       None,?           if problem, none + <none or artist>
 
     This one is actually easy with pyechonest.
     This is a debugging case.
@@ -94,50 +114,107 @@ def get_audio(artist_id,max_result=15):
     url += _api_dev_key
     url += '&id=music://id.echonest.com/~/AR/'
     url += artist_id
-    url += '&rows=' + str(int(max_result))
+    url += '&rows=' + str(int(max_results))
     url += '&version=3'
     # call, get XML
     xmldoc = do_xml_call(url)
     # check success
     if not check_xml_success(xmldoc):
-        return None,None,None
+        return None,None
     # get artist name
     artist_name = xmldoc.getElementsByTagName('artist')[0].firstChild.firstChild.data
     # get all audio
     results = xmldoc.getElementsByTagName('results')[0]
     nAudio = int(results.getAttribute('shown'))
     if nAudio == 0:
-        return None,None,artist_name
+        return None,artist_name
     # we have positive results
-    ids = []
     titles = []
     docs = results.getElementsByTagName('doc')
     for doc in docs:
-        ids.append(doc.getAttribute('id'))
         title = doc.getElementsByTagName('title')[0].firstChild.data
         titles.append(title)
     # done, return lists
-    return ids,titles,artist_name
+    return titles,artist_name
     
 
 
-def get_track_from_id(track_id):
+def search_tracks(artist,title='',max_results=100):
     """
-    Get track info (call 'analyze') given an id obtained from
-    an artist, for instance.
+    Search for songs that match a query.
+    Query based on artist and title (one of the two or both).
 
-    Typical call:
-    http://developer.echonest.com/api/analyze?api_key=5ZAOMB3BUR8QUN4PE&id=fb6e02de612836c3b6d407291ba2260e&version=3
+    INPUT:
+       - artist, or approximation
+       - title of the song, or approximation (optional)
+       - max_results, number of results (must be <= 100)
 
+    RETURN:
+       tids, titles, aids, artists    4 lists! or None, None, None, None
+
+    Not sure that addind a song title changes much the result...
+    This code relies on an alpha call to EchoNest API, it will
+    get deprecated!
+    """
+    # build call
+    url = 'http://developer.echonest.com/api/alpha_search_tracks?'
+    url += 'api_key=' + _api_dev_key
+    url += '&artist='+urllib.quote(artist)
+    if title != '':
+        url += '&title='+urllib.quote(title)
+    url += '&version=3'
+    url += '&results=' + str(int(max_results))
+    print url
+    # call, get XML
+    d = do_dict_call(url)
+    # check success
+    if not d['status'] == 'ok':
+        return None, None, None, None
+    results = d['results']
+    if len(results) == 0:
+        return None, None, None, None
+    # get results info
+    tids = []
+    titles = []
+    aids = []
+    artists = []
+    for res in results:
+        tids.append(res['trackID'])
+        titles.append(res['title'])
+        aids.append(res['artistID'])
+        artists.append(res['artist'])
+    # done
+    return tids, titles, aids, artists
+
+    
+
+def get_beats(track_id):
+    """ SEE GET_BEATS_BARS """
+    return get_beats_bars(track_id,'beat')
+
+def get_bars(track_id):
+    """ SEE GET_BEATS_BARS """
+    return get_beats_bars(track_id,'bar')
+
+def get_beats_bars(track_id,elem):
+    """
+    Get bars or beats from a given track ID
+    typical track id: TRCPOLF12548893D42
+
+    elem can be 'bar' or 'beat'
 
     RETURN
-       pyechonest.track.Track instance or none
+        bstarts        array or None
     """
-    raise NotImplementedError
+    assert elem=='bar' or elem=='beat', 'wrong element, only "bar" or "beat"'
     # build call
-    url = 'http://developer.echonest.com/api/get_audio?api_key='
+    url = 'http://developer.echonest.com/api/'
+    if elem == 'bar':
+        url += 'get_bars?api_key='
+    elif elem == 'beat':
+        url += 'get_beats?api_key='
     url += _api_dev_key
-    url += '&id=' + track_id
+    url += '&id=music://id.echonest.com/~/TR/' + track_id
     url += '&version=3'
     print url
     # call, get XML
@@ -145,8 +222,26 @@ def get_track_from_id(track_id):
     # check success
     if not check_xml_success(xmldoc):
         return None
-    # DEBUG
-    print xmldoc.toprettyxml()
+    result = []
+    bs = xmldoc.getElementsByTagName(elem) # elem = 'bar' or 'beat'
+    for b in bs:
+        result.append(float(b.firstChild.data))
+    # done
+    return result
+
+
+def get_our_analysis(track_id):
+    """
+    Get the analysis we need from a given track ID:
+    - segment starts
+    - segment chromas
+    - beatstart
+    - barstart
+    - duration
+
+    Return them in order, or 5 None if one of them fails
+    """
+    raise NotImplementedError
 
     
 
@@ -175,13 +270,20 @@ if __name__ == '__main__' :
 
     # call for all audio for a given artist
     artist_id = 'ARH6W4X1187B99274F'
-    ids, titles, artist_name = get_audio(artist_id)
+    titles, artist_name = get_audio(artist_id)
     print 'after get_audio with',artist_name,'id, got:'
     for t in titles:
         print '   ',t
 
     # get info on the first track from previous call
-    print 'calling id:',ids[0]
-    track = get_track_from_id(ids[0])
+    print 'calling first song, title=',titles[0],', artist=',artist_name
+    tids,titles2,aids,artists = search_tracks(artist_name,title=titles[0])
+    print 'got tracks:'
+    for k in range(len(tids)):
+        print '   ',titles2[k],'by',artists[k]
+    print 'first song id:',tids[0]
 
-
+    # get bars with that id
+    print get_bars(tids[0])
+    # get beats with that id
+    print get_beats(tids[0])
