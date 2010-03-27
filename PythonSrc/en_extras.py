@@ -24,9 +24,6 @@ try:
     _api_dev_key = os.environ['ECHO_NEST_API_KEY']
 except:
     _api_dev_key = os.environ['ECHONEST_API_KEY']
-from pyechonest import config
-config.ECHO_NEST_API_KEY = _api_dev_key
-from pyechonest import track as trackEN
 
 
 def do_xml_call(url):
