@@ -40,9 +40,12 @@ if __name__ == '__main__':
     artist = sys.argv[2]
     artist = artist.replace('"','')
 
+
+    # open connection
+    connection = sqlite.connect(dbname)
+
     try:
-        # connection
-        connection = sqlite.connect(dbname)
+        # cursor
         cursor = connection.cursor()
 
         # query
@@ -53,7 +56,11 @@ if __name__ == '__main__':
         
     except sqlite3.OperationalError:
         print 'ERROR, wrong database name? artist name with weird signs?'
+        connection.close()
         sys.exit(0)
+
+    # close connection
+    connection.close()
 
     # NOT FOUND
     if len(found) == 0:
