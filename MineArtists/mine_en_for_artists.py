@@ -70,7 +70,7 @@ def mine(sqlite_db,maxartists=1000000,verbose=False,nsims=100):
                 break
             unchecked_artist = unchecked[0]
             if verbose:
-                print '#artists:',nArtists,'new query artist:',unchecked_artist
+                print '#artists:',nArtists,', new query artist:',unchecked_artist
 
             # find similar artists
             aEN = artistEN.search_artists(unchecked_artist)[0]
