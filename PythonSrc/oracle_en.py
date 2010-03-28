@@ -38,6 +38,8 @@ _thread_en_song_data = deque()
 def _thread_en(artists):
     """
     Thread that load EN data
+    For artists receives a SQLlite database containing a table 'artists' with
+    a field 'name'.
     """
     print '_thread_en starting...'
     cnt_iter = 0
@@ -47,37 +49,35 @@ def _thread_en(artists):
     while not _stop_en_thread:
         # debug
         cnt_iter += 1
+
         # queue full?
         if len(_thread_en_song_data) > _en_queue_size :
             time.sleep(0.050) # sleep for 50 milliseconds
             continue
-        # get artist
-        if artist_list == []:
-            raise NotImplementedError
-        else:
-            idx = np.random.randint(len(artist_list))
-            artist = artist_list[idx]
 
-        #artists = artistEN.search_artists(artist)
-        #if len(artists) == 0:
-        #    continue
-        #artist = artists[np.random.randint(len(artists))]
+        # get artist
+        if len(waiting_artists) == 0:
+            artist_list = get_artists_from_db(artists)
+            for k in artist_list:
+                waiting_artists.append(k)        
+        artist = waiting_artists.pop()
 
         # get song
         tids,titles,aids,artists = en_extras.search_tracks(artist)
         if tids == None or len(tids) == 0:
             continue
         trackid = tids[np.random.randint(len(tids))]
+
         # save EchoNest data to queue
         segstart,chromas,beatstart,barstart,duration = en_extras.get_our_analysis(trackid)
         if segstart == None:
             continue
         d = {'segstart':segstart,'chromas':chromas,
              'beatstart':beatstart,'barstart':barstart,'duration':duration}
-        # put data in queue
-        #_thread_en_lock.acquire() # deque is supposed to be thread safe
+
+        # put data in queue, deque is supposed to be thread safe
         _thread_en_song_data.appendleft(d)
-        #_thread_en_lock.release()
+
         
     print '_thread_en closing...'
 
