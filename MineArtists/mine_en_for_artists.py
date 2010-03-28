@@ -50,7 +50,7 @@ def mine(sqlite_db,maxartists=1000000,verbose=False):
             cursor.execute(query)
             nArtists = int(cursor.fetchone()[0])
             if nArtists > maxartists:
-                print 'db has',nArtists,', we want',max_artists,', we stop.'
+                print 'db has',nArtists,', we want',maxartists,', we stop.'
                 break
             
             # get an artist not checked
