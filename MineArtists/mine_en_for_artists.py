@@ -21,12 +21,16 @@ except:
 
 
 
-def mine(sqlite_db,maxartists=1000000,verbose=False):
+def mine(sqlite_db,maxartists=1000000,verbose=False,nsims=100):
     """
     Mine EchoNest for artist name
     Method is simple: starts from the Beatles, get similar artists,
     mine similar artists.
+    nsims - number of similar artists to ask for at Echo Nest, between
+    1 and 100
     """
+
+    assert(nsims > 0 and nsims <= 100,'wrong nsims (# similar): %d'%nsims
 
     # start time
     tstart = time.time()
@@ -38,7 +42,7 @@ def mine(sqlite_db,maxartists=1000000,verbose=False):
 
     # count iterations before commit
     cnt_commit = 0
-    iter_between_commits = 20
+    iter_between_commits = 10
 
     # db empty? create table, add Beatles
     try:
@@ -70,7 +74,7 @@ def mine(sqlite_db,maxartists=1000000,verbose=False):
 
             # find similar artists
             aEN = artistEN.search_artists(unchecked_artist)[0]
-            asim = aEN.similar(rows=100)
+            asim = aEN.similar(rows=nsims)
             
             # add them to the database
             for a in asim:
@@ -129,6 +133,7 @@ def die_with_usage():
     print 'FLAGS:'
     print ' -maxartists M    maximum number of artists, stop db size >= M'
     print ' -verbose         print every new artist query, and db size'
+    print ' -nsims           num. similar artists to request from EN (100)
     sys.exit(0)
 
 
@@ -142,12 +147,16 @@ if __name__ == '__main__':
     # flags
     verbose = False
     maxartists = 1000000
+    nsims = 100
     while True:
         if sys.argv[1] == '-maxartists':
             maxartists = int(sys.argv[2])
             sys.argv.pop(1)
         elif sys.argv[1] == '-verbose':
             verbose = True
+        elif sys.argv[1] == '-nsims':
+            nsims = int(sys.argv[2])
+            sys.argv.pop(1)
         else:
             break
         sys.argv.pop(1)
