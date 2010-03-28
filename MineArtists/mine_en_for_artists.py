@@ -36,6 +36,10 @@ def mine(sqlite_db,maxartists=1000000,verbose=False):
     # gets cursor
     cursor = connection.cursor()
 
+    # count iterations before commit
+    cnt_commit = 0
+    iter_between_commits = 20
+
     # db empty? create table, add Beatles
     try:
         cursor.execute('SELECT * FROM artists WHERE name="The Beatles"')
@@ -88,7 +92,11 @@ def mine(sqlite_db,maxartists=1000000,verbose=False):
             cursor.execute(query)
 
             # commit
-            connection.commit()
+            cnt_commit += 1
+            if cnt_commit % iter_between_commits == 0:
+                if verbose:
+                    print 'commiting...'
+                connection.commit()
 
     # easy case, user terminates the program
     except KeyboardInterrupt:
