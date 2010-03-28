@@ -13,11 +13,12 @@ import numpy as np
 
 
 import oracle_en
+import features
 
 
 
-
-def train(expdir,savedmodel='',nThreads=4):
+def train(expdir,pSize=8,usebars=2,keyInv=True,lrate=1e-5,
+          savedmodel='',nThreads=4):
     """
     Performs training
     Grab track data from oracle
@@ -25,8 +26,14 @@ def train(expdir,savedmodel='',nThreads=4):
 
     INPUT
       expdir        - experiment directory, where to save experiments
+      pSize         - pattern size
+      usebars       - how many bars per pattern
+      keyInv        - perform 'key invariance' on patterns
+      lrate         - learning rate
       savedmodel    - previously saved model directory, to restart it
       nThreads      - number of threads for the oracle, default=4
+
+    Saves everything when done.
     """
 
     # start from saved model
@@ -46,10 +53,15 @@ def train(expdir,savedmodel='',nThreads=4):
     # main algorithm
     try:
         while True:
-            pass
-
-
-
+            # get data, dictionary of EchoNest analysis
+            data = oracle.nest_track()
+            # get features
+            feats = features.get_features(data,pSize=pSize,
+                                          usebars=usebars,keyInv=keyInv)
+            if feats == None:
+                continue
+            # update model
+            model.update(feats,lrate=lrate)
 
     except:
         print "ERROR:", sys.exc_info()[0]
@@ -59,6 +71,13 @@ def train(expdir,savedmodel='',nThreads=4):
         #quit
         return
 
+
+
+def save_experiment(crash=False):
+    """
+    Saves everything, either by routine or because of a crash
+    """
+    raise NotImplementedError
 
 
 
