@@ -21,26 +21,7 @@ except:
 
 
 
-
-
-def table_exists(cursor,tablename):
-    """
-    Checks if a table exists.
-    Trick taken from:
-    http://sqlserver2000.databases.aspfaq.com/
-    how-do-i-determine-if-a-table-exists-in-a-sql-server-database.html
-    """
-    query =  'IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES ' 
-    query += "WHERE TABLE_TYPE='BASE TABLE' "
-    query += "AND TABLE_NAME='" + tablename + "') " 
-    query += "SELECT 1 ELSE SELECT 0" 
-    cursor.execute(query)
-    res = cursor.fetchone()[0]
-    if res == 1:
-        return True
-    return False
-
-def mine(sqlite_db,maxartists=1000000):
+def mine(sqlite_db,maxartists=1000000,verbose=False):
     """
     Mine EchoNest for artist name
     Method is simple: starts from the Beatles, get similar artists,
@@ -56,22 +37,26 @@ def mine(sqlite_db,maxartists=1000000):
     cursor = connection.cursor()
 
     # db empty? create table, add Beatles
-    #cursor.execute('CREATE TABLE artists (id INTEGER PRIMARY KEY,name VARCHAR(50), checked INTEGER)')
-    #cursor.execute('INSERT INTO names VALUES (null, "The Beatles",0)')
-
+    try:
+        cursor.execute('SELECT * FROM artists WHERE name="The Beatles"')
+    except sqlite3.OperationalError:
+        cursor.execute('CREATE TABLE artists (id INTEGER PRIMARY KEY,name VARCHAR(50), checked INTEGER)')
+        cursor.execute('INSERT INTO artists VALUES (null, "The Beatles",0)')
 
     try:
         while True:
             # check if too many artists
             cursor.execute('SELECT COUNT(id) FROM artists')
-            nArtists = cursor.fetchone()[0]
-            if nArtist > maxartists:
+            nArtists = int(cursor.fetchone()[0])
+            if nArtists > maxartists:
                 break
             
             # get an artist not checked
-            cursor.execute('SELECT name FROM names WHERE checked=0')
+            cursor.execute('SELECT name FROM artists WHERE checked=0')
             unchecked = cursor.fetchmany(1000)
             unchecked_artist = unchecked[np.random.randint(len(unchecked))][0]
+            if verbose:
+                print '#artists:',nArtists,'new query artist:',unchecked_artist
 
             # find similar artists
             aEN = artistEN.search_artists(unchecked_artist)[0]
@@ -79,9 +64,11 @@ def mine(sqlite_db,maxartists=1000000):
             
             # add them to the database
             for a in asim:
+                # artist name
+                aname = a.name.replace('"','')
                 # already in?
                 query = 'SELECT name FROM artists WHERE name='
-                query += a.name
+                query += '"' + aname + '"'
                 cursor.execute(query)
                 found = cursor.fetchmany(2)
                 if len(found) == 0:
@@ -91,14 +78,12 @@ def mine(sqlite_db,maxartists=1000000):
 
             # check in the query artist
             query = 'UPDATE artists SET checked=1 WHERE name='
-            query += unchecked_artist
+            query += '"' + unchecked_artist + '"'
             cursor.execute(query)
 
             # commit
             connection.commit()
 
-
-            raise NotImplementedError
     except:
         print "ERROR:", sys.exc_info()[0]
         connection.commit()
@@ -122,6 +107,7 @@ def die_with_usage():
     print '   python mine_en_for_artists.py [flags] dbname'
     print 'FLAGS:'
     print ' -maxartists M    maximum number of artists, stop db size >= M'
+    print ' -verbose         print every new artist query, and db size'
     sys.exit(0)
 
 
@@ -133,11 +119,14 @@ if __name__ == '__main__':
         die_with_usage()
 
     # flags
+    verbose = False
     maxartists = 1000000
     while True:
         if sys.argv[1] == '-maxartists':
             maxartists = int(sys.argv[2])
             sys.argv.pop(1)
+        elif sys.argv[1] == '-verbose':
+            verbose = True
         else:
             break
         sys.argv.pop(1)
@@ -146,4 +135,4 @@ if __name__ == '__main__':
     dbname = sys.argv[1]
 
     # go!
-    mine(dbname,maxartists=maxartists)
+    mine(dbname,maxartists=maxartists,verbose=verbose)
