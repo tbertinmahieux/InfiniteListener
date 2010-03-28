@@ -46,7 +46,7 @@ if __name__ == '__main__':
         cursor = connection.cursor()
 
         # query
-        query = 'SELECT name FROM artists WHERE name='
+        query = 'SELECT * FROM artists WHERE name='
         query += '"' + artist + '"'
         cursor.execute(query)
         found = cursor.fetchall()
@@ -60,7 +60,10 @@ if __name__ == '__main__':
         print 'NOT FOUND'
         sys.exit(0)
 
-    print len(found),'entries found:'
+    if len(found) == 1:
+        print len(found),'entry found:'
+    else:
+        print len(found),'entries found:'
     for entry in found:
         print '  ',entry
     
