@@ -30,7 +30,7 @@ def mine(sqlite_db,maxartists=1000000,verbose=False,nsims=100):
     1 and 100
     """
 
-    assert(nsims > 0 and nsims <= 100,'wrong nsims (# similar): %d'%nsims
+    assert nsims > 0 and nsims <= 100,'wrong nsims (# similar): %d'%nsims
 
     # start time
     tstart = time.time()
@@ -133,7 +133,7 @@ def die_with_usage():
     print 'FLAGS:'
     print ' -maxartists M    maximum number of artists, stop db size >= M'
     print ' -verbose         print every new artist query, and db size'
-    print ' -nsims           num. similar artists to request from EN (100)
+    print ' -nsims           num. similar artists to request from EN (100)'
     sys.exit(0)
 
 
