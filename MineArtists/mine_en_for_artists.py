@@ -75,7 +75,7 @@ def mine(sqlite_db,maxartists=1000000,verbose=False):
                 found = cursor.fetchmany(2)
                 if len(found) == 0:
                     query = 'INSERT INTO artists VALUES (null, "'
-                    query += a.name + '",0)'
+                    query += aname + '",0)'
                     cursor.execute(query)
 
             # check in the query artist
@@ -94,7 +94,6 @@ def mine(sqlite_db,maxartists=1000000,verbose=False):
     # try to get debug information
     except:
         print "ERROR:", sys.exc_info()[0]
-        print sys.exc_info()[0].message
         print 'last query=',query
         connection.close()
         return
