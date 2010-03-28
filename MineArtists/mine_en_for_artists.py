@@ -46,13 +46,15 @@ def mine(sqlite_db,maxartists=1000000,verbose=False):
     try:
         while True:
             # check if too many artists
-            cursor.execute('SELECT COUNT(id) FROM artists')
+            query = 'SELECT COUNT(id) FROM artists'
+            cursor.execute(query)
             nArtists = int(cursor.fetchone()[0])
             if nArtists > maxartists:
                 break
             
             # get an artist not checked
-            cursor.execute('SELECT name FROM artists WHERE checked=0')
+            query = 'SELECT name FROM artists WHERE checked=0'
+            cursor.execute(query)
             unchecked = cursor.fetchmany(1000)
             unchecked_artist = unchecked[np.random.randint(len(unchecked))][0]
             if verbose:
@@ -84,11 +86,19 @@ def mine(sqlite_db,maxartists=1000000,verbose=False):
             # commit
             connection.commit()
 
-    except:
-        print "ERROR:", sys.exc_info()[0]
-        connection.commit()
+    # easy case, user terminates the program
+    except KeyboardInterrupt:
+        print "ERROR:", sys.exc_info()[0]        
         connection.close()
         return
+    # try to get debug information
+    except:
+        print "ERROR:", sys.exc_info()[0]
+        print sys.exc_info()[0].message
+        print 'last query=',query
+        connection.close()
+        return
+    
 
     # finish correctly
     connection.commit()
