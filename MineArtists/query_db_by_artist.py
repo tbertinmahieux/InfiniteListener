@@ -7,6 +7,7 @@ tb2332@columbia.edu
 
 
 import os
+import os.path
 import sys
 import time
 import copy
@@ -40,6 +41,11 @@ if __name__ == '__main__':
     artist = sys.argv[2]
     artist = artist.replace('"','')
 
+
+    # check if file exists
+    if not os.path.isfile(dbname):
+        print 'ERROR:',dbname,'does not exist.'
+        sys.exit(0)
 
     # open connection
     connection = sqlite.connect(dbname)
