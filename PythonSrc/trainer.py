@@ -1,4 +1,6 @@
 """
+Function to perform an online experiment, i.e. train a model by
+gathering online music analysis data.
 
 T. Bertin-Mahieux (2010) Columbia University
 tb2332@columbia.edu
@@ -9,8 +11,9 @@ import os
 import sys
 import time
 import copy
+import pickle
 import numpy as np
-
+import scipy.io
 
 import oracle_en
 import features
@@ -35,6 +38,10 @@ def train(expdir,pSize=8,usebars=2,keyInv=True,lrate=1e-5,
 
     Saves everything when done.
     """
+    # creates the experiment folder
+    if not os.path.isdir(expdir):
+        print 'creating experiment directory:',expdir
+        os.mkdir(expdir)
 
     # start from saved model
     if savedmodel != '':
@@ -49,7 +56,6 @@ def train(expdir,pSize=8,usebars=2,keyInv=True,lrate=1e-5,
     # starttime
     starttime = time.time()
 
-    
     # main algorithm
     try:
         while True:
@@ -66,18 +72,46 @@ def train(expdir,pSize=8,usebars=2,keyInv=True,lrate=1e-5,
     except:
         print "ERROR:", sys.exc_info()[0]
         # save
-        print 'saving to: '
-
+        savedir = save_experiment(model,starttime,crash=True)
+        print 'saving to: ',savedir
         #quit
         return
 
 
 
-def save_experiment(crash=False):
+def get_savedir_name(expdir):
+    """
+    Creates a directory name based on time, in the expdir directory.
+    Gives something like:
+       'expdir/exp_2010_03_27_AT_22h50m03s'
+    """
+    foldername = os.path.join(expdir,'exp_')
+    foldername += time.strftime("%Y_%m_%d_AT_%Hh%Mm%Ss", time.localtime())
+    return foldername
+
+
+def save_experiment(model,starttime,crash=False):
     """
     Saves everything, either by routine or because of a crash
+    Return directory name
     """
-    raise NotImplementedError
+    savedir = get_savedir_name(expdir):
+    os.mkdir(savedir)
+    # save codebook as matfile
+    fname = os.path.join(savedir,'codebook.mat'))
+    scipy.io.savemat(fname,{'codebook':model._codebook})
+    # save model
+    f = open(os.path.join(savedir,'model.p')),'w')
+    picle.dump(model,f)
+    f.close()
+    # save starttime
+    fname = 'starttime_'
+    fname += time.strftime("%Y_%m_%d_AT_%Hh%Mm%Ss", time.localtime(starttime))
+    fname += '.txt'
+    f = open(os.path.join(savedir,fname),'w')
+    f.close()
+    # done, return name of the directory
+    return savedir
 
 
 
