@@ -53,13 +53,13 @@ def mine(sqlite_db,maxartists=1000000,verbose=False):
                 break
             
             # get an artist not checked
-            query = 'SELECT name FROM artists WHERE checked=0'
+            query = 'SELECT name FROM artists WHERE checked=0 ORDER BY RANDOM() LIMIT 1'
             cursor.execute(query)
-            unchecked = cursor.fetchmany(1000)
+            unchecked = cursor.fetchone()
             if len(unchecked) == 0:
                 print "we stop, all artists checked"
                 break
-            unchecked_artist = unchecked[np.random.randint(len(unchecked))][0]
+            unchecked_artist = unchecked[0]
             if verbose:
                 print '#artists:',nArtists,'new query artist:',unchecked_artist
 
