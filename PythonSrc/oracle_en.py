@@ -132,6 +132,8 @@ class OracleEN():
         assert nThreads <= 15,'15 threads is the limit, that is a lot!'
         for k in range(nThreads):
             thread.start_new_thread(_thread_en,(),{'artists':artists})
+        # statistics
+        self._nTracksGiven = 0
 
     def __del__(self):
         """
@@ -153,8 +155,15 @@ class OracleEN():
                 break
             time.sleep(sleep_time)
         # done
+        self._nTracksGiven += 1
         return _thread_en_song_data.pop()
 
+    def tracksGiven(self):
+        """
+        Return the number of tracks given since the creation of
+        ths instance.
+        """
+        return self._nTracksGiven
 
 
 
