@@ -14,6 +14,8 @@ import copy
 import thread
 from collections import deque
 import numpy as np
+# features stuff
+import features
 # sqlite stuff
 import sqlite3
 import sqlite3.dbapi2 as sqlite
@@ -123,10 +125,20 @@ class OracleEN():
     Class to get EchoNest features
     """
 
-    def __init__(self,artists,nThreads = 1):
+    def __init__(self,params,artists):
         """
         Constructor
+        params is a dictionary containing all we need to now about:
+          - features
+          - nThreads
         """
+        # features stuff
+        self._pSize = params['pSize']
+        self._usebars = params['usebars']
+        self._keyInv = params['keyInv']
+        self._songKeyInv = params['songKeyInv']
+        self._positive = params['positive']
+        self._do_resample = params['do_resample']
         # start a number of EN threads
         assert nThreads > 0,'you need at least one thread'
         assert nThreads <= 15,'15 threads is the limit, that is a lot!'
@@ -145,7 +157,7 @@ class OracleEN():
 
     def next_track(self,sleep_time=0.05):
         """
-        Get the next song represented as a dictionary.
+        Get the next song features
         Take it from the queue (waits infinitely if needed...!)
         Sleep time between iterations when waiting is sleep_time (seconds)
         """
@@ -154,9 +166,17 @@ class OracleEN():
             if len(_thread_en_song_data) > 0:
                 break
             time.sleep(sleep_time)
-        # done
+        # data
         self._nTracksGiven += 1
-        return _thread_en_song_data.pop()
+        data = _thread_en_song_data.pop()
+        # get features
+        return features.get_features(data,pSize=self._pSize,
+                                     usebars=self._usebars,
+                                     keyInv=self._keyInv,
+                                     songKeyInv=self._songKeyInv,
+                                     positive=self._positive,
+                                     do_resample=self._do_resample,
+                                     btchroma_barbts=None)
 
     def tracksGiven(self):
         """
