@@ -17,7 +17,7 @@ import numpy as np
 
 
 
-def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True):
+def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,positive=True):
     """
     Main function, similar to those in demos.py for BostonHackDay
     Receives a dictionary containing:
@@ -28,6 +28,13 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True):
          - duration
     Returns a set of patterns, one per row, with the given pSize,
     bars, key invariance... or None if there is a problem
+
+    INPUT:
+      analysis_dict      dictionary contanng the analysis, see above
+      pSize              final size of a pattern (12 x pSize)
+      usebars            patterns based on 'usebars' bars, not on beats
+      keyInv             performs invariance over pattern (not songs)
+      positive           negative numbers (due to rescaling) set to 0
     """
     # get chroma per beat
     btchroma, barbts = create_beat_synchro_chromagram(analysis_dict)
@@ -60,6 +67,10 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True):
             pattern = keyinvariance(pattern)
         # add it to feats
         feats[k,:] = pattern.flatten()
+
+    # remove negative numbers
+    if positive:
+        feats[np.where(feats<0)] = 0
 
     # done, return features
     return feats
