@@ -12,6 +12,7 @@ import numpy as np
 import sqlite3
 import sqlite3.dbapi2 as sqlite
 # echonest stuff
+import pyechonest
 from pyechonest import config
 from pyechonest import artist as artistEN
 try:
@@ -21,7 +22,7 @@ except:
 
 
 
-def mine(sqlite_db,maxartists=1000000,verbose=False,nsims=100):
+def mine(sqlite_db,maxartists=10000,verbose=False,nsims=100):
     """
     Mine EchoNest for artist name
     Method is simple: starts from the Beatles, get similar artists,
@@ -73,8 +74,13 @@ def mine(sqlite_db,maxartists=1000000,verbose=False,nsims=100):
                 print '#artists:',nArtists,', new query artist:',unchecked_artist
 
             # find similar artists
-            aEN = artistEN.search_artists(unchecked_artist)[0]
-            asim = aEN.similar(rows=nsims)
+            try:
+                aEN = artistEN.search_artists(unchecked_artist)[0]
+                asim = aEN.similar(rows=nsims)
+            except pyechonest.util.EchoNestAPIError:
+                print 'EchoNestAPIError, wait a minute and continue'
+                time.sleep(60)
+                continue
             
             # add them to the database
             for a in asim:
@@ -146,7 +152,7 @@ if __name__ == '__main__':
 
     # flags
     verbose = False
-    maxartists = 1000000
+    maxartists = 10000
     nsims = 100
     while True:
         if sys.argv[1] == '-maxartists':
