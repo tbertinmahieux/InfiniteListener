@@ -17,7 +17,8 @@ import numpy as np
 
 
 
-def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,positive=True):
+def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
+                 positive=True,do_resample=True):
     """
     Main function, similar to those in demos.py for BostonHackDay
     Receives a dictionary containing:
@@ -29,15 +30,31 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,positive=True):
     Returns a set of patterns, one per row, with the given pSize,
     bars, key invariance... or None if there is a problem
 
+    This function works on the song level, so we can do invariance over songs
+    if we want, etc.
+
     INPUT:
       analysis_dict      dictionary contanng the analysis, see above
       pSize              final size of a pattern (12 x pSize)
       usebars            patterns based on 'usebars' bars, not on beats
       keyInv             performs invariance over pattern (not songs)
+      songKeyInv         same as keyInv, but over songs
       positive           negative numbers (due to rescaling) set to 0
+      do_resample        if True resample, otherwise pad with zeros or crop
+
+    RETURN:
+      feats              features, one pattern per row, or None if problem
     """
+    # param stuff
+    if songKeyInv:
+        keyInv = False # no ambiguity
+    
     # get chroma per beat
     btchroma, barbts = create_beat_synchro_chromagram(analysis_dict)
+
+    # song invariance
+    if songKeyInv:
+        btchroma = keyinvariance(btchroma)
 
     # case where no bar is used
     nBeats = btchroma.shape[0]
@@ -60,8 +77,11 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,positive=True):
             bt2 = nBeats
         # pattern before resize and invariance
         pattern = btchroma[:,bt1:bt2]
-        # resize
-        pattern = resample(pattern,pSize)
+        # resize by resampling on pad/crop
+        if do_resample:
+            pattern = resample(pattern,pSize)
+        else:
+            pattern = pad_crop(pattern,pSize)
         # key invariance
         if keyInv:
             pattern = keyinvariance(pattern)
@@ -188,6 +208,22 @@ def get_time_warp_matrix(segstart, btstart, duration):
     # return the transpose, meaning (#beats , #segs)
     return warpmat.T
 
+
+
+def pad_crop(data, newsize):
+    """ set the data to the right size, columnwise, by either
+    padding with zeros or cropping """
+    if data.shape[1] == newsize:
+        return data
+    # data too small
+    if data.shape[1] < newsize:
+        res = np.zeros([12,newsize])
+        res[:,:data.shape[1]] = data
+        return res
+    # data too big
+    else:
+        return data[:,:newsize]
+        
 
 def resample(data, newsize):
     """ resample the data, columnwise """
