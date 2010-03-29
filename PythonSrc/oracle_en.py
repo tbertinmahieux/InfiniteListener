@@ -58,6 +58,10 @@ def _thread_en(artists):
         # get artist
         if len(waiting_artists) == 0:
             artist_list = get_artists_from_db(artists)
+            if artist_list == None:
+                print 'ERROR,: en_thread, cant get artist from SQL database'
+                time.sleep(50)
+                continue
             for k in artist_list:
                 waiting_artists.append(k)        
         artist = waiting_artists.pop()
