@@ -21,7 +21,6 @@ import numpy as np
 import scipy as sp
 import scipy.spatial
 # ANN
-sys.path.append('scikits.ann-0.2.dev-r803/scikits')
 import scikits.ann as ann
 
 
@@ -30,6 +29,14 @@ def euclidean_dist(a,b):
     Typical euclidean distance. A and B must be row vectors!!!!
     """
     return np.sqrt(np.square(a-b).sum())
+
+def euclidean_dist_batch(a,b):
+    """
+    Typical euclidean distance. B must be row vectors!!!!
+    A is a batch, one vector per row.
+    """
+    return np.sqrt(np.square(a-b).sum(axis=1))
+
 
 def euclidean_norm(a):
     """ regular euclidean norm of a numpy vector """
@@ -127,7 +134,15 @@ class Codebook:
         """
         res = self._ann.knn(sample,1,eps=eps)
         return res[0][0][0]
+
         
+    def closest_code_batch(self,sample):
+        """
+        Finds distance from all all codes in a batch way
+        """
+        dists = euclidean_dist_batch(self._codebook,sample)
+        return np.argmin(dists)
+
 
     def closest_code_debug(self,sample):
         """
@@ -144,6 +159,7 @@ class Codebook:
                 bestidx = idx
         assert bestidx > -1, "debug function: did not find closest code???"
         return bestidx
+
 
 
 
@@ -203,7 +219,7 @@ if __name__ == '__main__':
     timekd = 0
     timeckd = 0
     timeann = 0
-    timeannapprox = 0
+    timebatch = 0
     timeann2 = 0
     tstart = time.time()
     cb = Codebook(codebook)
@@ -226,10 +242,10 @@ if __name__ == '__main__':
         tstart = time.time()
         idx5 = cb.closest_code_ann(sample)
         timeann += time.time() - tstart
-        # ann approx.
+        # batch
         tstart = time.time()
-        idx6 = cb.closest_code_ann_approx(sample,0.0000001)
-        timeannapprox += time.time() - tstart
+        idx6 = cb.closest_code_batch(sample)
+        timebatch += time.time() - tstart
         # ann redoing codebook
         tstart = time.time()
         cb._ann = ann.kdtree(cb._codebook)
@@ -239,14 +255,16 @@ if __name__ == '__main__':
         assert idx2 == idx3 or (cb[idx2] == cb[idx3]).all()
         assert idx2 == idx4 or (cb[idx2] == cb[idx4]).all()
         assert idx2 == idx5 or (cb[idx2] == cb[idx5]).all()
-        assert idx2 == idx7 or (cb[idx2] == cb[idx5]).all()
-        annapprox_p = 0
-        if idx2 == idx6 or (cb[idx2] == cb[idx6]).all():
-            annapprox_p += 1
+        assert idx2 == idx6 or (cb[idx2] == cb[idx6]).all()
+        assert idx2 == idx7 or (cb[idx2] == cb[idx7]).all()
+
     #print 'time for fast algo:',timefast,'seconds.'
     print 'time for slow algo:        ',timeslow,'seconds.'
     print 'time for kd algo:          ',timekd,'seconds.'
     print 'time for ckd algo:         ',timeckd,'seconds.'
     print 'time for ann algo:         ',timeann,'seconds.'
-    print 'time for ann approx. algo: ',timeannapprox,'seconds, accuracy:',annapprox_p*1./samples.shape[0]
+    print 'time for batch algo:       ',timebatch,'seconds.'
     print 'time for ann2 algo:        ',timeann2,'seconds.'
+
+
+
