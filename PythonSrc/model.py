@@ -64,10 +64,10 @@ class Model():
         at a time then update the codebook, building a kdtree is
         useless. If the model is trained and we want to predict on
         a large database, t's worth having the kdtree.
-        Threshold set at 500.
+        Threshold set at 200 features.
         """
         # ann
-        use_ann = feats.shape[0] > 500
+        use_ann = feats.shape[0] > 200
         if use_ann:
             self._ann = ann.kdtree(self._codebook)
         # prepare result
