@@ -63,7 +63,7 @@ def train(expdir,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
         raise NotImplementedError
 
     # create oracle
-    oracle = OracleEN(nThreads=nThreads)
+    oracle = OracleEN(params)
 
     # starttime
     starttime = time.time()
@@ -71,11 +71,8 @@ def train(expdir,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
     # main algorithm
     try:
         while True:
-            # get data, dictionary of EchoNest analysis
-            data = oracle.next_track()
-            # get features
-            feats = features.get_features(data,pSize=pSize,
-                                          usebars=usebars,keyInv=keyInv)
+            # get features from the oracle
+            feats = oracle.next_track()
             if feats == None:
                 continue
             # stats
