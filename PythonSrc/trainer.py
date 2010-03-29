@@ -20,8 +20,9 @@ import features
 
 
 
-def train(expdir,pSize=8,usebars=2,keyInv=True,lrate=1e-5,
-          savedmodel='',nThreads=4):
+def train(expdir,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
+          positive=True,do_resample=True
+          lrate=1e-5,savedmodel='',nThreads=4):
     """
     Performs training
     Grab track data from oracle
@@ -38,6 +39,14 @@ def train(expdir,pSize=8,usebars=2,keyInv=True,lrate=1e-5,
 
     Saves everything when done.
     """
+
+    # creates a dctionary with all parameters
+    params = {'expdir':expdir,'pSize':pSize8,'usebars':usebars,
+              'keyInv':keyInv,'songKeyInv':songKeyInv,
+              'positive':positive,'do_resample':do_resample,
+              'lrate':lrate,'savedmodel':savedmodel,
+              'nThreads':nThreads}
+
     # creates the experiment folder
     if not os.path.isdir(expdir):
         print 'creating experiment directory:',expdir
@@ -77,7 +86,7 @@ def train(expdir,pSize=8,usebars=2,keyInv=True,lrate=1e-5,
     except:
         print "ERROR:", sys.exc_info()[0]
         # save
-        savedir = save_experiment(model,starttime,statlog,crash=True)
+        savedir = save_experiment(model,starttime,statlog,params,crash=True)
         print 'saving to: ',savedir
         #quit
         return
@@ -110,7 +119,7 @@ def get_savedir_name(expdir):
     return foldername
 
 
-def save_experiment(model,starttime,statlog,crash=False):
+def save_experiment(model,starttime,statlog,params,crash=False):
     """
     Saves everything, either by routine or because of a crash
     Return directory name
@@ -127,6 +136,10 @@ def save_experiment(model,starttime,statlog,crash=False):
     # save stats
     f = open(os.path.join(savedir,'stats.p')),'w')
     picle.dump(statlog,f)
+    f.close()
+    # save params
+    f = open(os.path.join(savedir,'params.p')),'w')
+    picle.dump(params,f)
     f.close()
     # save starttime
     fname = 'starttime_'
