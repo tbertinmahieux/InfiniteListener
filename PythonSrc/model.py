@@ -17,7 +17,10 @@ import scikits.ann as ann
 
 
 class Model():
-
+    """
+    Most simple model, has a codebook and updates by
+    gradient descent using the online vector quantization algorithm.
+    """
 
     def __init__(self,codewords):
         """
@@ -49,32 +52,56 @@ class Model():
         for idx in range(feats):
             cidx = best_code_per_p[idx]
             self._codebook[cidx,:] += (feats[idx,:] - self._codebook[cidx,:]) * lrate
-        # prepare kdtree for next time
-        self._ann = ann.kdtree(self._codebook)
-
 
     def predicts(self,feats):
         """
         Returns two lists, best_code_per_pattern
         and average squared distance
+
+        Note on method used:
+        Uses ann if we have many features. Reason:
+        during training, when we might look at one new sample
+        at a time then update the codebook, building a kdtree is
+        useless. If the model is trained and we want to predict on
+        a large database, t's worth having the kdtree.
+        Threshold set at 500.
         """
-        
+        # ann
+        use_ann = feats.shape[0] > 500
+        if use_ann:
+            self._ann = ann.kdtree(self._codebook)
+        # prepare result
         best_code_per_p = np.zeros(feats.shape[0])
         avg_dists = np.zeros(feats.shape[0])
         idx = -1
         for f in feats:
             idx += 1
-            code,dist = self._closest_code_ann(self,sample)
+            if use_ann:
+                code,dist = self._closest_code_ann(self,sample)
+            else:
+                code,dist = self._closest_code_batch(self,sample)
             best_code_per_p[idx] = code
             avg_dists[idx] = code * code * 1. / feats.shape[1]
-        # don, return two list
+        # done, return two list
         return best_code_per_p, avg_dists
+
+
+    def _closest_code_batch(self,sample):
+        """
+        Efficiently compute the distance from one sample to all codewords.
+        Methods works well if the codebook is often modified.
+        Returns the index of the closest code
+        and euclidean distance
+        """
+        dists = euclidean_dist_batch(self._codebook,sample)
+        bestidx = np.argmin(dists)
+        return bestidx,dists[bestidx]
 
 
     def _closest_code_ann(self,sample):
         """
         Finds the closest code to a given sample.
-        Do it using a kd-tree
+        Do it using a kd-tree, good if the codebook is not modified.
         Returns the index of the closest code
         and euclidean distance
         """
@@ -87,6 +114,13 @@ def euclidean_dist(a,b):
     Typical euclidean distance. A and B must be row vectors!!!!
     """
     return np.sqrt(np.square(a-b).sum())
+
+def euclidean_dist_batch(a,b):
+    """
+    Typical euclidean distance. B must be row vectors!!!!
+    A is a batch, one vector per row.
+    """
+    return np.sqrt(np.square(a-b).sum(axis=1))
 
 def euclidean_norm(a):
     """ regular euclidean norm of a numpy vector """
