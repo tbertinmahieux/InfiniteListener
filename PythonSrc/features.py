@@ -12,13 +12,14 @@ import sys
 import time
 import glob
 import scipy as sp
+import scipy.io
 import numpy as np
 
 
 
 
 def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
-                 positive=True,do_resample=True):
+                 positive=True,do_resample=True,btchroma_barbts=None):
     """
     Main function, similar to those in demos.py for BostonHackDay
     Receives a dictionary containing:
@@ -41,6 +42,7 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
       songKeyInv         same as keyInv, but over songs
       positive           negative numbers (due to rescaling) set to 0
       do_resample        if True resample, otherwise pad with zeros or crop
+      btchroma_barbts    pair(btchroma,barbts) if info known (set dict to None)
 
     RETURN:
       feats              features, one pattern per row, or None if problem
@@ -50,7 +52,10 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
         keyInv = False # no ambiguity
     
     # get chroma per beat
-    btchroma, barbts = create_beat_synchro_chromagram(analysis_dict)
+    if btchroma_barbts == None:
+        btchroma, barbts = create_beat_synchro_chromagram(analysis_dict)
+    else:
+        btchroma,barbts = btchroma_barbts
 
     # song invariance
     if songKeyInv:
@@ -94,6 +99,35 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
 
     # done, return features
     return feats
+
+
+
+def features_from_matfile(filename,pSize=8,usebars=2,keyInv=True,
+                          songKeyInv=False,positive=True,do_resample=True):
+    """
+    Function to help the transition from the BostonHackDay project.
+    Loads a matlab file containing beat features.
+
+    Returns all features for that song, one pattern per row, or None
+    if there is a problem
+
+    MATfile in filename should contain:
+       - btchroma      chroma per beats
+       - barbts        bar as a function of beats
+
+    Real job done by get_features(...), for details look at it.
+    """
+    if sys.version_info[1] == 5:
+        mat = sp.io.loadmat(self.matfiles[self.fidx])
+    else:
+        mat = sp.io.loadmat(self.matfiles[self.fidx], struct_as_record=True)
+    analysis = (mat['btchroma'], mat['barbts'])
+    # call the function that does the actual work
+    # analysis_dict (1st param) useless, set to None or anything else
+    return get_features(None,pSize=pSize,usebars=usebars,
+                        keyInv=keyInv,songKeyInv=songKeyInv,
+                        positive=positive,do_resample=do_resample,
+                        btchroma_barbts=analysis)
 
 
 def create_beat_synchro_chromagram(analysis_dict):
