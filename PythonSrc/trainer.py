@@ -160,6 +160,19 @@ def die_with_usage():
     print '   python -O trainer.py [flags] <expdir>'
     print 'INPUT'
     print ' <expdir>    experiment directory, where to save experiments'
+    print 'FLAGS'
+    print ' -pSize N'
+    print ' -usebars 2'
+    print ' -noKeyInv'
+    print ' -songKeyInv'
+    print ' -notpositive'
+    print ' -dont_resample    pad or crop instead'
+    print ' -lrate r'
+    print ' -savedmodel d'
+    print ' -nThreads n'
+    print ''
+    print 'typical command:'
+    print ' python -O -pSize 8 -usebars 2 -lrate 1e-5 ~/experiment_dir'
     sys.exit(0)
 
 
@@ -169,5 +182,49 @@ if __name__ == '__main__':
     if len(sys.argv) < 2:
         die_with_usage()
 
+    # FLAGS
+    pSize = 8
+    usebars = 2
+    keyInv = True
+    songKeyInv = False
+    positive = True
+    do_resample = True
+    lrate = 1e-5
+    savedmodel = ''
+    nThreads = 4
+    while True:
+        if sys.argv[1] == '-pSize':
+            pSize = int(sys.argv[2])
+            sys.argv.pop(1)
+        elif sys.argv[1] == '-usebars':
+            usebars = int(sys.argv[2])
+            sys.argv.pop(1)
+        elif sys.argv[1] == '-noKeyInv':
+            keyInv = False
+        elif sys.argv[1] == '-songKeyInv':
+            songKeyInv = True
+        elif sys.argv[1] == '-notpositive':
+            positive = False
+        elif sys.argv[1] == '-dont_resample':
+            do_resample = False
+        elif sys.argv[1] == '-lrate':
+            lrate = float(sys.argv[2])
+            sys.argv.pop(1)
+        elif sys.argv[1] == '-savedmodel':
+            savedmodel = sys.argv[2]
+            sys.argv.pop(1)
+        elif sys.argv[1] == '-nThreads':
+            nThreads = int(sys.argv[2])
+            sys.argv.pop(1)
+        else:
+            break
+        sys.argv.pop(1)
+
+    # experiment dir
+    expdir = sys.argv[1]
+
     # launch training
-    train()
+    train(expdir,pSize=pSize,usebars=usebars,keyInv=keyInv,
+          songKeyInv=songKeyInv,positive=positive,
+          do_resample=do_resample,lrate=lrate,
+          savedmodel=savedmodel,nThreads=nThreads)
