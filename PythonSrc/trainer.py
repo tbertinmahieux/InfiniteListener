@@ -43,6 +43,9 @@ def train(expdir,pSize=8,usebars=2,keyInv=True,lrate=1e-5,
         print 'creating experiment directory:',expdir
         os.mkdir(expdir)
 
+    # create the StatLog object
+    statlog = StatLog()
+
     # start from saved model
     if savedmodel != '':
         raise NotImplementedError
@@ -60,23 +63,40 @@ def train(expdir,pSize=8,usebars=2,keyInv=True,lrate=1e-5,
     try:
         while True:
             # get data, dictionary of EchoNest analysis
-            data = oracle.nest_track()
+            data = oracle.next_track()
             # get features
             feats = features.get_features(data,pSize=pSize,
                                           usebars=usebars,keyInv=keyInv)
             if feats == None:
                 continue
+            # stats
+            statlog.patternsSeen(feats.shape[0])
             # update model
             model.update(feats,lrate=lrate)
 
     except:
         print "ERROR:", sys.exc_info()[0]
         # save
-        savedir = save_experiment(model,starttime,crash=True)
+        savedir = save_experiment(model,starttime,statlog,crash=True)
         print 'saving to: ',savedir
         #quit
         return
 
+
+
+
+class StatLog():
+    """
+    Simple class to keep track of different stats of the trainer
+    """
+    def __init__(self):
+        """ Creates counters """
+        self.nTrackUsed = 0
+        self.nPatternUsed = 0
+    def trackSeen(self):
+        self.nTrackUsed += 1
+    def patternsSeen(self,n):
+        self.nPatternUsed += n
 
 
 def get_savedir_name(expdir):
@@ -90,7 +110,7 @@ def get_savedir_name(expdir):
     return foldername
 
 
-def save_experiment(model,starttime,crash=False):
+def save_experiment(model,starttime,statlog,crash=False):
     """
     Saves everything, either by routine or because of a crash
     Return directory name
@@ -103,6 +123,10 @@ def save_experiment(model,starttime,crash=False):
     # save model
     f = open(os.path.join(savedir,'model.p')),'w')
     picle.dump(model,f)
+    f.close()
+    # save stats
+    f = open(os.path.join(savedir,'stats.p')),'w')
+    picle.dump(statlog,f)
     f.close()
     # save starttime
     fname = 'starttime_'
