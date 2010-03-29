@@ -16,13 +16,14 @@ import numpy as np
 import scipy.io
 
 import oracle_en
+import oracle_matfiles
 import features
 
 
 
 def train(expdir,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
-          positive=True,do_resample=True
-          lrate=1e-5,savedmodel='',nThreads=4):
+          positive=True,do_resample=True,lrate=1e-5,
+          savedmodel='',nThreads=4,oracle='EN',matdir=''):
     """
     Performs training
     Grab track data from oracle
@@ -36,6 +37,8 @@ def train(expdir,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
       lrate         - learning rate
       savedmodel    - previously saved model directory, to restart it
       nThreads      - number of threads for the oracle, default=4
+      oracle        - EN (EchoNest) or MAT (matfiles)
+      matdir        - matfiles directory, for oracle MAT
 
     Saves everything when done.
     """
@@ -45,7 +48,7 @@ def train(expdir,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
               'keyInv':keyInv,'songKeyInv':songKeyInv,
               'positive':positive,'do_resample':do_resample,
               'lrate':lrate,'savedmodel':savedmodel,
-              'nThreads':nThreads}
+              'nThreads':nThreads,'oracle':oracle,'matdir':matdir}
 
     # creates the experiment folder
     if not os.path.isdir(expdir):
@@ -63,7 +66,12 @@ def train(expdir,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
         raise NotImplementedError
 
     # create oracle
-    oracle = OracleEN(params)
+    if oracle == 'EN':
+        oracle = oracle_en.OracleEN(params)
+    elif oracle == 'MAT':
+        oracle = oracle_matfiles.OracleMatfiles(params,matdir)
+    else:
+        assert False, 'wrong oracle codename: %s.'%oracle
 
     # starttime
     starttime = time.time()
@@ -170,6 +178,7 @@ def die_with_usage():
     print ' -lrate r'
     print ' -savedmodel d'
     print ' -nThreads n'
+    print ' -oraclemat d      matfiles oracle, d: matfiles dir'
     print ''
     print 'typical command:'
     print ' python -O -pSize 8 -usebars 2 -lrate 1e-5 ~/experiment_dir'
@@ -179,10 +188,11 @@ def die_with_usage():
 
 if __name__ == '__main__':
 
+    # help menu
     if len(sys.argv) < 2:
         die_with_usage()
 
-    # FLAGS
+    # flags
     pSize = 8
     usebars = 2
     keyInv = True
@@ -192,30 +202,46 @@ if __name__ == '__main__':
     lrate = 1e-5
     savedmodel = ''
     nThreads = 4
+    oracle = 'EN'
+    matdir = ''
     while True:
         if sys.argv[1] == '-pSize':
             pSize = int(sys.argv[2])
             sys.argv.pop(1)
+            print 'pSize =',pSize
         elif sys.argv[1] == '-usebars':
             usebars = int(sys.argv[2])
             sys.argv.pop(1)
+            print 'usebars =',usebars
         elif sys.argv[1] == '-noKeyInv':
             keyInv = False
+            print 'keyInv =', keyInv
         elif sys.argv[1] == '-songKeyInv':
             songKeyInv = True
+            print 'songKeyInv', songKeyInv
         elif sys.argv[1] == '-notpositive':
             positive = False
+            print 'positive =', positive
         elif sys.argv[1] == '-dont_resample':
             do_resample = False
+            print 'do_resample =', do_resample
         elif sys.argv[1] == '-lrate':
             lrate = float(sys.argv[2])
             sys.argv.pop(1)
+            print 'lrate =', lrate
         elif sys.argv[1] == '-savedmodel':
             savedmodel = sys.argv[2]
             sys.argv.pop(1)
+            print 'savedmodel =', savedmodel
         elif sys.argv[1] == '-nThreads':
             nThreads = int(sys.argv[2])
             sys.argv.pop(1)
+            print 'nThreads =', nThreads
+        elif sys.argv[1] == '-oraclemat':
+            oracle = 'MAT'
+            matdir = sys.argv[2]
+            sys.argv.pop(1)
+            print 'oracle =',oracle,', matfiles dir =',matdir
         else:
             break
         sys.argv.pop(1)
@@ -227,4 +253,5 @@ if __name__ == '__main__':
     train(expdir,pSize=pSize,usebars=usebars,keyInv=keyInv,
           songKeyInv=songKeyInv,positive=positive,
           do_resample=do_resample,lrate=lrate,
-          savedmodel=savedmodel,nThreads=nThreads)
+          savedmodel=savedmodel,nThreads=nThreads,oracle=oracle,
+          matdir=matdir)
