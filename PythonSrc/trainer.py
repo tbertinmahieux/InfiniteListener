@@ -23,7 +23,7 @@ import model as MODEL
 
 def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
           positive=True,do_resample=True,lrate=1e-5,nThreads=4,
-          oracle='EN',artistsdb='',matdir=''):
+          oracle='EN',artistsdb='',matdir='', nIterations=1e6):
     """
     Performs training
     Grab track data from oracle
@@ -41,6 +41,7 @@ def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
       oracle        - EN (EchoNest) or MAT (matfiles)
       artistdb      - SQLlite database containing artist names
       matdir        - matfiles directory, for oracle MAT
+      nIterations   - maximum number of iterations
 
     Saves everything when done.
     """
@@ -52,7 +53,7 @@ def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
               'positive':positive, 'do_resample':do_resample,
               'lrate':lrate, 'nThreads':nThreads,
               'oracle':oracle, 'artistdb':artistdb,
-              'matdir':matdir}
+              'matdir':matdir, 'nIterations':nIterations}
 
     # creates the experiment folder
     if not os.path.isdir(expdir):
@@ -85,9 +86,18 @@ def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
     # starttime
     starttime = time.time()
 
+    # count iteration
+    main_iterations = 0
+    
     # main algorithm
     try:
         while True:
+            # increment iterations
+            main_iterations += 1
+            statlog.iteration()
+            if main_iterations > nIterations:
+                raise StopIteration
+            
             # get features from the oracle
             feats = oracle.next_track()
             if feats == None:
@@ -97,10 +107,12 @@ def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
             # update model
             model.update(feats,lrate=lrate)
 
+    # error, save and quit
     except:
         print "ERROR:", sys.exc_info()[0]
+        print 'Stoping after', main_iterations, 'iterations.'
         # save
-        savedir = save_experiment(model,starttime,statlog,params,crash=True)
+        savedir = save_experiment(model,starttime,statlog,params, crash=True)
         print 'saving to: ',savedir
         #quit
         return
@@ -114,12 +126,12 @@ class StatLog():
     """
     def __init__(self):
         """ Creates counters """
-        self.nTrackUsed = 0
+        self.nIterations = 0
         self.nPatternUsed = 0
-    def trackSeen(self):
-        self.nTrackUsed += 1
     def patternsSeen(self,n):
         self.nPatternUsed += n
+    def iteration(self):
+        self.nIterations += 1
 
 
 def get_savedir_name(expdir):
@@ -208,6 +220,7 @@ def die_with_usage():
     print ' -artistsdb db     SQLlite database containing artist names'
     print '                   used by EchoNest oracle'
     print ' -oraclemat d      matfiles oracle, d: matfiles dir'
+    print ' -nIters n         maximum number of iterations'
     print ''
     print 'typical command:'
     print ' python -O -pSize 8 -usebars 2 -lrate 1e-5 -artistsdb artists28March.db~/experiment_dir codebook.mat'
@@ -233,6 +246,7 @@ if __name__ == '__main__':
     oracle = 'EN'
     artistsdb = ''
     matdir = ''
+    nIterations = 1e6
     while True:
         if sys.argv[1] == '-pSize':
             pSize = int(sys.argv[2])
@@ -271,6 +285,10 @@ if __name__ == '__main__':
             matdir = sys.argv[2]
             sys.argv.pop(1)
             print 'oracle =',oracle,', matfiles dir =',matdir
+        elif sys.argv[1] == '-nIters':
+            nIterations = int(sys.argv[2])
+            sys.argv.pop(1)
+            print 'max number of iterations =', nIterations
         else:
             break
         sys.argv.pop(1)
@@ -287,4 +305,4 @@ if __name__ == '__main__':
           songKeyInv=songKeyInv, positive=positive,
           do_resample=do_resample, lrate=lrate,
           nThreads=nThreads, oracle=oracle, artistsdb=artistsdb,
-          matdir=matdir)
+          matdir=matdir, nIterations=nIterations)
