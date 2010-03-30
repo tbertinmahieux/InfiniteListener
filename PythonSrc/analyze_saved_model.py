@@ -177,3 +177,7 @@ if __name__ == '__main__':
     print 'number of iterations:', nIters
     print 'number of patterns seen:', nPatterns
     
+    # params
+    print 'PARAMS:'
+    for k in params.keys():
+        print '   ',k,' = ',params[k]
