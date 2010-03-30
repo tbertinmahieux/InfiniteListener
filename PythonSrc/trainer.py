@@ -18,7 +18,7 @@ import scipy.io
 import oracle_en
 import oracle_matfiles
 import features
-
+import model as MODEL
 
 
 def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
@@ -67,7 +67,9 @@ def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
         raise NotImplementedError
     # initialized model from codebook
     elif os.path.isfile(savedmodel):
-        raise NotImplementedError
+        codebook = load_codebook(savedmodel)
+        assert codebook != None,'Could not load codebook in: %s.'%savedmodel
+        model = MODEL.Model(codebook,lrate=lrate)
     # problem
     else:
         assert False,'saved model does not exist: %s.'%savedmodel
