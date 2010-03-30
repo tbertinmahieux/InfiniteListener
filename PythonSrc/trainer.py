@@ -23,7 +23,7 @@ import features
 
 def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
           positive=True,do_resample=True,lrate=1e-5,nThreads=4,
-          oracle='EN',matdir=''):
+          oracle='EN',artistsdb='',matdir=''):
     """
     Performs training
     Grab track data from oracle
@@ -31,14 +31,15 @@ def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
 
     INPUT
       expdir        - experiment directory, where to save experiments
+      savedmodel    - previously saved model directory, to restart it
+                      or matlab file, to start from a codebook
       pSize         - pattern size
       usebars       - how many bars per pattern
       keyInv        - perform 'key invariance' on patterns
       lrate         - learning rate
-      savedmodel    - previously saved model directory, to restart it
-                      or matlab file, to start from a codebook
       nThreads      - number of threads for the oracle, default=4
       oracle        - EN (EchoNest) or MAT (matfiles)
+      artistdb      - SQLlite database containing artist names
       matdir        - matfiles directory, for oracle MAT
 
     Saves everything when done.
@@ -50,7 +51,8 @@ def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
               'keyInv':keyInv, 'songKeyInv':songKeyInv,
               'positive':positive, 'do_resample':do_resample,
               'lrate':lrate, 'nThreads':nThreads,
-              'oracle':oracle,'matdir':matdir}
+              'oracle':oracle, 'artistdb':artistdb,
+              'matdir':matdir}
 
     # creates the experiment folder
     if not os.path.isdir(expdir):
@@ -134,21 +136,21 @@ def save_experiment(model,starttime,statlog,params,crash=False):
     Saves everything, either by routine or because of a crash
     Return directory name
     """
-    savedir = get_savedir_name(expdir):
+    savedir = get_savedir_name(expdir)
     os.mkdir(savedir)
     # save codebook as matfile
-    fname = os.path.join(savedir,'codebook.mat'))
+    fname = os.path.join(savedir,'codebook.mat')
     scipy.io.savemat(fname,{'codebook':model._codebook})
     # save model
-    f = open(os.path.join(savedir,'model.p')),'w')
+    f = open(os.path.join(savedir,'model.p'),'w')
     picle.dump(model,f)
     f.close()
     # save stats
-    f = open(os.path.join(savedir,'stats.p')),'w')
+    f = open(os.path.join(savedir,'stats.p'),'w')
     picle.dump(statlog,f)
     f.close()
     # save params
-    f = open(os.path.join(savedir,'params.p')),'w')
+    f = open(os.path.join(savedir,'params.p'),'w')
     picle.dump(params,f)
     f.close()
     # save starttime
@@ -167,6 +169,9 @@ def die_with_usage():
     """
     HELP MENU
     """
+    print 'trainer.py by T. Bertin-Maheux (2010) Columbia University'
+    print 'tb2332@columbia.edu'
+    print ''
     print 'Train a model with EchoNest data'
     print 'usage:'
     print '   python trainer.py [flags] <expdir>'
@@ -183,10 +188,12 @@ def die_with_usage():
     print ' -dont_resample    pad or crop instead'
     print ' -lrate r          learning rate for the algorithm'
     print ' -nThreads n       launch n threads for the EchoNest oracle'
+    print ' -artistsdb db     SQLlite database containing artist names'
+    print '                   used by EchoNest oracle'
     print ' -oraclemat d      matfiles oracle, d: matfiles dir'
     print ''
     print 'typical command:'
-    print ' python -O -pSize 8 -usebars 2 -lrate 1e-5 ~/experiment_dir codebook.mat'
+    print ' python -O -pSize 8 -usebars 2 -lrate 1e-5 -artistsdb artists28March.db~/experiment_dir codebook.mat'
     sys.exit(0)
 
 
@@ -207,6 +214,7 @@ if __name__ == '__main__':
     lrate = 1e-5
     nThreads = 4
     oracle = 'EN'
+    artistsdb = ''
     matdir = ''
     while True:
         if sys.argv[1] == '-pSize':
@@ -237,6 +245,10 @@ if __name__ == '__main__':
             nThreads = int(sys.argv[2])
             sys.argv.pop(1)
             print 'nThreads =', nThreads
+        elif sys.argv[1] == '-artistsdb':
+            artistsdb = sys.argv[2]
+            sys.argv.pop(1)
+            print 'artistsdb =', artistsdb
         elif sys.argv[1] == '-oraclemat':
             oracle = 'MAT'
             matdir = sys.argv[2]
@@ -257,4 +269,5 @@ if __name__ == '__main__':
     train(expdir, savedmodel, pSize=pSize,usebars=usebars,keyInv=keyInv,
           songKeyInv=songKeyInv, positive=positive,
           do_resample=do_resample, lrate=lrate,
-          nThreads=nThreads, oracle=oracle, matdir=matdir)
+          nThreads=nThreads, oracle=oracle, artistsdb=artistsdb,
+          matdir=matdir)
