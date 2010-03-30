@@ -12,6 +12,7 @@ import sys
 import time
 import copy
 import pickle
+import traceback
 import numpy as np
 import scipy as sp
 import scipy.io
@@ -106,13 +107,23 @@ def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
             # stats
             statlog.patternsSeen(feats.shape[0])
             # update model
-            print 'will update the model'
             model.update(feats,lrate=lrate)
 
     # error, save and quit
     except:
-        print "ERROR:", sys.exc_info()[0]
-        print 'Stoping after', main_iterations, 'iterations.'
+        print ''
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        print "ERROR:", exc_type
+        if str(exc_type) != "<type 'exceptions.KeyboardInterrupt'>":
+            print '********** DEBUGGING INFO *******************'
+            formatted_lines = traceback.format_exc().splitlines()
+            if len(formatted_lines) > 2:
+                print formatted_lines[-3]
+            if len(formatted_lines) > 1:
+                print formatted_lines[-2]
+            print formatted_lines[-1]
+            print '*********************************************'
+            print 'Stoping after', main_iterations, 'iterations.'
         # save
         #savedir = save_experiment(model,starttime,statlog,params, crash=True)
         #print 'saving to: ',savedir
