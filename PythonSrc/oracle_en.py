@@ -68,9 +68,11 @@ def _thread_en(artistsdb):
                 waiting_artists.append(k)
         try:
             artist = waiting_artists.pop()
-            artist = str(artist)
+            #artist = str(artist)
         except UnicodeEncodeError:
             print 'cannot encode artist :', artist
+            # above error comes from urllib.quote and should be fixed in
+            # python 3.0
             continue
 
         # get song
@@ -88,7 +90,8 @@ def _thread_en(artistsdb):
 
         # put data in queue, deque is supposed to be thread safe
         _thread_en_song_data.appendleft(d)
-        print 'added data (artist :',artist,') to _en_queue' #debugging
+        print 'added data'
+        print '(artist :',artist,') to _en_queue' #debugging
 
         
     print '_thread_en closing...'
