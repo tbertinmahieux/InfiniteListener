@@ -59,7 +59,7 @@ def check_one_artist(done_db=None,new_db=None):
             except IndexError:
                 continue # we're probably done
             # artist already done?
-            query = 'SELECT name FROM artists WHERE name='
+            query = 'BEGIN SELECT name FROM artists WHERE name='
             query += '"' + artist + '"'
             cursor_done.execute(query)
             found = cursor_done.fetchmany(2)
@@ -72,7 +72,7 @@ def check_one_artist(done_db=None,new_db=None):
                     _main_artist_queue.appendleft(artist)
                     time.sleep(1)
                 if tids != None and len(tids) > 0: # got songs
-                    query = 'INSERT INTO artists VALUES (null, "'
+                    query = 'BEGIN INSERT INTO artists VALUES (null, "'
                     query += artist + '",' + str(int(len(tids))) +')'
                     try:
                         cursor_new.execute(query)
@@ -81,9 +81,13 @@ def check_one_artist(done_db=None,new_db=None):
                         continue
                     connection_new.commit()
                 # artist done
-                query = 'INSERT INTO artists VALUES (null, "'
+                query = 'BEGIN INSERT INTO artists VALUES (null, "'
                 query += artist + '")'
-                cursor_done.execute(query)
+                try:
+                    cursor_done.execute(query)
+                except sqlite3.OperationalError:
+                    time.sleep(10)
+                    continue
                 connection_done.commit()
             
     except KeyboardInterrupt:
