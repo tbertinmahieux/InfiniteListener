@@ -48,6 +48,10 @@ def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
     Saves everything when done.
     """
 
+    # special case: expdir
+    if os.path.isdir(savedmodel) and expdir == '':
+        expdir, tmp = os.path.split(savedmodel)
+
     # creates a dictionary with all parameters
     params = {'savedmodel':savedmodel, 'expdir':expdir,
               'pSize':pSize, 'usebars':usebars,
@@ -125,7 +129,7 @@ def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
             model.update(feats,lrate=lrate)
             # save
             if should_save(starttime,last_save):
-                savedir = save_experiment(model,starttime,statlog,params)
+                savedir = save_experiment(expdir,model,starttime,statlog,params)
                 last_save = time.time()
 
     # error, save and quit
@@ -144,7 +148,8 @@ def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
             print '*********************************************'
             print 'Stoping after', main_iterations, 'iterations.'
         # save
-        savedir = save_experiment(model,starttime,statlog,params, crash=True)
+        savedir = save_experiment(expdir,model,starttime,statlog,params,
+                                  crash=True)
         print 'saving to: ',savedir
         #quit
         return
@@ -224,7 +229,7 @@ def should_save(starttime,last_save):
 
 
 
-def save_experiment(model,starttime,statlog,params,crash=False):
+def save_experiment(expdir,model,starttime,statlog,params,crash=False):
     """
     Saves everything, either by routine or because of a crash
     Return directory name
@@ -253,6 +258,13 @@ def save_experiment(model,starttime,statlog,params,crash=False):
     fname += '.txt'
     f = open(os.path.join(savedir,fname),'w')
     f.close()
+    # crash
+    if crash:
+        f = open(os.path.join(savedir,'crash.txt'),'w')
+        formatted_lines = traceback.format_exc().splitlines()
+        formatted_lines = map(lambda x: x+'\n', formatted_lines)
+        f.writelines(formatted_lines)
+        f.close()
     # done, return name of the directory
     return savedir
 
@@ -380,7 +392,7 @@ if __name__ == '__main__':
         sys.argv.pop(1)
 
     # saved model, directory or matfile
-    savedmodel = sys.argv[1]
+    savedmodel = os.path.abspath(sys.argv[1])
     print 'starting from model =', savedmodel
 
     # launch training
