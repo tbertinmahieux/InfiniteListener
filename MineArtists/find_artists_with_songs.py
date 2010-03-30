@@ -79,14 +79,14 @@ def check_one_artist(done_db=None,new_db=None):
                         connection_new.commit()
                     except sqlite.OperationalError, sqlite.IntegrityError :
                         pass
-            # artist done
-            query = 'INSERT INTO artists VALUES (null, "'
-            query += artist + '")'
-            cursor_done.execute(query)
-            try:
-                connection_done.commit()
-            except OperationalError:
-                pass
+                # artist done
+                query = 'INSERT INTO artists VALUES (null, "'
+                query += artist + '")'
+                cursor_done.execute(query)
+                try:
+                    connection_done.commit()
+                except OperationalError:
+                    pass
             
     except KeyboardInterrupt:
         # stop all threads
