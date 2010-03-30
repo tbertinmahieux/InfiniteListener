@@ -59,7 +59,7 @@ def check_one_artist(done_db=None,new_db=None):
             except IndexError:
                 continue # we're probably done
             # artist already done?
-            query = 'BEGIN SELECT name FROM artists WHERE name='
+            query = 'SELECT name FROM artists WHERE name='
             query += '"' + artist + '"'
             cursor_done.execute(query)
             found = cursor_done.fetchmany(2)
