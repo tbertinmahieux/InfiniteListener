@@ -75,6 +75,8 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
     splits = np.concatenate([splits,[nBeats]])
     diff_splits = np.diff(splits)
     splits = splits[np.where(diff_splits>0)]
+    if len(splits) < 1:
+        return None
     if splits[-1] != nBeats:
         splits = np.concatenate([splits,[nBeats]])
     if len(splits) < 2:
