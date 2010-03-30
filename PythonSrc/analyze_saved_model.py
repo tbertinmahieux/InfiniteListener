@@ -108,6 +108,8 @@ def print_traceback(folder):
     if not statlog.fromscratch:
         assert params['savedmodel'] != '','No saved model in traceback'
         print_traceback(params['savedmodel'])
+    else:
+        print params['savedmodel']
     print folder
     return
 
@@ -158,7 +160,7 @@ if __name__ == '__main__':
     if len(sys.argv) < 2:
         die_with_usage
 
-    savedmodel = sys.argv[1]
+    savedmodel = os.path.abspath(sys.argv[1])
     assert os.path.isdir(savedmodel),'%s is not a directory.'%savedmodel
     
     # load stat, params
