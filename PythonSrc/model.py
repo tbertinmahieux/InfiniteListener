@@ -50,7 +50,7 @@ class Model():
         print 'start predicting on batch, batch size =',feats.shape[0]
         best_code_per_p,dists = self.predicts(feats)
         # update codebook
-        for idx in range(feats):
+        for idx in range(feats.shape[0]):
             cidx = best_code_per_p[idx]
             self._codebook[cidx,:] += (feats[idx,:] - self._codebook[cidx,:]) * lrate
 
@@ -70,7 +70,6 @@ class Model():
         # ann
         use_ann = feats.shape[0] > 200
         if use_ann:
-            print 'we use ann'
             self._ann = ann.kdtree(self._codebook)
         # prepare result
         best_code_per_p = np.zeros(feats.shape[0])
@@ -79,11 +78,11 @@ class Model():
         for f in feats:
             idx += 1
             if use_ann:
-                code,dist = self._closest_code_ann(self,sample)
+                code,dist = self._closest_code_ann(f)
             else:
-                code,dist = self._closest_code_batch(self,sample)
+                code,dist = self._closest_code_batch(f)
             best_code_per_p[idx] = code
-            avg_dists[idx] = code * code * 1. / feats.shape[1]
+            avg_dists[idx] = dist * dist * 1. / feats.shape[1]
         # done, return two list
         return best_code_per_p, avg_dists
 
