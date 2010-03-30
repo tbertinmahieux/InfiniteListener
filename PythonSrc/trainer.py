@@ -73,6 +73,7 @@ def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
         codebook = load_codebook(savedmodel)
         assert codebook != None,'Could not load codebook in: %s.'%savedmodel
         model = MODEL.Model(codebook)
+        statlog.startFromScratch()
     # problem
     else:
         assert False,'saved model does not exist: %s.'%savedmodel
@@ -130,8 +131,8 @@ def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
             print '*********************************************'
             print 'Stoping after', main_iterations, 'iterations.'
         # save
-        #savedir = save_experiment(model,starttime,statlog,params, crash=True)
-        #print 'saving to: ',savedir
+        savedir = save_experiment(model,starttime,statlog,params, crash=True)
+        print 'saving to: ',savedir
         #quit
         return
 
@@ -144,12 +145,15 @@ class StatLog():
     """
     def __init__(self):
         """ Creates counters """
-        self.nIterations = 0
-        self.nPatternUsed = 0
+        self.nIterations = 0       # count iterations
+        self.nPatternUsed = 0      # count patterns seen
+        self.fromscratch = False   # whether we started from a saved model
     def patternsSeen(self,n):
         self.nPatternUsed += n
     def iteration(self):
         self.nIterations += 1
+    def startFromScratch(self):
+        self.fromscratch = True
 
 
 def get_savedir_name(expdir):
