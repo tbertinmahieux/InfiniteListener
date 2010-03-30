@@ -31,7 +31,6 @@ class Model():
         self._nCodes = codewords.shape[0]
         self._codesize = codewords.shape[1]
         self._dist = euclidean_dist
-        self._ann = ann.kdtree(self._codebook)
 
 
     def update(self,feats,lrate=1e-5):
@@ -47,7 +46,6 @@ class Model():
         rate is low.
         """
         # predicts on the features
-        print 'start predicting on batch, batch size =',feats.shape[0]
         best_code_per_p,dists = self.predicts(feats)
         # update codebook
         for idx in range(feats.shape[0]):
@@ -70,7 +68,7 @@ class Model():
         # ann
         use_ann = feats.shape[0] > 200
         if use_ann:
-            self._ann = ann.kdtree(self._codebook)
+            kdtree = ann.kdtree(self._codebook)
         # prepare result
         best_code_per_p = np.zeros(feats.shape[0])
         avg_dists = np.zeros(feats.shape[0])
@@ -78,7 +76,7 @@ class Model():
         for f in feats:
             idx += 1
             if use_ann:
-                code,dist = self._closest_code_ann(f)
+                code,dist = self._closest_code_ann(f,kdtree)
             else:
                 code,dist = self._closest_code_batch(f)
             best_code_per_p[idx] = code
@@ -99,14 +97,14 @@ class Model():
         return bestidx,dists[bestidx]
 
 
-    def _closest_code_ann(self,sample):
+    def _closest_code_ann(self,sample,kdtree):
         """
         Finds the closest code to a given sample.
         Do it using a kd-tree, good if the codebook is not modified.
         Returns the index of the closest code
         and euclidean distance
         """
-        res = self._ann.knn(sample,1)
+        res = kdtree.knn(sample,1)
         return res[0][0][0], res[1][0][0]  
 
 
