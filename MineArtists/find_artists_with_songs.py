@@ -72,7 +72,7 @@ def check_one_artist(done_db=None,new_db=None):
                     _main_artist_queue.appendleft(artist)
                     time.sleep(1)
                 if tids != None and len(tids) > 0: # got songs
-                    query = 'BEGIN INSERT INTO artists VALUES (null, "'
+                    query = 'INSERT INTO artists VALUES (null, "'
                     query += artist + '",' + str(int(len(tids))) +')'
                     try:
                         cursor_new.execute(query)
@@ -81,7 +81,7 @@ def check_one_artist(done_db=None,new_db=None):
                         continue
                     connection_new.commit()
                 # artist done
-                query = 'BEGIN INSERT INTO artists VALUES (null, "'
+                query = 'INSERT INTO artists VALUES (null, "'
                 query += artist + '")'
                 try:
                     cursor_done.execute(query)
