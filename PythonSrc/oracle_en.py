@@ -44,6 +44,7 @@ def _thread_en(artistsdb):
     a field 'name'.
     """
     cnt_iter = 0
+    cnt_provided = 0
     waiting_artists = deque() # for db
 
     # MAIN LOOP
@@ -54,6 +55,7 @@ def _thread_en(artistsdb):
         # queue full?
         if len(_thread_en_song_data) > _en_queue_size :
             time.sleep(0.050) # sleep for 50 milliseconds
+            cnt_iter -= 1
             continue
 
         # get artist
@@ -83,6 +85,10 @@ def _thread_en(artistsdb):
         # put data in queue, deque is supposed to be thread safe
         _thread_en_song_data.appendleft(d)
         print 'added data (artist :',artist,') to _en_queue' #debugging
+        cnt_provided += 1
+
+    # done
+    print 'stopping _en_thread, prob. of providing:',cnt_provided*1./cnt_iter
 
 
 
