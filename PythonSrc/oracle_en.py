@@ -85,7 +85,12 @@ def _thread_en(artistsdb):
         # put data in queue, deque is supposed to be thread safe
         _thread_en_song_data.appendleft(d)
         print 'added data (artist :',artist,') to _en_queue' #debugging
+        # success rate too low? print WARNING
         cnt_provided += 1
+        if cnt_provided % 100 == 0:
+            prob_provide = ,cnt_provided*100./cnt_iter
+            if prob_provide < 85.:
+                print 'WARNING: _en_thread, prob. of providing is low:',prob_provide,'% , artists do not actually have song?'
 
     # done
     print 'stopping _en_thread, prob. of providing:',cnt_provided*1./cnt_iter
