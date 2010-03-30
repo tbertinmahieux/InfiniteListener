@@ -200,6 +200,8 @@ if __name__ == '__main__':
     # launch threads
     assert nThreads > 0,'you need at least one thread'
     assert nThreads <= 15,'15 threads is the limit, that is a lot!'
+    if nThreads > 1:
+        print 'concurrency problem with the db, using 1 thread is safer'
     for k in range(nThreads):
         thread.start_new_thread(check_one_artist,(),{'done_db':transf_db,
                                                      'new_db':new_db})
