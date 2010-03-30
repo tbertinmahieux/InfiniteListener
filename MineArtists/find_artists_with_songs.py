@@ -84,7 +84,7 @@ def check_one_artist(done_db=None,new_db=None):
                 query = 'INSERT INTO artists VALUES (null, "'
                 query += artist + '")'
                 cursor_done.execute(query)
-                connecton_done.commit()
+                connection_done.commit()
             
     except KeyboardInterrupt:
         # stop all threads
