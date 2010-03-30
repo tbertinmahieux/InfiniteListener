@@ -76,17 +76,13 @@ def check_one_artist(done_db=None,new_db=None):
                     query += artist + '",' + str(int(len(tids))) +')'
                     try:
                         cursor_new.execute(query)
-                        connection_new.commit()
-                    except sqlite3.OperationalError, sqlite3.IntegrityError :
+                    except sqlite3.IntegrityError :
                         pass
                 # artist done
                 query = 'INSERT INTO artists VALUES (null, "'
                 query += artist + '")'
                 cursor_done.execute(query)
-                try:
-                    connection_done.commit()
-                except sqlite3.OperationalError:
-                    pass
+
             
     except KeyboardInterrupt:
         # stop all threads
