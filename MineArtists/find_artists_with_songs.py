@@ -85,7 +85,7 @@ def check_one_artist(done_db=None,new_db=None):
                 cursor_done.execute(query)
                 try:
                     connection_done.commit()
-                except OperationalError:
+                except sqlite3.OperationalError:
                     pass
             
     except KeyboardInterrupt:
