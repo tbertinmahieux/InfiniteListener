@@ -48,19 +48,6 @@ def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
     Saves everything when done.
     """
 
-    # special case: expdir
-    if os.path.isdir(savedmodel) and expdir == '':
-        expdir, tmp = os.path.split(savedmodel)
-
-    # creates a dictionary with all parameters
-    params = {'savedmodel':savedmodel, 'expdir':expdir,
-              'pSize':pSize, 'usebars':usebars,
-              'keyInv':keyInv, 'songKeyInv':songKeyInv,
-              'positive':positive, 'do_resample':do_resample,
-              'lrate':lrate, 'nThreads':nThreads,
-              'oracle':oracle, 'artistsdb':artistsdb,
-              'matdir':matdir, 'nIterations':nIterations}
-
     # create the StatLog object
     statlog = StatLog()
 
@@ -77,6 +64,8 @@ def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
         oldparams = param_unp.load()
         f.close()
         for k in oldparams.keys():
+            if k == 'savedmodel': # special case
+                continue
             exec_str = k + ' = oldparams["'+k+'"]'
             exec( exec_str )
             print 'from saved model,',k,'=',eval(k)
@@ -89,6 +78,15 @@ def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
     # problem
     else:
         assert False,'saved model does not exist: %s.'%savedmodel
+
+    # creates a dictionary with all parameters
+    params = {'savedmodel':savedmodel, 'expdir':expdir,
+              'pSize':pSize, 'usebars':usebars,
+              'keyInv':keyInv, 'songKeyInv':songKeyInv,
+              'positive':positive, 'do_resample':do_resample,
+              'lrate':lrate, 'nThreads':nThreads,
+              'oracle':oracle, 'artistsdb':artistsdb,
+              'matdir':matdir, 'nIterations':nIterations}
 
     # creates the experiment folder
     if not os.path.isdir(expdir):
