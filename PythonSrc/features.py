@@ -55,6 +55,8 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
     # get chroma per beat
     if btchroma_barbts == None:
         btchroma, barbts = create_beat_synchro_chromagram(analysis_dict)
+        if btchroma == None:
+            return None
     else:
         btchroma, barbts = btchroma_barbts
 
@@ -154,6 +156,8 @@ def create_beat_synchro_chromagram(analysis_dict):
     # result for track: 'TR0002Q11C3FA8332D'
     #    segchroma.shape = (12, 708)
     segchroma = analysis_dict['chromas']
+    if segchroma.shape[1] == 0:
+        return None,None
 
     # get the series of starts for segments, beats, and bars
     # result for track: 'TR0002Q11C3FA8332D'
@@ -174,6 +178,8 @@ def create_beat_synchro_chromagram(analysis_dict):
     #    btchroma.shape = (304, 12)
     warpmat = get_time_warp_matrix(segstart, btstart, duration)
     btchroma = np.dot(warpmat, segchroma.T).T
+    if btchroma.shape[1] == 0:
+        return None, None
     assert btchroma.shape[0] == 12, 'bad btchroma shape'
 
     # Renormalize.
