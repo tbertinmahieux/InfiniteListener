@@ -163,6 +163,21 @@ def save_experiment(model,starttime,statlog,params,crash=False):
     return savedir
 
 
+def load_codebook(matfile,cbkey='codebook'):
+    """
+    Load a codebook saved in matfile.
+    Assumes codebook s saved under <cbkey>
+    Returns codebook, or None if key does not exists
+    """
+    if not os.path.isfile(matfile):
+        return None
+    if sys.version_info[1] == 5:
+        mat = sp.io.loadmat(self.matfiles[self.fidx])
+    else:
+        mat = sp.io.loadmat(self.matfiles[self.fidx], struct_as_record=True)
+    if not mat.has_key(cbkey):
+        return None
+    return mat[cbkey]
 
 
 def die_with_usage():
