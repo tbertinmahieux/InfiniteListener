@@ -18,6 +18,7 @@ import copy
 import xml
 from xml.dom import minidom
 import urllib
+import urlparse
 import numpy as np
 
 try:
@@ -72,6 +73,29 @@ def do_dict_call(url):
     d = eval(data)
     # return dictionary
     return d
+
+
+
+def fixurl(url):
+    """
+    Taken from:
+    http://stackoverflow.com/questions/804336/best-way-to-convert-a-unicode-url-to-ascii-utf-8-percent-escaped-in-python
+    """
+    # turn string into unicode
+    url = url.decode('utf8')
+    # parse it
+    parsed = urlparse.urlsplit(url)
+    # encode each component
+    scheme = parsed.scheme.encode('utf8')
+    netloc = parsed.netloc.encode('idna')
+    path = '/'.join(  # could be encoded slashes!
+        urllib.quote(urllib.unquote(pce).encode('utf8'),'')
+        for pce in parsed.path.split('/')
+    )
+    query = urllib.quote(urllib.unquote(parsed.query).encode('utf8'),'=&?/')
+    fragment = urllib.quote(urllib.unquote(parsed.query).encode('utf8'))
+    # put it back together
+    return urlparse.urlunsplit((scheme,netloc,path,query,fragment))
 
 
 def check_xml_success(xmldoc):
@@ -156,12 +180,12 @@ def search_tracks(artist,title='',max_results=100):
     # build call
     url = 'http://developer.echonest.com/api/alpha_search_tracks?'
     url += 'api_key=' + _api_dev_key
-    try:
-        url += '&artist='+urllib.quote(artist)
-    except TypeError:
-        url += '&artist='+artist
+    # next inspired from fixurl
+    artist = urllib.quote(urllib.unquote(artist).encode('utf8'),'=&?/')
+    url +=  '&artist='+ artist
     if title != '':
-        url += '&title='+urllib.quote(title)
+        title = urllib.quote(urllib.unquote(title).encode('utf8'),'=&?/')
+        url += '&title='+title
     url += '&version=3'
     url += '&results=' + str(int(max_results))
     # call, get XML
@@ -334,6 +358,8 @@ if __name__ == '__main__' :
 
 
     # DEBUGGING
+
+    # typical call
     call1 = 'http://developer.echonest.com/api/get_audio?api_key=5ZAOMB3BUR8QUN4PE&id=musicbrainz:artist:6fe07aa5-fec0-4eca-a456-f29bff451b04&rows=2&version=3'
 
     # do a call, get XML
