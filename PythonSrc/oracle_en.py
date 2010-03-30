@@ -37,7 +37,7 @@ _en_queue_size = 100
 _thread_en_song_data = deque()
 # lock for the song_data
 #_thread_en_lock = thread.allocate_lock() # deque supposed to be thread safe
-def _thread_en(artists):
+def _thread_en(artistsdb):
     """
     Thread that load EN data
     For artists receives a SQLlite database containing a table 'artists' with
@@ -59,17 +59,17 @@ def _thread_en(artists):
 
         # get artist
         if len(waiting_artists) == 0:
-            artist_list = get_artists_from_db(artists)
+            artist_list = get_artists_from_db(artistsdb)
             if artist_list == None:
                 print 'ERROR,: en_thread, cant get artist from SQL database'
                 time.sleep(50)
                 continue
             for k in artist_list:
                 waiting_artists.append(k)        
-        artist = waiting_artists.pop()
+        artist = str(waiting_artists.pop())
 
         # get song
-        tids,titles,aids,artists = en_extras.search_tracks(artist)
+        tids,tmp_titles,tmp_aids,tmp_artists = en_extras.search_tracks(artist)
         if tids == None or len(tids) == 0:
             continue
         trackid = tids[np.random.randint(len(tids))]
@@ -83,6 +83,7 @@ def _thread_en(artists):
 
         # put data in queue, deque is supposed to be thread safe
         _thread_en_song_data.appendleft(d)
+        print 'added data (artist :',artist,') to _en_queue' #debugging
 
         
     print '_thread_en closing...'
@@ -103,17 +104,19 @@ def get_artists_from_db(dbname,nArtists=100):
     assert nArtists > 0,'ask for at least one artist!'
     assert nArtists < 10000,'wow.... that is a lot of artists'
     # connects to the DB
-    connection = sqlite.connect(sqlite_db)
+    connection = sqlite.connect(dbname)
     # gets cursor
     cursor = connection.cursor()
     try:
         query = 'SELECT name FROM artists ORDER BY RANDOM() LIMIT '+str(nArtists)
-        cursor.execute(q)
+        cursor.execute(query)
         res = cursor.fetchall()
+        connection.close()
         if len(res) == 0:
             return None
-        return res
+        return [x[0] for x in res]
     except sqlite3.OperationalError:
+        connection.close()
         return None
 
 
@@ -140,10 +143,11 @@ class OracleEN():
         self._positive = params['positive']
         self._do_resample = params['do_resample']
         # start a number of EN threads
+        nThreads = params['nThreads']
         assert nThreads > 0,'you need at least one thread'
         assert nThreads <= 15,'15 threads is the limit, that is a lot!'
         for k in range(nThreads):
-            thread.start_new_thread(_thread_en,(),{'artists':artists})
+            thread.start_new_thread(_thread_en,(),{'artistsdb':artists})
         # statistics
         self._nTracksGiven = 0
 
