@@ -79,11 +79,12 @@ def check_one_artist(done_db=None,new_db=None):
                     except sqlite3.IntegrityError :
                         time.sleep(1)
                         continue
+                    connection_new.commit()
                 # artist done
                 query = 'INSERT INTO artists VALUES (null, "'
                 query += artist + '")'
                 cursor_done.execute(query)
-
+                connecton_done.commit()
             
     except KeyboardInterrupt:
         # stop all threads
