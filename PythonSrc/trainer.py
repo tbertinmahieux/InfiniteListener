@@ -23,18 +23,18 @@ import features
 import model as MODEL
 
 
-def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
-          positive=True,do_resample=True,lrate=1e-5,nThreads=4,
-          oracle='EN',artistsdb='',matdir='', nIterations=1e6):
+def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
+          songKeyInv=False,positive=True,do_resample=True,lrate=1e-5,
+          nThreads=4,oracle='EN',artistsdb='',matdir='', nIterations=1e6):
     """
     Performs training
     Grab track data from oracle
     Pass them to model that updates itself
 
     INPUT
-      expdir        - experiment directory, where to save experiments
       savedmodel    - previously saved model directory, to restart it
                       or matlab file, to start from a codebook
+      expdir        - experiment directory, where to save experiments
       pSize         - pattern size
       usebars       - how many bars per pattern
       keyInv        - perform 'key invariance' on patterns
@@ -48,8 +48,8 @@ def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
     Saves everything when done.
     """
 
-    # creates a dctionary with all parameters
-    params = {'expdir':expdir, 'savedmodel':savedmodel,
+    # creates a dictionary with all parameters
+    params = {'savedmodel':savedmodel, 'expdir':expdir,
               'pSize':pSize, 'usebars':usebars,
               'keyInv':keyInv, 'songKeyInv':songKeyInv,
               'positive':positive, 'do_resample':do_resample,
@@ -57,17 +57,25 @@ def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
               'oracle':oracle, 'artistsdb':artistsdb,
               'matdir':matdir, 'nIterations':nIterations}
 
-    # creates the experiment folder
-    if not os.path.isdir(expdir):
-        print 'creating experiment directory:',expdir
-        os.mkdir(expdir)
-
     # create the StatLog object
     statlog = StatLog()
 
     # start from saved model
     if os.path.isdir(savedmodel):
-        raise NotImplementedError
+        # load model
+        f = open(os.path.join(savedmodel,'model.p'),'r')
+        model_unp = pickle.Unpickler(f)
+        model = model_unp.load()
+        f.close()
+        # load params, savedmodel will be modified
+        f = open(os.path.join(savedmodel,'params.p'),'r')
+        param_unp = pickle.Unpickler(f)
+        oldparams = param_unp.load()
+        f.close()
+        for k in oldparams.keys():
+            exec_str = k + ' = oldparams["'+k+'"]'
+            exec( exec_str )
+            print 'from saved model,',k,'=',eval(k)
     # initialized model from codebook
     elif os.path.isfile(savedmodel):
         codebook = load_codebook(savedmodel)
@@ -77,6 +85,11 @@ def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
     # problem
     else:
         assert False,'saved model does not exist: %s.'%savedmodel
+
+    # creates the experiment folder
+    if not os.path.isdir(expdir):
+        print 'creating experiment directory:',expdir
+        os.mkdir(expdir)
 
     # create oracle
     if oracle == 'EN':
@@ -270,12 +283,11 @@ def die_with_usage():
     print ''
     print 'Train a model with EchoNest data'
     print 'usage:'
-    print '   python trainer.py [flags] <expdir>'
-    print '   python -O trainer.py [flags] <expdir> <savedmodel>'
+    print '   python -O trainer.py [flags] <savedmodel>'
     print 'INPUT'
-    print ' <expdir>     experiment directory, where to save experiments'
     print ' <savedmodel> directory or codebook saved as matfile'
     print 'FLAGS'
+    print ' -expdir d         directory to save model, when initializing'
     print ' -pSize n          final pattern size is 12 x n'
     print ' -usebars n        n number of bars per pattern, or 0'
     print ' -noKeyInv         do not perform key inveriance on patterns'
@@ -289,8 +301,10 @@ def die_with_usage():
     print ' -oraclemat d      matfiles oracle, d: matfiles dir'
     print ' -nIters n         maximum number of iterations'
     print ''
-    print 'typical command:'
-    print ' python -O trainer.py -pSize 8 -usebars 2 -lrate 1e-5 -artistsdb artists28March.db ~/experiment_dir codebook.mat'
+    print 'typical command to initialize from codebook:'
+    print '  python -O trainer.py -pSize 8 -usebars 2 -lrate 1e-5 -artistsdb artists28March.db -expdir ~/experiment_dir codebook.mat'
+    print 'typical command to initialize to continue:'
+    print '  python -O trainer.py ~/experiment_dir/expBLABLA'
     sys.exit(0)
 
 
@@ -302,6 +316,7 @@ if __name__ == '__main__':
         die_with_usage()
 
     # flags
+    expdir = ''
     pSize = 8
     usebars = 2
     keyInv = True
@@ -315,7 +330,11 @@ if __name__ == '__main__':
     matdir = ''
     nIterations = 1e6
     while True:
-        if sys.argv[1] == '-pSize':
+        if sys.argv[1] == '-expdir':
+            expdir = os.path.abspath(sys.argv[2])
+            sys.argv.pop(1)
+            print 'experiment dir =', expdir
+        elif sys.argv[1] == '-pSize':
             pSize = int(sys.argv[2])
             sys.argv.pop(1)
             print 'pSize =',pSize
@@ -360,15 +379,12 @@ if __name__ == '__main__':
             break
         sys.argv.pop(1)
 
-    # experiment dir
-    expdir = sys.argv[1]
-    print 'experiment directory =', expdir
     # saved model, directory or matfile
-    savedmodel = sys.argv[2]
+    savedmodel = sys.argv[1]
     print 'starting from model =', savedmodel
 
     # launch training
-    train(expdir, savedmodel, pSize=pSize,usebars=usebars,keyInv=keyInv,
+    train(savedmodel, expdir=expdir, pSize=pSize,usebars=usebars,keyInv=keyInv,
           songKeyInv=songKeyInv, positive=positive,
           do_resample=do_resample, lrate=lrate,
           nThreads=nThreads, oracle=oracle, artistsdb=artistsdb,
