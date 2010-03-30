@@ -13,6 +13,7 @@ import time
 import glob
 import scipy as sp
 import scipy.io
+import scipy.signal
 import numpy as np
 
 
@@ -55,7 +56,7 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
     if btchroma_barbts == None:
         btchroma, barbts = create_beat_synchro_chromagram(analysis_dict)
     else:
-        btchroma,barbts = btchroma_barbts
+        btchroma, barbts = btchroma_barbts
 
     # song invariance
     if songKeyInv:
@@ -67,17 +68,20 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
         barbts = np.array(range(0,nBeats-nBeats%pSize,pSize))
         usebars = 1
 
-    # allocate space for anser
+    # allocate space for answer
     nFeats = int(len(barbts)/2)
-    feats = np.zeros([12,nFeats])
+    feats = np.zeros([nFeats,12*pSize])
 
     # iterate on patterns
+    bt2 = 0
+    barpos = 0
     for k in range(nFeats):
         # beginning of the bar
-        bt1 = barbts[k]
+        bt1 = bt2
         # end of the bar
-        if k + usebars < nFeats:
-            bt2 = barbts[k+usebars]
+        if barpos + usebars < len(barbts):
+            bt2 = barbts[barpos+usebars]
+            barpos += usebars
         else:
             bt2 = nBeats
         # pattern before resize and invariance
@@ -157,9 +161,9 @@ def create_beat_synchro_chromagram(analysis_dict):
     #    segstart.shape = (708,)
     #    btstart.shape = (304,)
     #    barstart.shape = (98,)
-    segstart = analysis_dict['segstart']
-    btstart = np.array(analysis_dict['beatstart'])
-    barstart = np.array(analysis_dict['barstart'])
+    segstart = np.array(analysis_dict['segstart']).flatten()
+    btstart = np.array(analysis_dict['beatstart']).flatten()
+    barstart = np.array(analysis_dict['barstart']).flatten()
 
     # get duration
     duration = analysis_dict['duration']
@@ -170,7 +174,8 @@ def create_beat_synchro_chromagram(analysis_dict):
     #    warpmat.shape = (304, 708)
     #    btchroma.shape = (304, 12)
     warpmat = get_time_warp_matrix(segstart, btstart, duration)
-    btchroma = np.dot(warpmat, segchroma)
+    btchroma = np.dot(warpmat, segchroma.T).T
+    assert btchroma.shape[0] == 12, 'bad btchroma shape'
 
     # Renormalize.
     btchroma = (btchroma.T / btchroma.max(axis=1)).T
@@ -247,6 +252,8 @@ def get_time_warp_matrix(segstart, btstart, duration):
 def pad_crop(data, newsize):
     """ set the data to the right size, columnwise, by either
     padding with zeros or cropping """
+    assert data.shape[0] > 0
+    assert data.shape[1] > 0
     if data.shape[1] == newsize:
         return data
     # data too small
@@ -261,8 +268,10 @@ def pad_crop(data, newsize):
 
 def resample(data, newsize):
     """ resample the data, columnwise """
+    assert data.shape[0] > 0
+    assert data.shape[1] > 0
     if newsize > 1:
-        return SP.signal.resample(data, newsize, axis=1)
+        return scipy.signal.resample(data, newsize, axis=1)
     # special case, newsize == 1
     if newsize == 1 and data.shape[1] == 1:
         return data
