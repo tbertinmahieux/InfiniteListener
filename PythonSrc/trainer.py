@@ -21,9 +21,9 @@ import features
 
 
 
-def train(expdir,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
-          positive=True,do_resample=True,lrate=1e-5,
-          savedmodel='',nThreads=4,oracle='EN',matdir=''):
+def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
+          positive=True,do_resample=True,lrate=1e-5,nThreads=4,
+          oracle='EN',matdir=''):
     """
     Performs training
     Grab track data from oracle
@@ -36,6 +36,7 @@ def train(expdir,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
       keyInv        - perform 'key invariance' on patterns
       lrate         - learning rate
       savedmodel    - previously saved model directory, to restart it
+                      or matlab file, to start from a codebook
       nThreads      - number of threads for the oracle, default=4
       oracle        - EN (EchoNest) or MAT (matfiles)
       matdir        - matfiles directory, for oracle MAT
@@ -44,11 +45,12 @@ def train(expdir,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
     """
 
     # creates a dctionary with all parameters
-    params = {'expdir':expdir,'pSize':pSize8,'usebars':usebars,
-              'keyInv':keyInv,'songKeyInv':songKeyInv,
-              'positive':positive,'do_resample':do_resample,
-              'lrate':lrate,'savedmodel':savedmodel,
-              'nThreads':nThreads,'oracle':oracle,'matdir':matdir}
+    params = {'expdir':expdir, 'savedmodel':savedmodel,
+              'pSize':pSize8, 'usebars':usebars,
+              'keyInv':keyInv, 'songKeyInv':songKeyInv,
+              'positive':positive, 'do_resample':do_resample,
+              'lrate':lrate, 'nThreads':nThreads,
+              'oracle':oracle,'matdir':matdir}
 
     # creates the experiment folder
     if not os.path.isdir(expdir):
@@ -59,11 +61,14 @@ def train(expdir,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
     statlog = StatLog()
 
     # start from saved model
-    if savedmodel != '':
+    if os.path.isdir(savedmodel):
         raise NotImplementedError
-    # intialize new model
+    # initialized model from codebook
+    elif os.path.isfile(savedmodel):
+        raise NotImplementedError
+    # problem
     else:
-        raise NotImplementedError
+        assert False,'saved model does not exist: %s.'%savedmodel
 
     # create oracle
     if oracle == 'EN':
@@ -165,23 +170,23 @@ def die_with_usage():
     print 'Train a model with EchoNest data'
     print 'usage:'
     print '   python trainer.py [flags] <expdir>'
-    print '   python -O trainer.py [flags] <expdir>'
+    print '   python -O trainer.py [flags] <expdir> <savedmodel>'
     print 'INPUT'
-    print ' <expdir>    experiment directory, where to save experiments'
+    print ' <expdir>     experiment directory, where to save experiments'
+    print ' <savedmodel> directory or codebook saved as matfile'
     print 'FLAGS'
-    print ' -pSize N'
-    print ' -usebars 2'
-    print ' -noKeyInv'
-    print ' -songKeyInv'
-    print ' -notpositive'
+    print ' -pSize n          final pattern size is 12 x n'
+    print ' -usebars n        n number of bars per pattern, or 0'
+    print ' -noKeyInv         do not perform key inveriance on patterns'
+    print ' -songKeyInv       perform key invariance on song level'
+    print ' -notpositive      do not replace negative values by zero'
     print ' -dont_resample    pad or crop instead'
-    print ' -lrate r'
-    print ' -savedmodel d'
-    print ' -nThreads n'
+    print ' -lrate r          learning rate for the algorithm'
+    print ' -nThreads n       launch n threads for the EchoNest oracle'
     print ' -oraclemat d      matfiles oracle, d: matfiles dir'
     print ''
     print 'typical command:'
-    print ' python -O -pSize 8 -usebars 2 -lrate 1e-5 ~/experiment_dir'
+    print ' python -O -pSize 8 -usebars 2 -lrate 1e-5 ~/experiment_dir codebook.mat'
     sys.exit(0)
 
 
@@ -200,7 +205,6 @@ if __name__ == '__main__':
     positive = True
     do_resample = True
     lrate = 1e-5
-    savedmodel = ''
     nThreads = 4
     oracle = 'EN'
     matdir = ''
@@ -229,10 +233,6 @@ if __name__ == '__main__':
             lrate = float(sys.argv[2])
             sys.argv.pop(1)
             print 'lrate =', lrate
-        elif sys.argv[1] == '-savedmodel':
-            savedmodel = sys.argv[2]
-            sys.argv.pop(1)
-            print 'savedmodel =', savedmodel
         elif sys.argv[1] == '-nThreads':
             nThreads = int(sys.argv[2])
             sys.argv.pop(1)
@@ -248,10 +248,13 @@ if __name__ == '__main__':
 
     # experiment dir
     expdir = sys.argv[1]
+    print 'experiment directory =', expdir
+    # saved model, directory or matfile
+    savedmodel = sys.argv[2]
+    print 'starting from model =', savedmodel
 
     # launch training
-    train(expdir,pSize=pSize,usebars=usebars,keyInv=keyInv,
-          songKeyInv=songKeyInv,positive=positive,
-          do_resample=do_resample,lrate=lrate,
-          savedmodel=savedmodel,nThreads=nThreads,oracle=oracle,
-          matdir=matdir)
+    train(expdir, savedmodel, pSize=pSize,usebars=usebars,keyInv=keyInv,
+          songKeyInv=songKeyInv, positive=positive,
+          do_resample=do_resample, lrate=lrate,
+          nThreads=nThreads, oracle=oracle, matdir=matdir)
