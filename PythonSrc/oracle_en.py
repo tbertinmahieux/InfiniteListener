@@ -43,7 +43,6 @@ def _thread_en(artistsdb):
     For artists receives a SQLlite database containing a table 'artists' with
     a field 'name'.
     """
-    print '_thread_en starting...'
     cnt_iter = 0
     waiting_artists = deque() # for db
 
@@ -66,14 +65,7 @@ def _thread_en(artistsdb):
                 continue
             for k in artist_list:
                 waiting_artists.append(k)
-        try:
-            artist = waiting_artists.pop()
-            #artist = str(artist)
-        except UnicodeEncodeError:
-            print 'cannot encode artist :', artist
-            # above error comes from urllib.quote and should be fixed in
-            # python 3.0
-            continue
+        artist = waiting_artists.pop()
 
         # get song
         tids,tmp_titles,tmp_aids,tmp_artists = en_extras.search_tracks(artist)
@@ -90,12 +82,7 @@ def _thread_en(artistsdb):
 
         # put data in queue, deque is supposed to be thread safe
         _thread_en_song_data.appendleft(d)
-        print 'added data'
-        print '(artist :',artist,') to _en_queue' #debugging
-
-        
-    print '_thread_en closing...'
-
+        print 'added data (artist :',artist,') to _en_queue' #debugging
 
 
 
