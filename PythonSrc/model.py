@@ -47,6 +47,7 @@ class Model():
         rate is low.
         """
         # predicts on the features
+        print 'start predicting on batch, batch size =',feats.shape[0]
         best_code_per_p,dists = self.predicts(feats)
         # update codebook
         for idx in range(feats):
@@ -69,6 +70,7 @@ class Model():
         # ann
         use_ann = feats.shape[0] > 200
         if use_ann:
+            print 'we use ann'
             self._ann = ann.kdtree(self._codebook)
         # prepare result
         best_code_per_p = np.zeros(feats.shape[0])
