@@ -13,6 +13,7 @@ import time
 import copy
 import pickle
 import numpy as np
+import scipy as sp
 import scipy.io
 
 import oracle_en
@@ -48,11 +49,11 @@ def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
 
     # creates a dctionary with all parameters
     params = {'expdir':expdir, 'savedmodel':savedmodel,
-              'pSize':pSize8, 'usebars':usebars,
+              'pSize':pSize, 'usebars':usebars,
               'keyInv':keyInv, 'songKeyInv':songKeyInv,
               'positive':positive, 'do_resample':do_resample,
               'lrate':lrate, 'nThreads':nThreads,
-              'oracle':oracle, 'artistdb':artistdb,
+              'oracle':oracle, 'artistsdb':artistsdb,
               'matdir':matdir, 'nIterations':nIterations}
 
     # creates the experiment folder
@@ -70,14 +71,14 @@ def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
     elif os.path.isfile(savedmodel):
         codebook = load_codebook(savedmodel)
         assert codebook != None,'Could not load codebook in: %s.'%savedmodel
-        model = MODEL.Model(codebook,lrate=lrate)
+        model = MODEL.Model(codebook)
     # problem
     else:
         assert False,'saved model does not exist: %s.'%savedmodel
 
     # create oracle
     if oracle == 'EN':
-        oracle = oracle_en.OracleEN(params)
+        oracle = oracle_en.OracleEN(params,artistsdb)
     elif oracle == 'MAT':
         oracle = oracle_matfiles.OracleMatfiles(params,matdir)
     else:
@@ -94,10 +95,10 @@ def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
         while True:
             # increment iterations
             main_iterations += 1
+            print main_iterations,'iterations'
             statlog.iteration()
             if main_iterations > nIterations:
                 raise StopIteration
-            
             # get features from the oracle
             feats = oracle.next_track()
             if feats == None:
@@ -105,6 +106,7 @@ def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
             # stats
             statlog.patternsSeen(feats.shape[0])
             # update model
+            print 'will update the model'
             model.update(feats,lrate=lrate)
 
     # error, save and quit
@@ -112,8 +114,8 @@ def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
         print "ERROR:", sys.exc_info()[0]
         print 'Stoping after', main_iterations, 'iterations.'
         # save
-        savedir = save_experiment(model,starttime,statlog,params, crash=True)
-        print 'saving to: ',savedir
+        #savedir = save_experiment(model,starttime,statlog,params, crash=True)
+        #print 'saving to: ',savedir
         #quit
         return
 
@@ -157,15 +159,15 @@ def save_experiment(model,starttime,statlog,params,crash=False):
     scipy.io.savemat(fname,{'codebook':model._codebook})
     # save model
     f = open(os.path.join(savedir,'model.p'),'w')
-    picle.dump(model,f)
+    pickle.dump(model,f)
     f.close()
     # save stats
     f = open(os.path.join(savedir,'stats.p'),'w')
-    picle.dump(statlog,f)
+    pickle.dump(statlog,f)
     f.close()
     # save params
     f = open(os.path.join(savedir,'params.p'),'w')
-    picle.dump(params,f)
+    pickle.dump(params,f)
     f.close()
     # save starttime
     fname = 'starttime_'
@@ -186,9 +188,9 @@ def load_codebook(matfile,cbkey='codebook'):
     if not os.path.isfile(matfile):
         return None
     if sys.version_info[1] == 5:
-        mat = sp.io.loadmat(self.matfiles[self.fidx])
+        mat = sp.io.loadmat(matfile)
     else:
-        mat = sp.io.loadmat(self.matfiles[self.fidx], struct_as_record=True)
+        mat = sp.io.loadmat(matfile, struct_as_record=True)
     if not mat.has_key(cbkey):
         return None
     return mat[cbkey]
@@ -223,7 +225,7 @@ def die_with_usage():
     print ' -nIters n         maximum number of iterations'
     print ''
     print 'typical command:'
-    print ' python -O -pSize 8 -usebars 2 -lrate 1e-5 -artistsdb artists28March.db~/experiment_dir codebook.mat'
+    print ' python -O trainer.py -pSize 8 -usebars 2 -lrate 1e-5 -artistsdb artists28March.db ~/experiment_dir codebook.mat'
     sys.exit(0)
 
 
