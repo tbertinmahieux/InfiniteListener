@@ -166,8 +166,9 @@ def save_experiment(model,starttime,statlog,params,crash=False):
     savedir = get_savedir_name(expdir)
     os.mkdir(savedir)
     # save codebook as matfile
-    fname = os.path.join(savedir,'codebook.mat')
-    scipy.io.savemat(fname,{'codebook':model._codebook})
+    if hasattr(model,'_codebook'):
+        fname = os.path.join(savedir,'codebook.mat')
+        scipy.io.savemat(fname,{'codebook':model._codebook})
     # save model
     f = open(os.path.join(savedir,'model.p'),'w')
     pickle.dump(model,f)
