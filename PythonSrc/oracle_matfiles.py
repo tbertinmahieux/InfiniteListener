@@ -24,9 +24,10 @@ class OracleMatfiles():
     Class to get EchoNest features
     """
 
-    def __init__(self,params,folder):
+    def __init__(self,params,folder,oneFullIter=False):
         """
         Constructor, get a folder name containing matfiles in any subdirectory.
+        if oneFullIter is True, go through the data once (e.g. for testing)
         """
         # features stuff
         self._pSize = params['pSize']
@@ -40,13 +41,25 @@ class OracleMatfiles():
         assert len(self._matfiles) > 0,'no matfiles found in %s'%folder
         # statistics
         self._nTracksGiven = 0
+        # one iteration?
+        self._oneFullIter = oneFullIter
+        self._fileidx = 0
 
 
     def next_track(self):
         """
         Returns features for a random matlab file, or None if some error.
+        If only one iter over the data, raise StopIteration at the end.
         """
-        matfile = _matfiles[np.random.randint(len(self._matfiles))]
+        # find next matfile
+        if not self._oneFullIter:
+            matfile = self._matfiles[np.random.randint(len(self._matfiles))]
+        else:
+            if self._fileidx >= len(self._matfiles):
+                return StopIteration
+            matfile = self._matfiles[self._fileidx]
+            self._fileidx += 1
+        # return features
         return features.features_from_matfile(matfile,
                                               pSize=self._pSize,
                                               usebars=self._usebars,
