@@ -85,8 +85,9 @@ def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
     else:
         assert False, 'wrong oracle codename: %s.'%oracle
 
-    # starttime
+    # starttime and save time
     starttime = time.time()
+    last_save = starttime
 
     # count iteration
     main_iterations = 0
@@ -108,6 +109,10 @@ def train(expdir,savedmodel,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
             statlog.patternsSeen(feats.shape[0])
             # update model
             model.update(feats,lrate=lrate)
+            # save
+            if should_save(starttime,last_save):
+                savedir = save_experiment(model,starttime,statlog,params)
+                last_save = time.time()
 
     # error, save and quit
     except:
@@ -156,6 +161,50 @@ def get_savedir_name(expdir):
     foldername = os.path.join(expdir,'exp_')
     foldername += time.strftime("%Y_%m_%d_AT_%Hh%Mm%Ss", time.localtime())
     return foldername
+
+
+def should_save(starttime,last_save):
+    """
+    A set of simple rules to regularly save the model. Often at the
+    beginning, once a day after a week.
+    """
+    # simple constants
+    mins = 60.
+    hours = 3600.
+    days = 86400.
+    # current time
+    currtime = time.time()
+    # first time after a minute
+    if starttime == last_save:
+        if (currtime - last_save) / mins > 1:
+            return True
+        else:
+            return False
+    # less than one hour, every 10 minutes
+    elif (currtime - starttime) / hours < 1:
+        if (currtime - last_save) / mins > 10:
+            return True
+        else:
+            return False
+    # less than one day, every hour
+    elif (currtime - starttime) / days < 1:
+        if (currtime - last_save) / hours > 1:
+            return True
+        else:
+            return False
+    # less than one week, every 6 hours
+    elif (currtime - starttime) / days < 7:
+        if (currtime - last_save) / hours > 6:
+            return True
+        else:
+            return False
+    # more than a week, once a day
+    else:
+        if (currtime - last_save) / days > 1:
+            return True
+        else:
+            return False  
+
 
 
 def save_experiment(model,starttime,statlog,params,crash=False):
