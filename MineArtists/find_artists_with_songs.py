@@ -77,7 +77,8 @@ def check_one_artist(done_db=None,new_db=None):
                     try:
                         cursor_new.execute(query)
                     except sqlite3.IntegrityError :
-                        pass
+                        time.sleep(1)
+                        continue
                 # artist done
                 query = 'INSERT INTO artists VALUES (null, "'
                 query += artist + '")'
