@@ -88,7 +88,7 @@ def _thread_en(artistsdb):
         # success rate too low? print WARNING
         cnt_provided += 1
         if cnt_provided % 100 == 0:
-            prob_provide = ,cnt_provided*100./cnt_iter
+            prob_provide = cnt_provided*100./cnt_iter
             if prob_provide < 85.:
                 print 'WARNING: _en_thread, prob. of providing is low:',prob_provide,'% , artists do not actually have song?'
 
