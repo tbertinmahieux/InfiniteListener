@@ -107,13 +107,16 @@ def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
 
     # count iteration
     main_iterations = 0
+    last_printed_iter = 1
     
     # main algorithm
     try:
         while True:
             # increment iterations
             main_iterations += 1
-            print main_iterations,'iterations'
+            if main_iterations == np.round(last_printed_iter * 1.1):
+                print main_iterations,'iterations'
+                last_printed_iter = main_iterations
             statlog.iteration()
             if main_iterations > nIterations:
                 raise StopIteration
