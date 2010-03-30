@@ -65,8 +65,13 @@ def _thread_en(artistsdb):
                 time.sleep(50)
                 continue
             for k in artist_list:
-                waiting_artists.append(k)        
-        artist = str(waiting_artists.pop())
+                waiting_artists.append(k)
+        try:
+            artist = waiting_artists.pop()
+            artist = str(artist)
+        except UnicodeEncodeError:
+            print 'cannot encode artist :', artist
+            continue
 
         # get song
         tids,tmp_titles,tmp_aids,tmp_artists = en_extras.search_tracks(artist)
