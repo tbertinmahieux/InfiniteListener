@@ -63,29 +63,28 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
         btchroma = keyinvariance(btchroma)
 
     # case where no bar is used
-    nBeats = btchroma.shape[0]
+    nBeats = btchroma.shape[1]
     if usebars == 0:
         barbts = np.array(range(0,nBeats-nBeats%pSize,pSize))
         usebars = 1
 
+    # splits over beats (last one should be nBeats)
+    splits = barbts[range(0,len(barbts),usebars)]
+    splits = np.concatenate([splits,[nBeats]])
+    diff_splits = np.diff(splits)
+    splits = splits[np.where(diff_splits>0)]
+    if splits[-1] != nBeats:
+        splits = np.concatenate([splits,[nBeats]])
+    if len(splits) < 2:
+        return None
+
     # allocate space for answer
-    nFeats = int(len(barbts)/2)
-    feats = np.zeros([nFeats,12*pSize])
+    feats = np.zeros([len(splits)-1,12*pSize])
 
     # iterate on patterns
-    bt2 = 0
-    barpos = 0
-    for k in range(nFeats):
-        # beginning of the bar
-        bt1 = bt2
-        # end of the bar
-        if barpos + usebars < len(barbts):
-            bt2 = barbts[barpos+usebars]
-            barpos += usebars
-        else:
-            bt2 = nBeats
+    for k in range(feats.shape[0]):
         # pattern before resize and invariance
-        pattern = btchroma[:,bt1:bt2]
+        pattern = btchroma[:,splits[k]:splits[k+1]]
         # resize by resampling on pad/crop
         if do_resample:
             pattern = resample(pattern,pSize)
@@ -252,7 +251,6 @@ def get_time_warp_matrix(segstart, btstart, duration):
 def pad_crop(data, newsize):
     """ set the data to the right size, columnwise, by either
     padding with zeros or cropping """
-    assert data.shape[0] > 0
     assert data.shape[1] > 0
     if data.shape[1] == newsize:
         return data
@@ -268,7 +266,6 @@ def pad_crop(data, newsize):
 
 def resample(data, newsize):
     """ resample the data, columnwise """
-    assert data.shape[0] > 0
     assert data.shape[1] > 0
     if newsize > 1:
         return scipy.signal.resample(data, newsize, axis=1)
