@@ -120,7 +120,7 @@ def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
             # increment iterations
             main_iterations += 1
             if main_iterations == int(np.ceil(last_printed_iter * 1.1)):
-                print main_iterations,'iterations, approx. avg dist:',mean(dist_estimate)
+                print main_iterations,'iterations, approx. avg dist:',np.average(dist_estimate)
                 last_printed_iter = main_iterations
             statlog.iteration()
             if main_iterations > nIterations:
