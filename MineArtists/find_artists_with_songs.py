@@ -48,7 +48,7 @@ def eta(starttime,nstartelems,nelems,currtime=time.time()):
     RETURN: string
     """
     time_elapsed = currtime - starttime # in seconds
-    elems_done = nstartelemts - nelems
+    elems_done = nstartelems - nelems
     if elems_done <= 0 or time_elapsed <= 0:
         return 'UNKNOWN'
     secs_per_elem = time_elapsed * 1. / elems_done
