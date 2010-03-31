@@ -44,6 +44,7 @@ def commit_to_dbs(done_db=None,new_db=None):
     """
     Check the queue of checked artists, commit to the db.
     """
+    raise NotImplementedError
     # open connections
     connection_done = sqlite.connect(done_db)
     connection_new = sqlite.connect(new_db)
@@ -237,7 +238,7 @@ if __name__ == '__main__':
     except sqlite3.OperationalError:
         cursor_transf.execute('CREATE TABLE artists (id INTEGER PRIMARY KEY,name VARCHAR(50))')
         connection_transf.commit()
-    connection_transf.close()
+    #connection_transf.close()
 
     # initalize new db
     connection_new = sqlite.connect(new_db)
@@ -247,7 +248,7 @@ if __name__ == '__main__':
     except sqlite3.OperationalError:
         cursor_new.execute('CREATE TABLE artists (id INTEGER PRIMARY KEY,name VARCHAR(50) UNIQUE, nsongs INTEGER)')
         connection_new.commit()
-    connection_new.close()
+    #connection_new.close()
 
     # launch threads
     assert nThreads > 0,'you need at least one thread'
@@ -257,21 +258,74 @@ if __name__ == '__main__':
     for k in range(nThreads):
         thread.start_new_thread(check_one_artist,(),{'done_db':transf_db,
                                                      'new_db':new_db})
-    thread.start_new_thread(commit_to_dbs,(),{'done_db':transf_db,
+    #thread.start_new_thread(commit_to_dbs,(),{'done_db':transf_db,
                                               'new_db':new_db})
-    print 'launched',nThreads,'threads + 1.'
+    print 'launched',nThreads,'threads.'
 
     # to print info every minute
     last_print = time.time()
-    # stupidly wait for queue to be empty
+    # wait for artist queue to be empty and commit stuff
     try:
-        while len(_main_artist_queue) > 0 or len(_checked_artists_queue) > 0:
+        while True:
+            # print info
             if time.time() - last_print > 60.:
                 print 'num. artists still in queue:',len(_main_artist_queue)
                 print 'num. artists to commit:',len(_checked_artists_queue)
                 last_print = time.time()
-            time.sleep(3)
+            
+            # done?
+            if len(_checked_artists_queue) == 0 and len(_main_artist_queue) == 0:
+                time.sleep(30) # to be sure no thread is finishing
+                if len(_checked_artists_queue) == 0:
+                    break
+
+            # nothing to commit, wait
+            if len(_checked_artists_queue) == 0:
+                time.sleep(.5)
+                continue
+
+            cnt = 0
+            while len(_checked_artists_queue) > 0:
+                artist,nSongs = _checked_artists_queue.pop()
+                # add to artists with songs
+                if nSongs > 0:
+                    query = 'INSERT INTO artists VALUES (null, "'
+                    query += artist + '",' + str(nSongs) +')'
+                    cursor_new.execute(query)
+                # add to checked
+                query = 'INSERT INTO artists VALUES (null, "'
+                query += artist + '")'
+                cursor_done.execute(query)
+                cnt += 1
+            # commit
+            connection_done.commit()
+            connection_new.commit()
+
+            
     except KeyboardInterrupt:
         print 'quitting, num. artists still in queue:',len(_main_artist_queue)
+        # stop threads
         _main_artist_queue.clear()
+        # close connections
+        connection_done.commit()
+        connection_new.commit()
+        connection_done.close()
+        connection_new.commit()
+        # to be cleaner... maybe
         time.sleep(1)
+
+    except:
+        print 'MAIN THREAD:'
+        print '********** DEBUGGING INFO *******************'
+        formatted_lines = traceback.format_exc().splitlines()
+        if len(formatted_lines) > 2:
+            print formatted_lines[-3]
+        if len(formatted_lines) > 1:
+            print formatted_lines[-2]
+        print formatted_lines[-1]
+        print '*********************************************'
+        # stop threads
+        _main_artist_queue.clear()
+        # just close
+        connection_done.close()
+        connection_new.close()
