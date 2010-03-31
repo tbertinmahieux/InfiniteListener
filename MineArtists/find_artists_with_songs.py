@@ -40,70 +40,6 @@ _checked_artists_queue = deque()
 
 
 
-def commit_to_dbs(done_db=None,new_db=None):
-    """
-    Check the queue of checked artists, commit to the db.
-    """
-    raise NotImplementedError
-    # open connections
-    connection_done = sqlite.connect(done_db)
-    connection_new = sqlite.connect(new_db)
-    # gets cursors
-    cursor_done = connection_done.cursor()
-    cursor_new = connection_new.cursor()
-
-    try:
-        while True:
-            # done?
-            if len(_checked_artists_queue) == 0 and len(_main_artist_queue) == 0:
-                time.sleep(60) # to be sure no thread is finishing
-                if len(_checked_artists_queue) == 0:
-                    break
-            # nothing to commit, wait
-            if len(_checked_artists_queue) == 0:
-                time.sleep(.5)
-                continue
-            cnt = 0
-            while len(_checked_artists_queue) > 0:
-                artist,nSongs = _checked_artists_queue.pop()
-                # add to artists with songs
-                if nSongs > 0:
-                    query = 'INSERT INTO artists VALUES (null, "'
-                    query += artist + '",' + str(nSongs) +')'
-                    cursor_new.execute(query)
-                # add to checked
-                query = 'INSERT INTO artists VALUES (null, "'
-                query += artist + '")'
-                cursor_done.execute(query)
-                cnt += 1
-            # commit
-            connection_done.commit()
-            connection_new.commit()
-    except:
-        print 'SPECIAL THREAD:'
-        print '********** DEBUGGING INFO *******************'
-        formatted_lines = traceback.format_exc().splitlines()
-        if len(formatted_lines) > 2:
-            print formatted_lines[-3]
-        if len(formatted_lines) > 1:
-            print formatted_lines[-2]
-        print formatted_lines[-1]
-        print '*********************************************'
-        # stop threads
-        _main_artist_queue.clear()
-        # just close
-        connection_done.commit()
-        connection_new.commit()
-        connection_done.close()
-        connection_new.close()
-        print 'SPECIAL THREAD FINISHED by exception'
-        return
-    
-    print 'SPECIAL THREAD FINISHED'
-
-
-
-
 def check_one_artist(done_db=None,new_db=None):
     """
     Check one artist to see if it has songs.
@@ -238,7 +174,6 @@ if __name__ == '__main__':
     except sqlite3.OperationalError:
         cursor_transf.execute('CREATE TABLE artists (id INTEGER PRIMARY KEY,name VARCHAR(50))')
         connection_transf.commit()
-    #connection_transf.close()
 
     # initalize new db
     connection_new = sqlite.connect(new_db)
@@ -248,7 +183,6 @@ if __name__ == '__main__':
     except sqlite3.OperationalError:
         cursor_new.execute('CREATE TABLE artists (id INTEGER PRIMARY KEY,name VARCHAR(50) UNIQUE, nsongs INTEGER)')
         connection_new.commit()
-    #connection_new.close()
 
     # launch threads
     assert nThreads > 0,'you need at least one thread'
@@ -258,8 +192,6 @@ if __name__ == '__main__':
     for k in range(nThreads):
         thread.start_new_thread(check_one_artist,(),{'done_db':transf_db,
                                                      'new_db':new_db})
-    #thread.start_new_thread(commit_to_dbs,(),{'done_db':transf_db,
-    #                                          'new_db':new_db})
     print 'launched',nThreads,'threads.'
 
     # to print info every minute
@@ -329,3 +261,5 @@ if __name__ == '__main__':
         # just close
         connection_transf.close()
         connection_new.close()
+        # to be cleaner... maybe
+        time.sleep(1)
