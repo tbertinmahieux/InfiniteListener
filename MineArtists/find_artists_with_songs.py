@@ -259,7 +259,7 @@ if __name__ == '__main__':
         thread.start_new_thread(check_one_artist,(),{'done_db':transf_db,
                                                      'new_db':new_db})
     #thread.start_new_thread(commit_to_dbs,(),{'done_db':transf_db,
-                                              'new_db':new_db})
+    #                                          'new_db':new_db})
     print 'launched',nThreads,'threads.'
 
     # to print info every minute
