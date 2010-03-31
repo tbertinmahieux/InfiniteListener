@@ -15,6 +15,7 @@ import thread
 import threading
 from collections import deque
 import traceback
+import numpy as np
 # sqlite stuff
 import sqlite3
 import sqlite3.dbapi2 as sqlite
@@ -33,6 +34,54 @@ import en_extras
 
 # queue containing all artists
 _main_artist_queue = deque()
+
+# checked artists, queue contains pairs: (artist name,nSongs)
+_checked_artists_queue = deque()
+
+
+
+def commit_to_dbs(done_db=None,new_db=None):
+    """
+    Check the queue of checked artists, commit to the db.
+    """
+    # open connections
+    connection_done = sqlite.connect(done_db)
+    connection_new = sqlite.connect(new_db)
+    # gets cursors
+    cursor_done = connection_done.cursor()
+    cursor_new = connection_new.cursor()
+
+    try:
+        while True:
+            # nothing to commit, wait
+            if len(_main_artist_queue) == 0:
+                sleep.time(.5)
+                continue
+            while len(_main_artist_queue) > 0:
+                artist,nSongs = _checked_artists_queue.pop()
+                # add to artists with songs
+                if nSongs > 0:
+                    query = 'INSERT INTO artists VALUES (null, "'
+                    query += artist + '",' + str(nSongs) +')'
+                    cursor_new.execute(query)
+                # add to checked
+                query = 'INSERT INTO artists VALUES (null, "'
+                query += artist + '")'
+                cursor_done.execute(query)
+            # commit
+            connection_done.commit()
+            connection_new.commit()
+    except:
+        # just close
+        connection_done.commit()
+        connection_new.commit()
+        connection_done.close()
+        connection_new.close()
+        return
+        
+
+
+
 
 def check_one_artist(done_db=None,new_db=None):
     """
@@ -71,31 +120,12 @@ def check_one_artist(done_db=None,new_db=None):
                     # add abck to queue, wait a second, move to other song
                     _main_artist_queue.appendleft(artist)
                     time.sleep(1)
-                if tids != None and len(tids) > 0: # got songs
-                    query = 'INSERT INTO artists VALUES (null, "'
-                    query += artist + '",' + str(int(len(tids))) +')'
-                    try:
-                        cursor_new.execute(query)
-                    except sqlite3.IntegrityError :
-                        time.sleep(1)
-                        continue
-                    connection_new.commit()
-                # artist done
-                query = 'INSERT INTO artists VALUES (null, "'
-                query += artist + '")'
-                try:
-                    cursor_done.execute(query)
-                except sqlite3.OperationalError:
-                    time.sleep(10)
                     continue
-                connection_done.commit()
-            
+                _checked_artists_queuea.appendleft( (artist, len(tids)) )                    
     except KeyboardInterrupt:
         # stop all threads
         _main_artist_queue.clear()
         # try to quit clean, commit than close
-        connection_done.commit()
-        connection_new.commit()
         connection_done.close()
         connection_new.close()
         return
@@ -205,17 +235,19 @@ if __name__ == '__main__':
     for k in range(nThreads):
         thread.start_new_thread(check_one_artist,(),{'done_db':transf_db,
                                                      'new_db':new_db})
-    print 'launched',nThreads,'threads.'
+    thread.start_new_thread(commit_to_dbs,(),{'done_db':transf_db,
+                                              'new_db':new_db})
+    print 'launched',nThreads,'threads + 1.'
 
     # to print info every minute
     last_print = time.time()
     # stupidly wait for queue to be empty
     try:
-        while len(_main_artist_queue) > 0:
+        while len(_main_artist_queue) > 0 or len(_checked_artists_queue) > 0:
             if time.time() - last_print > 60.:
                 print 'num. artists still in queue:',len(_main_artist_queue)
                 last_print = time.time()
-            time.sleep(1)
+            time.sleep(3)
     except KeyboardInterrupt:
         print 'quitting, num. artists still in queue:',len(_main_artist_queue)
         _main_artist_queue.clear()
