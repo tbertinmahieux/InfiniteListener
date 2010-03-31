@@ -108,6 +108,10 @@ def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
     # count iteration
     main_iterations = 0
     last_printed_iter = .1
+
+    # for estimate of distance
+    dist_estimate = deque()
+    dist_estimate_len = 500
     
     # main algorithm
     try:
@@ -115,7 +119,7 @@ def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
             # increment iterations
             main_iterations += 1
             if main_iterations == int(np.ceil(last_printed_iter * 1.1)):
-                print main_iterations,'iterations'
+                print main_iterations,'iterations, approx. avg dist:',mean(dist_estimate)
                 last_printed_iter = main_iterations
             statlog.iteration()
             if main_iterations > nIterations:
@@ -127,7 +131,11 @@ def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
             # stats
             statlog.patternsSeen(feats.shape[0])
             # update model
-            model.update(feats,lrate=lrate)
+            avg_dist = model.update(feats,lrate=lrate)
+            # add to dist_estimate
+            dist_estimate.append(avg_dist)
+            if len(dist_estimate) > dist_estimate_len:
+                dist_estimate.popleft()
             # save
             if should_save(starttime,last_save):
                 savedir = save_experiment(expdir,model,starttime,statlog,params)
