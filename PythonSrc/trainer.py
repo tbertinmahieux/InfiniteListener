@@ -26,7 +26,8 @@ import model as MODEL
 
 def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
           songKeyInv=False,positive=True,do_resample=True,lrate=1e-5,
-          nThreads=4,oracle='EN',artistsdb='',matdir='', nIterations=1e6):
+          nThreads=4,oracle='EN',artistsdb='',matdir='', nIterations=1e7,
+          useModel='VQ'):
     """
     Performs training
     Grab track data from oracle
@@ -45,6 +46,7 @@ def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
       artistdb      - SQLlite database containing artist names
       matdir        - matfiles directory, for oracle MAT
       nIterations   - maximum number of iterations
+      useModel      - which model to use: 'VQ', 'VQFILT'
 
     Saves everything when done.
     """
@@ -74,7 +76,12 @@ def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
     elif os.path.isfile(savedmodel):
         codebook = load_codebook(savedmodel)
         assert codebook != None,'Could not load codebook in: %s.'%savedmodel
-        model = MODEL.Model(codebook)
+        if useModel == 'VQ':
+            model = MODEL.Model(codebook)
+        elif useModel == 'VQFILT':
+            model = MODEL.ModelFilter(codebook)
+        else:
+            assert False, 'wrong model codename: %s.'%useModel
         statlog.startFromScratch()
     # problem
     else:
@@ -87,7 +94,8 @@ def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
               'positive':positive, 'do_resample':do_resample,
               'lrate':lrate, 'nThreads':nThreads,
               'oracle':oracle, 'artistsdb':artistsdb,
-              'matdir':matdir, 'nIterations':nIterations}
+              'matdir':matdir, 'nIterations':nIterations,
+              'useModel':useModel}
 
     # creates the experiment folder
     if not os.path.isdir(expdir):
@@ -322,6 +330,7 @@ def die_with_usage():
     print '                   used by EchoNest oracle'
     print ' -oraclemat d      matfiles oracle, d: matfiles dir'
     print ' -nIters n         maximum number of iterations'
+    print ' -useModel N       model name, VQ (default), VQFILT'
     print ''
     print 'typical command to initialize from codebook:'
     print '  python -O trainer.py -pSize 8 -usebars 2 -lrate 1e-5 -artistsdb artists28March.db -expdir ~/experiment_dir codebook.mat'
@@ -350,7 +359,8 @@ if __name__ == '__main__':
     oracle = 'EN'
     artistsdb = ''
     matdir = ''
-    nIterations = 1e6
+    nIterations = 1e7
+    useModel = 'VQ'
     while True:
         if sys.argv[1] == '-expdir':
             expdir = os.path.abspath(sys.argv[2])
@@ -397,6 +407,10 @@ if __name__ == '__main__':
             nIterations = int(sys.argv[2])
             sys.argv.pop(1)
             print 'max number of iterations =', nIterations
+        elif sys.argv[1] == '-useModel':
+            useModel = sys.argv[2]
+            sys.argv.pop(1)
+            print 'use model =', useModel
         else:
             break
         sys.argv.pop(1)
@@ -410,4 +424,4 @@ if __name__ == '__main__':
           songKeyInv=songKeyInv, positive=positive,
           do_resample=do_resample, lrate=lrate,
           nThreads=nThreads, oracle=oracle, artistsdb=artistsdb,
-          matdir=matdir, nIterations=nIterations)
+          matdir=matdir, nIterations=nIterations, useModel=useModel)
