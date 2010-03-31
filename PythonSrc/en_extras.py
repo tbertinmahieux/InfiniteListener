@@ -319,25 +319,29 @@ def get_our_analysis(track_id):
 
     Return them in order, or 5 None if one of them fails
     """
-    # duration
-    duration = get_duration(track_id)
-    if duration == None:
-        return None,None,None,None,None
-    # beats
-    beatstart = get_beats(track_id)
-    if beatstart == None:
-        return None,None,None,None,None
-    # bars
-    barstart = get_bars(track_id)
-    if barstart == None:
-        return None,None,None,None,None
-    # segments
-    segstart, chromas = get_segments(track_id)
-    if segstart == None or chromas == None:
+    try:
+        # duration
+        duration = get_duration(track_id)
+        if duration == None:
+            return None,None,None,None,None
+        # beats
+        beatstart = get_beats(track_id)
+        if beatstart == None:
+            return None,None,None,None,None
+        # bars
+        barstart = get_bars(track_id)
+        if barstart == None:
+            return None,None,None,None,None
+        # segments
+        segstart, chromas = get_segments(track_id)
+        if segstart == None or chromas == None:
+            return None,None,None,None,None
+    except IOError:
+        print 'IOError on', time.ctime(),': check connection if happens often.'
         return None,None,None,None,None
     # done, return
     return segstart, chromas, beatstart, barstart, duration
-
+    
     
 
 def die_with_usage():
