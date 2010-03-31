@@ -50,9 +50,20 @@ if __name__ == '__main__':
     # open connection
     connection = sqlite.connect(dbname)
 
+    # number of element in artists
+    nElems = 0
+
     try:
         # cursor
         cursor = connection.cursor()
+
+        # count number of elements
+        query = 'SELECT COUNT(*) FROM artists'
+        cursor.execute(query)
+        res = cursor.fetchone()
+        if len(res) > 0:
+            nElems = res[0]
+        
 
         # query
         query = 'SELECT * FROM artists WHERE name='
@@ -67,6 +78,9 @@ if __name__ == '__main__':
 
     # close connection
     connection.close()
+
+    # print number of elements in 'artists'
+    print "Table 'artists' contains",nElems,'entries.'
 
     # NOT FOUND
     if len(found) == 0:
