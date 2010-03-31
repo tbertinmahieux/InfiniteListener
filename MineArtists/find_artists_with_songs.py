@@ -40,6 +40,29 @@ _checked_artists_queue = deque()
 
 
 
+def eta(starttime,nstartelems,nelems,currtime=time.time()):
+    """
+    Compute an estmate time of arrival (completion) based on
+    initial time, current time (by defult taking the computer time),
+    number of elements to begin with and number of elements remaining.
+    RETURN: string
+    """
+    time_elapsed = currtime - starttime # in seconds
+    elems_done = nstartelemts - nelems
+    if elems_done <= 0 or time_elapsed <= 0:
+        return 'UNKNOWN'
+    secs_per_elem = time_elapsed * 1. / elems_done
+    time_remaining = secs_per_elem * nelems
+    # less than minute
+    if time_remaining < 60:
+        return str(int(time_remaining)) + 'secs'
+    # less than an hour
+    if time_remaining < 3600:
+        return str(int(time_remaining/60.)) + 'mins'
+    # more than an hour
+    return str(int(time_remaining/3600.)) + 'hours'
+
+
 def check_one_artist(done_db=None,new_db=None):
     """
     Check one artist to see if it has songs.
@@ -161,6 +184,7 @@ if __name__ == '__main__':
     connection_old.close()
     print 'found',len(allartists),'in original database'
     assert len(allartists) > 0,'no artist to start with?'
+    nStartArtists = len(allartists)
     allartists = map(lambda x: x[0], allartists)
     # put them in the queue
     for k in allartists:
@@ -195,6 +219,7 @@ if __name__ == '__main__':
     print 'launched',nThreads,'threads.'
 
     # to print info every minute
+    start_time = time.time()
     last_print = time.time()
     # wait for artist queue to be empty and commit stuff
     try:
@@ -203,6 +228,7 @@ if __name__ == '__main__':
             if time.time() - last_print > 60.:
                 print 'num. artists still in queue:',len(_main_artist_queue)
                 print 'num. artists to commit:',len(_checked_artists_queue)
+                print 'ETA: ' + eta(start_time,nStartArtists,len(_main_artist_queue))
                 last_print = time.time()
             
             # done?
