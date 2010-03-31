@@ -166,9 +166,10 @@ def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
             print '*********************************************'
             print 'Stoping after', main_iterations, 'iterations.'
         # save
+        print 'saving...'
         savedir = save_experiment(expdir,model,starttime,statlog,params,
                                   crash=True)
-        print 'saving to: ',savedir
+        print 'saved to: ',savedir
         #quit
         return
 
