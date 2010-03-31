@@ -121,7 +121,7 @@ def check_one_artist(done_db=None,new_db=None):
                     _main_artist_queue.appendleft(artist)
                     time.sleep(1)
                     continue
-                _checked_artists_queuea.appendleft( (artist, len(tids)) )                    
+                _checked_artists_queue.appendleft( (artist, len(tids)) )                    
     except KeyboardInterrupt:
         # stop all threads
         _main_artist_queue.clear()
