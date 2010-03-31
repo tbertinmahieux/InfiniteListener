@@ -40,17 +40,21 @@ _checked_artists_queue = deque()
 
 
 
-def eta(starttime,nstartelems,nelems,currtime=time.time()):
+def eta(starttime,nstartelems,nelems,currtime=-1):
     """
     Compute an estmate time of arrival (completion) based on
     initial time, current time (by defult taking the computer time),
     number of elements to begin with and number of elements remaining.
     RETURN: string
     """
+    if currtime == -1:
+        currtime = time.time()
     time_elapsed = currtime - starttime # in seconds
     elems_done = nstartelems - nelems
-    if elems_done <= 0 or time_elapsed <= 0:
-        return 'UNKNOWN'
+    if elems_done <= 0:
+        return 'UNKNOWN (zero or negative remaining elems?)'
+    if time_elapsed <= 0:
+        return 'UNKNOWN (zero or negative time elapsed?)'
     secs_per_elem = time_elapsed * 1. / elems_done
     time_remaining = secs_per_elem * nelems
     # less than minute
