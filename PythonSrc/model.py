@@ -44,6 +44,8 @@ class Model():
         Note that we do minibatch, not exactly online, because
         updating the kdtree takes time for not much if learning
         rate is low.
+
+        Return avg_dist (mean squared distance per pixel)
         """
         # predicts on the features
         best_code_per_p,dists = self.predicts(feats)
@@ -51,6 +53,8 @@ class Model():
         for idx in range(feats.shape[0]):
             cidx = best_code_per_p[idx]
             self._codebook[cidx,:] += (feats[idx,:] - self._codebook[cidx,:]) * lrate
+        # return mean dists
+        return mean(dists)
 
     def predicts(self,feats):
         """
