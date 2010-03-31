@@ -250,6 +250,7 @@ if __name__ == '__main__':
         while len(_main_artist_queue) > 0 or len(_checked_artists_queue) > 0:
             if time.time() - last_print > 60.:
                 print 'num. artists still in queue:',len(_main_artist_queue)
+                print 'num. artists to commit:',len(_checked_artists_queue)
                 last_print = time.time()
             time.sleep(3)
     except KeyboardInterrupt:
