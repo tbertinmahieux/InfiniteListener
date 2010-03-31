@@ -295,10 +295,10 @@ if __name__ == '__main__':
                 # add to checked
                 query = 'INSERT INTO artists VALUES (null, "'
                 query += artist + '")'
-                cursor_done.execute(query)
+                cursor_transf.execute(query)
                 cnt += 1
             # commit
-            connection_done.commit()
+            connection_transf.commit()
             connection_new.commit()
 
             
@@ -307,9 +307,9 @@ if __name__ == '__main__':
         # stop threads
         _main_artist_queue.clear()
         # close connections
-        connection_done.commit()
+        connection_transf.commit()
         connection_new.commit()
-        connection_done.close()
+        connection_transf.close()
         connection_new.commit()
         # to be cleaner... maybe
         time.sleep(1)
@@ -327,5 +327,5 @@ if __name__ == '__main__':
         # stop threads
         _main_artist_queue.clear()
         # just close
-        connection_done.close()
+        connection_transf.close()
         connection_new.close()
