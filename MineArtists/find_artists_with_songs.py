@@ -55,7 +55,7 @@ def commit_to_dbs(done_db=None,new_db=None):
         while True:
             # nothing to commit, wait
             if len(_checked_artists_queue) == 0:
-                sleep.time(.5)
+                time.sleep(.5)
                 continue
             cnt = 0
             while len(_checked_artists_queue) > 0:
