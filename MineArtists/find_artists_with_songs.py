@@ -53,6 +53,11 @@ def commit_to_dbs(done_db=None,new_db=None):
 
     try:
         while True:
+            # done?
+            if len(_checked_artists_queue) == 0 and len(_main_artist_queue) == 0:
+                time.sleep(60) # to be sure no thread is finishing
+                if len(_checked_artists_queue) == 0:
+                    break
             # nothing to commit, wait
             if len(_checked_artists_queue) == 0:
                 time.sleep(.5)
@@ -71,7 +76,6 @@ def commit_to_dbs(done_db=None,new_db=None):
                 cursor_done.execute(query)
                 cnt += 1
             # commit
-            print 'just commited',cnt,'queries'
             connection_done.commit()
             connection_new.commit()
     except:
