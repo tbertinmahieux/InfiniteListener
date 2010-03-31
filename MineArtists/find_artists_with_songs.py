@@ -59,12 +59,12 @@ def eta(starttime,nstartelems,nelems,currtime=-1):
     time_remaining = secs_per_elem * nelems
     # less than minute
     if time_remaining < 60:
-        return str(int(time_remaining)) + 'secs'
+        return str(int(time_remaining)) + ' secs'
     # less than an hour
     if time_remaining < 3600:
-        return str(int(time_remaining/60.)) + 'mins'
+        return str(int(time_remaining/60.)) + ' mins'
     # more than an hour
-    return str(int(time_remaining/3600.)) + 'hours'
+    return str(int(time_remaining/3600.)) + ' hours'
 
 
 def check_one_artist(done_db=None,new_db=None):
