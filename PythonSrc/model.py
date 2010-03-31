@@ -54,7 +54,7 @@ class Model():
             cidx = best_code_per_p[idx]
             self._codebook[cidx,:] += (feats[idx,:] - self._codebook[cidx,:]) * lrate
         # return mean dists
-        return mean(dists)
+        return np.average(dists)
 
     def predicts(self,feats):
         """
