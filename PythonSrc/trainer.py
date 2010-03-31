@@ -108,7 +108,7 @@ def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
 
     # count iteration
     main_iterations = 0
-    last_printed_iter = .1
+    last_printed_iter = 1
 
     # for estimate of distance
     dist_estimate = deque()
