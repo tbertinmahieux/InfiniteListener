@@ -72,6 +72,8 @@ def commit_to_dbs(done_db=None,new_db=None):
             connection_done.commit()
             connection_new.commit()
     except:
+        # stop threads
+        _main_artist_queue.clear()
         # just close
         connection_done.commit()
         connection_new.commit()
