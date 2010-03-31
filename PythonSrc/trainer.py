@@ -16,7 +16,7 @@ import traceback
 import numpy as np
 import scipy as sp
 import scipy.io
-from collections import deque()
+from collections import deque
 
 import oracle_en
 import oracle_matfiles
