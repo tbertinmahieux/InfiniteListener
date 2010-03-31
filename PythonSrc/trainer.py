@@ -112,7 +112,7 @@ def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
 
     # for estimate of distance
     dist_estimate = deque()
-    dist_estimate_len = 500
+    dist_estimate_len = 2000
     
     # main algorithm
     try:
