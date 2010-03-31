@@ -75,6 +75,15 @@ def commit_to_dbs(done_db=None,new_db=None):
             connection_done.commit()
             connection_new.commit()
     except:
+        print 'SPECIAL THREAD:'
+        print '********** DEBUGGING INFO *******************'
+        formatted_lines = traceback.format_exc().splitlines()
+        if len(formatted_lines) > 2:
+            print formatted_lines[-3]
+        if len(formatted_lines) > 1:
+            print formatted_lines[-2]
+        print formatted_lines[-1]
+        print '*********************************************'
         # stop threads
         _main_artist_queue.clear()
         # just close
@@ -83,6 +92,7 @@ def commit_to_dbs(done_db=None,new_db=None):
         connection_done.close()
         connection_new.close()
         print 'SPECIAL THREAD FINISHED by exception'
+        return
     
     print 'SPECIAL THREAD FINISHED'
 
@@ -254,6 +264,7 @@ if __name__ == '__main__':
         while len(_main_artist_queue) > 0 or len(_checked_artists_queue) > 0:
             if time.time() - last_print > 60.:
                 print 'num. artists still in queue:',len(_main_artist_queue)
+                print 'num. artists to commit:',len(_checked_artists_queue)
                 last_print = time.time()
             time.sleep(3)
     except KeyboardInterrupt:
