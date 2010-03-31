@@ -82,8 +82,9 @@ def commit_to_dbs(done_db=None,new_db=None):
         connection_new.commit()
         connection_done.close()
         connection_new.close()
-        return
-        
+        print 'SPECIAL THREAD FINISHED by exception'
+    
+    print 'SPECIAL THREAD FINISHED'
 
 
 
