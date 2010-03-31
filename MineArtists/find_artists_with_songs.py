@@ -57,6 +57,7 @@ def commit_to_dbs(done_db=None,new_db=None):
             if len(_checked_artists_queue) == 0:
                 sleep.time(.5)
                 continue
+            cnt = 0
             while len(_checked_artists_queue) > 0:
                 artist,nSongs = _checked_artists_queue.pop()
                 # add to artists with songs
@@ -68,7 +69,9 @@ def commit_to_dbs(done_db=None,new_db=None):
                 query = 'INSERT INTO artists VALUES (null, "'
                 query += artist + '")'
                 cursor_done.execute(query)
+                cnt += 1
             # commit
+            print 'just commited',cnt,'queries'
             connection_done.commit()
             connection_new.commit()
     except:
