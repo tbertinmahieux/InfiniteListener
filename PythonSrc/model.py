@@ -12,6 +12,7 @@ import sys
 import copy
 import time
 import numpy as np
+from collections import deque
 import scikits.ann as ann
 
 
@@ -114,6 +115,94 @@ class Model():
         res = kdtree.knn(sample,1)
         return res[0][0][0], res[1][0][0]  
 
+
+
+
+def ModelFilter(Model):
+    """
+    Implements a regular online VQ model, but with a twist, a
+    filter is added when updating the model.
+    Difficult patterns are preferred.
+    Model is slower, but... that's life.
+    P.S. Uniorns rock!!!!
+    """
+
+    def __init__(self,codewords):
+        """
+        Constructor
+        """
+        # parent
+        Model.__init__(self,codewords)
+        # for average dist per code
+        self._avg_dist_per_code = []
+        for k in range(self._nCodes):
+            self._avg_dist_per_code = deque()
+        self._avg_dist_qlen = 200 # queue length
+
+
+    def _add_dist(self,dist,codeidx):
+        """
+        Add a new distance to one of the codes.
+        """
+        self._avg_dist_per_code[codeix].append(dist)
+        if len(self._avg_dist_per_code[codeix]) > self._avg_dist_qlen:
+            self._avg_dist_per_code[codeix].popleft()
+
+    def _get_avg_dist(self,codeidx):
+        """
+        Return average distance for a particular codeword, or None
+        if no data is available
+        """
+        if len(self._avg_dist_per_code[codeix]) == 0:
+            return None
+        return np.average(self._avg_dist_per_code[codeix])
+
+    def _accept_prob(self,dist,codeidx):
+        """
+        Compute the probability of acceptance given a distance and
+        a particular codewords index.
+        """
+        if dist == 0:
+            return 0.
+        avg_dist_for_code = self._get_avg_dist(codeidx)
+        if avg_dist_for_code == None:
+            return 1.
+        # logistic function on ratio 1/(1+exp(dist / avg_dist))
+        # it's certain to be between 0 and 1 (excluded)
+        return 1. / (1. + np.exp(dist / avg_dist_for_code) )
+
+    def update(self,feats,lrate=1e-5):
+        """
+        Receives a set of features (one pattern per line)
+        Do prediction on whole set.
+        Update the codebook.
+
+        Use the online VQ algorithm (simple online k-means)
+        Adds filtering.
+        Overrides Model() method!!!
+        
+        Note that we do minibatch, not exactly online, because
+        updating the kdtree takes time for not much if learning
+        rate is low.
+
+        Return avg_dist (mean squared distance per pixel)
+        """
+        # predicts on the features
+        best_code_per_p,dists = self.predicts(feats)
+        # FILTER
+        probs = np.array(map(lambda k: self._accept_prob(self,dists[k],best_code_per_p[k]),range(feats.shape[0])))
+        idxs_to_keep = np.where(probs - np.random.rand(feats.shape[0])>0)[0]
+        best_code_per_p_select = best_code_per_p[idxs_to_keep]
+        feats_select = feats[idxs_to_keep]
+        # update codebook
+        for idx in range(feats_select.shape[0]):
+            cidx = best_code_per_p_select[idx]
+            self._codebook[cidx,:] += (feats_select[idx,:] - self._codebook[cidx,:]) * lrate
+        # return mean dists
+        return np.average(dists)
+
+
+    
 
 def euclidean_dist(a,b):
     """
