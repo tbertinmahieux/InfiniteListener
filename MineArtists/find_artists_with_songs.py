@@ -249,7 +249,10 @@ if __name__ == '__main__':
                 if nSongs > 0:
                     query = 'INSERT INTO artists VALUES (null, "'
                     query += artist + '",' + str(nSongs) +')'
-                    cursor_new.execute(query)
+                    try:
+                        cursor_new.execute(query)
+                    except sqlite3.IntegrityError:
+                        pass
                 # add to checked
                 query = 'INSERT INTO artists VALUES (null, "'
                 query += artist + '")'
