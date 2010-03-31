@@ -84,7 +84,7 @@ def _thread_en(artistsdb):
 
         # put data in queue, deque is supposed to be thread safe
         _thread_en_song_data.appendleft(d)
-        print 'added data (artist :',artist,') to _en_queue' #debugging
+        #print 'added data (artist :',artist,') to _en_queue' #debugging
         # success rate too low? print WARNING
         cnt_provided += 1
         if cnt_provided % 100 == 0:
