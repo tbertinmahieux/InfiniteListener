@@ -54,10 +54,10 @@ def commit_to_dbs(done_db=None,new_db=None):
     try:
         while True:
             # nothing to commit, wait
-            if len(_main_artist_queue) == 0:
+            if len(_checked_artists_queue) == 0:
                 sleep.time(.5)
                 continue
-            while len(_main_artist_queue) > 0:
+            while len(_checked_artists_queue) > 0:
                 artist,nSongs = _checked_artists_queue.pop()
                 # add to artists with songs
                 if nSongs > 0:
