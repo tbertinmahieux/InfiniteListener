@@ -138,6 +138,8 @@ class ModelFilter(Model):
         for k in range(self._nCodes):
             self._avg_dist_per_code.append(deque())
         self._avg_dist_qlen = 200 # queue length
+        self._nPatternReceived = 0 # everything submitted to update
+        self._nPatternUsed = 0 # after discarding some
 
 
     def _add_dist(self,dist,codeidx):
@@ -188,6 +190,8 @@ class ModelFilter(Model):
 
         Return avg_dist (mean squared distance per pixel)
         """
+        # stat
+        self._nPatternReceived += feats.shape[0]
         # predicts on the features
         best_code_per_p,dists = self.predicts(feats)
         #***************************************************
@@ -200,6 +204,8 @@ class ModelFilter(Model):
         print 'UpdateFilter: kept',feats_select.shape[0],'/',feats.shape[0],'patterns.'
         # add distances for improved avg. dist per code
         map(lambda k: self._add_dist(dists_select[k],int(best_code_per_p_select[k])),range(feats_select.shape[0]))
+        # stat
+        self._nPatternUsed += feats_select.shape[0]
         #***************************************************
         # update codebook
         for idx in range(feats_select.shape[0]):
