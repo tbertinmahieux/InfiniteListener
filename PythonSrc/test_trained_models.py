@@ -33,12 +33,12 @@ def print_write(s,fname):
 
 def safe_traceback(folder):
     """
-    Performs traceback, but return None if an error is raised.
+    Performs traceback, but returns [None] if an error is raised.
     """
     try:
         return ANALYZE.traceback(folder)
     except IOError:
-        return None
+        return [None]
         
 
 def die_with_usage():
@@ -108,7 +108,7 @@ if __name__ == '__main__':
         all_in_folder = glob.glob(os.path.join(parentdir,'*'))
         all_in_folder = filter(lambda x: os.path.isdir(x), all_in_folder)
         # keep those that have same origin
-        leaves = filter(lambda x: ANALYZE.traceback(x)==tb[0],all_in_folder)
+        leaves = filter(lambda x: safe_traceback(x)[0]==tb[0],all_in_folder)
         # everything to test, matfile at the end
         all_to_test = set()
         for f in tb:
@@ -121,7 +121,7 @@ if __name__ == '__main__':
     print_write('all models to try:',output)
     for f in all_to_test:
         print_write(str(f),output)
-    print_write('number of models to test: '+len(all_to_test),output)
+    print_write('number of models to test: '+str(len(all_to_test)),output)
     
 
     #******************************************************************
