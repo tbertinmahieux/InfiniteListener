@@ -29,7 +29,17 @@ def print_write(s,fname):
     f.write(s)
     f.write('\n')
     f.close()
-    
+
+
+def safe_traceback(folder):
+    """
+    Performs traceback, but return None if an error is raised.
+    """
+    try:
+        return ANALYZE.traceback(folder)
+    except IOError:
+        return None
+        
 
 def die_with_usage():
     """
