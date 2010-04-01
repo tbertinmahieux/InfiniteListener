@@ -115,7 +115,6 @@ if __name__ == '__main__':
     print_write('matfiles dir = '+ matfilesdir,output)
     print_write('output = '+output,output)
 
-
     # init output
     print_write('test results launched on '+time.ctime(),output,mode='w')
 
@@ -162,6 +161,9 @@ if __name__ == '__main__':
     #******************************************************************
     # get params
     params = ANALYZE.unpickle(os.path.join(savedmodel,'params.p'))
+    print_write('PARAMS:',output)
+    for k in params.keys():
+        print_write(str(k)+' : '+str(params[k]),output)
     # load data into memory
     oracle = ORACLE.OracleMatfiles(params,matfilesdir,oneFullIter=True)
     # get all features
