@@ -190,6 +190,8 @@ if __name__ == '__main__':
         dist,nPatterns,nIters,totalTime = a,b,c,d
         dists.append(dist)
         patterns.append(nPatterns)
+    # in case we plot or something else, release memory
+    del data
 
     # plot
     if doplot:
