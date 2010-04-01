@@ -12,6 +12,7 @@ import sys
 import glob
 import time
 import copy
+#import pickle
 import numpy as np
 
 from trainer import StatLog
@@ -144,12 +145,24 @@ if __name__ == '__main__':
 
     #******************************************************************
     # get params
-    f = open(os.path.join(savedmodel,'params.p'),'r')
-    #params = 
+    params = ANALYZE.unpickle(os.path.join(savedmodel,'params.p'))
     # load data into memory
-    oracle = ORACLE.OracleMatfiles()
-
-
+    oracle = ORACLE.OracleMatfiles(params,matfilesdir,oneFullIter=True)
+    # get all features
+    data = [x for x in oracle]
+    print_write('retrieved '+str(len(data))+' tracks.',output)
+    # get none none features
+    data = filter(lambda x: x != None, data)
+    print_write(str(len(data))+' tracks not None remaining.',output)
+    # transform into numpy array
+    data = np.concatenate(data)
+    print_write(str(data.shape[0])+' patterns loaded.',output)
+    # remove empty patterns
+    data = data[np.where(np.sum(data,axis=1)>0)]
+    print_write(str(data.shape[0])+' non-zero patterns loaded.',output)
+    if data.shape[0] == 0:
+        print_write('No patterns loaded, quit.',output)
+        sys.exit(0)
 
     #******************************************************************
     # predict on every model
