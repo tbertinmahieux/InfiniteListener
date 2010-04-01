@@ -21,12 +21,12 @@ import oracle_matfiles as ORACLE
 import analyze_saved_model as ANALYZE
 
 
-def print_write(s,fname):
+def print_write(s,fname,mode='a'):
     """
     Prints something and write it to file
     """
     print s
-    f = open(fname,'a')
+    f = open(fname,mode)
     f.write(s)
     f.write('\n')
     f.close()
@@ -46,17 +46,27 @@ def test_saved_model_folder(dirname,feats,output):
     """
     Test a saved model by loading it and applying to features.
     Output is the output file, used with print_write()
+    RETURN
+      avgerage dist
+      nPatterns
+      nIters
+      totaltime
     """
-    raise NotImplementedError
+    print_write('*** MODEL SAVED IN: '+dirname+' ***',output)
+    # load model
+    model = ANALYZE.unpickle(os.path.join(dirname,'model.p'))
+    print_write('model loaded',output)
+    # find nIters (#tracks), nPatterns, totaltime
+    nIters, nPatterns, totalTime = ANALYZE.traceback_stats(dirname)
+    print_write('nIters (=nTracks): '+str(nIters),output)
+    print_write('nPatterns: '+str(nPatterns),output)
+    print_write('total time ran: '+str(totalTime),output)
+    # predict
+    best_code_per_p, dists = model.predicts(feats)
+    print_write('prediction done, avg. dist: '+str(np.average(dists)),output)
+    # return
+    return np.average(dists),nPatterns,nIters,totalTime
 
-
-def test_saved_model_codebook(filename,feats,output):
-    """
-    Test a codebook by creating the simplest model we have,
-    model.Model().
-    Output is the output file, used with print_write()
-    """
-    raise NotImplementedError
 
 
 def die_with_usage():
@@ -102,6 +112,9 @@ if __name__ == '__main__':
     print_write('output = '+output,output)
 
 
+    # init output
+    print_write('test results launched on '+time.ctime(),output,mode='w')
+
     #******************************************************************
     # gather in a set all models to try
     # also gather the number of iterations associated with each model
@@ -136,7 +149,6 @@ if __name__ == '__main__':
         for f in leaves:
             all_to_test.add(f)
         all_to_test = list(all_to_test)
-        all_to_test.append(tb[0])
     print_write('all models to try:',output)
     for f in all_to_test:
         print_write(str(f),output)
@@ -164,7 +176,10 @@ if __name__ == '__main__':
         print_write('No patterns loaded, quit.',output)
         sys.exit(0)
 
+
     #******************************************************************
     # predict on every model
-
+    for f in all_to_test:
+        a,b,c,d = test_saved_model_folder(f,data,output)
+        dist,nPatterns,nIters,totalTime = a,b,c,d
 
