@@ -14,6 +14,7 @@ import time
 import copy
 import numpy as np
 
+from trainer import StatLog
 import model as MODEL
 import oracle_matfiles as ORACLE
 import analyze_saved_model as ANALYZE
@@ -89,10 +90,10 @@ if __name__ == '__main__':
         parentdir,tmp = os.path.split(savedmodel)
         # traceback
         tb = ANALYZE.traceback(savedmodel)
-        print_write('*** TRACEBACK ****************')
+        print_write('*** TRACEBACK ****************',output)
         for f in tb:
             print_write(str(f),output)
-        print_write('******************************')
+        print_write('******************************',output)
         # find everything in parent folder, then just folders
         all_in_folder = glob.glob(os.path.join(parentdir,'*'))
         all_in_folder = filter(lambda x: os.path.isdir(x), all_in_folder)
@@ -107,6 +108,9 @@ if __name__ == '__main__':
             all_to_test.add(f)
         all_to_test = list(all_to_test)
         all_to_test.append(tb[0])
+    print_write('all models to try:',output)
+    for f in all_to_test:
+        print_write(str(f),output)
     print_write('number of models to test: '+len(all_to_test),output)
     
 
