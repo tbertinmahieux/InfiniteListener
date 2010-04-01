@@ -137,6 +137,10 @@ def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
             feats = oracle.next_track()
             if feats == None:
                 continue
+            # remove empty pattenrs
+            feats = feats[np.where(np.sum(feats,axis=1)>0)]
+            if feats.shape[0] == 0:
+                continue
             # stats
             statlog.patternsSeen(feats.shape[0])
             # update model
