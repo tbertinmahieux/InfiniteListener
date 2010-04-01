@@ -56,6 +56,7 @@ class OracleMatfiles():
             matfile = self._matfiles[np.random.randint(len(self._matfiles))]
         else:
             if self._fileidx >= len(self._matfiles):
+                self._fileidx = 0 # for next time
                 return StopIteration
             matfile = self._matfiles[self._fileidx]
             self._fileidx += 1
@@ -74,6 +75,22 @@ class OracleMatfiles():
         ths instance.
         """
         return self._nTracksGiven
+
+
+    def __iter__(self):
+        """
+        For iterator interface
+        """
+        return self
+
+    def next():
+        """
+        For iterator interface
+        Can be used only if oneFulliter is True
+        """
+        assert self._oneFullIter,'cant use this oracle as an iterator unless we do only one pass on the data, set oneFullIter=True at creation.'
+        return self.next_track()
+
 
 
 def get_all_matfiles(basedir) :
