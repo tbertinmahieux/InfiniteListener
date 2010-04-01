@@ -12,6 +12,7 @@ import os
 import sys
 import time
 import copy
+import glob
 import numpy as np
 # features stuff
 import features
@@ -57,7 +58,7 @@ class OracleMatfiles():
         else:
             if self._fileidx >= len(self._matfiles):
                 self._fileidx = 0 # for next time
-                return StopIteration
+                raise StopIteration
             matfile = self._matfiles[self._fileidx]
             self._fileidx += 1
         # return features
@@ -83,7 +84,7 @@ class OracleMatfiles():
         """
         return self
 
-    def next():
+    def next(self):
         """
         For iterator interface
         Can be used only if oneFulliter is True
