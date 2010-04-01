@@ -82,6 +82,7 @@ def die_with_usage():
     print '  <output.txt>   '
     print 'FLAGS:'
     print '  -testone       test only the given saved model'
+    print '  -plot          plot dist in function of patterns seen'
     print ''
     print 'T. Bertin-Mahieux (2010) Columbia University'
     print 'tb2332@columbia.edu'
@@ -95,10 +96,13 @@ if __name__ == '__main__':
         die_with_usage()
 
     # flags
+    doplot = False
     testone = False
     while True:
         if sys.argv[1] == '-testone':
             testone = True
+        elif sys.argv[1] == '-plot':
+            doplot = True
         else:
             break
         sys.argv.pop(1)
@@ -179,7 +183,22 @@ if __name__ == '__main__':
 
     #******************************************************************
     # predict on every model
+    dists = []
+    patterns = []
     for f in all_to_test:
         a,b,c,d = test_saved_model_folder(f,data,output)
         dist,nPatterns,nIters,totalTime = a,b,c,d
+        dists.append(dist)
+        patterns.append(nPatterns)
 
+    # plot
+    if doplot:
+        if len(dists) == 1:
+            print 'cant plot one data point'
+        else:
+            import pylab as P
+            dists = np.array(dists)
+            patterns = np.array(patterns)
+            order = np.argsort(patterns)
+            dists = P.plot(patterns[order],dists[order])
+            P.show()
