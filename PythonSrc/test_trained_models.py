@@ -41,6 +41,23 @@ def safe_traceback(folder):
         return [None]
         
 
+def test_saved_model_folder(dirname,feats,output):
+    """
+    Test a saved model by loading it and applying to features.
+    Output is the output file, used with print_write()
+    """
+    raise NotImplementedError
+
+
+def test_saved_model_codebook(filename,feats,output):
+    """
+    Test a codebook by creating the simplest model we have,
+    model.Model().
+    Output is the output file, used with print_write()
+    """
+    raise NotImplementedError
+
+
 def die_with_usage():
     """
     HELP MENU
@@ -88,9 +105,10 @@ if __name__ == '__main__':
     # gather in a set all models to try
     # also gather the number of iterations associated with each model
     if os.path.isfile(savedmodel):
-        # special case, matfile
-        print_write('Doing one file (codebook).',output)
-        all_to_test = [savedmodel]
+        # WRONG CASE, matfile
+        print_write('Cannot do it on just a codebook.',output)
+        print_write('We dont know the params!.',output)
+        sys.exit(0)
     elif testone:
         # load one things and move on
         print_write('Doing only one file.',output)
@@ -125,7 +143,12 @@ if __name__ == '__main__':
     
 
     #******************************************************************
+    # get params
+    f = open(os.path.join(savedmodel,'params.p'),'r')
+    #params = 
     # load data into memory
+    oracle = ORACLE.OracleMatfiles()
+
 
 
     #******************************************************************
