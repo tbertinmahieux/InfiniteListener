@@ -205,4 +205,5 @@ if __name__ == '__main__':
             patterns = np.array(patterns)
             order = np.argsort(patterns)
             dists = P.plot(patterns[order],dists[order])
+            P.title(savedmodel)
             P.show()
