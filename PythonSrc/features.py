@@ -59,6 +59,7 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
             return None
     else:
         btchroma, barbts = btchroma_barbts
+        barbts = barbts.flatten()
 
     # song invariance
     if songKeyInv:
