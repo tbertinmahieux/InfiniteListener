@@ -129,6 +129,14 @@ def features_from_matfile(filename,pSize=8,usebars=2,keyInv=True,
         mat = sp.io.loadmat(filename)
     else:
         mat = sp.io.loadmat(filename, struct_as_record=True)
+    # weird cases from matfiles
+    if type(mat['barbts']) == type(0.0):
+        return None
+    if len(mat['btchroma'].shape) < 2:
+        return None
+    if mat['btchroma'].shape[1] == 0:
+        return None
+
     analysis = (mat['btchroma'], mat['barbts'])
     # call the function that does the actual work
     # analysis_dict (1st param) useless, set to None or anything else
