@@ -125,9 +125,9 @@ def features_from_matfile(filename,pSize=8,usebars=2,keyInv=True,
     Real job done by get_features(...), for details look at it.
     """
     if sys.version_info[1] == 5:
-        mat = sp.io.loadmat(self.matfiles[self.fidx])
+        mat = sp.io.loadmat(filename)
     else:
-        mat = sp.io.loadmat(self.matfiles[self.fidx], struct_as_record=True)
+        mat = sp.io.loadmat(filename, struct_as_record=True)
     analysis = (mat['btchroma'], mat['barbts'])
     # call the function that does the actual work
     # analysis_dict (1st param) useless, set to None or anything else
