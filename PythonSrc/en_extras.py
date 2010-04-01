@@ -32,26 +32,17 @@ def do_xml_call(url):
     Calls echonest with a given command, expect XML document
     Return XML object
     """
-    # open stream
-    stream = urllib.urlopen(url)
-    # directly parse it to XML
-    xmldoc = minidom.parse(stream).documentElement
-    # close stream
-    stream.close()
-    # done, return xml document
-    return xmldoc
-
-    # SLOW METHOD, BY CREATING A FILE:
-    # call the url, save the output to file
-    filename,httpmesage = urllib.urlretrieve(url)
-    # open the file
-    f = open(filename,'r')
-    # parse it to xml
-    xmldoc = minidom.parse(f).documentElement
-    # close the file
-    f.close()
-    # return xml object
-    return xmldoc
+    try:
+        # open stream
+        stream = urllib.urlopen(url)
+        # directly parse it to XML
+        xmldoc = minidom.parse(stream).documentElement
+        # close stream
+        stream.close()
+        # done, return xml document
+        return xmldoc
+    except xml.parsers.expat.ExpatError:
+        return None
 
 
 def do_dict_call(url):
@@ -103,6 +94,8 @@ def check_xml_success(xmldoc):
     Check an XML document received from the EchoNest
     Return True if success, otherwise
     """
+    if xmldoc == None:
+        return False # failure
     status = xmldoc.getElementsByTagName('status')[0]
     code = xmldoc.getElementsByTagName('code')[0]
     value = code.firstChild
@@ -250,7 +243,6 @@ def get_beats_bars(track_id,elem):
         result.append(float(b.firstChild.data))
     # done
     return result
-
 
 def get_duration(track_id):
     """
