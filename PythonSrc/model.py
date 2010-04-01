@@ -48,6 +48,8 @@ class Model():
 
         Return avg_dist (mean squared distance per pixel)
         """
+        # remove empty patterns
+        feats = feats[np.where(np.sum(feats,axis=1)>0)]
         # predicts on the features
         best_code_per_p,dists = self.predicts(feats)
         # update codebook
@@ -190,6 +192,8 @@ class ModelFilter(Model):
 
         Return avg_dist (mean squared distance per pixel)
         """
+        # remove empty patterns
+        feats = feats[np.where(np.sum(feats,axis=1)>0)]
         # stat
         self._nPatternReceived += feats.shape[0]
         # predicts on the features
