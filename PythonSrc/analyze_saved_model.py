@@ -94,11 +94,34 @@ def pretty_print_secs(seconds):
     # days
     res = str(days) + ' days ' + res
     return res
-    
+
+
+def traceback(folder):
+    """
+    Get the original folder and the followers
+    """
+    if not os.path.isdir(folder):
+        print 'missing folder in traceback:',folder
+        return
+    statlog = unpickle(os.path.join(folder,'stats.p'))
+    params = unpickle(os.path.join(folder,'params.p'))    
+    if not statlog.fromscratch:
+        assert params['savedmodel'] != '','No saved model in traceback'
+        res = traceback(params['savedmodel'])
+    else:
+        res = [params['savedmodel']]
+    res.append(folder)
+    return res
+
 
 def print_traceback(folder):
     """
     Print the original folder and the followers
+    """
+    tb = traceback(folder)
+    for f in tb:
+        print f
+    # old method:
     """
     if not os.path.isdir(folder):
         print 'missing folder in print_traceback:',folder
@@ -112,7 +135,9 @@ def print_traceback(folder):
         print params['savedmodel']
     print folder
     return
+    """
 
+        
 
 def traceback_stats(folder):
     """
