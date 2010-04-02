@@ -183,7 +183,7 @@ if __name__ == '__main__':
 
     # help menu
     if len(sys.argv) < 2:
-        die_with_usage
+        die_with_usage()
 
     savedmodel = os.path.abspath(sys.argv[1])
     assert os.path.isdir(savedmodel),'%s is not a directory.'%savedmodel
