@@ -126,6 +126,15 @@ class Codebook:
         res = self._ann.knn(sample,1)
         return res[0][0][0]
 
+    def closest_codes_ann_batch(self,samples):
+        """
+        Finds the closest code to a batch of given sample.
+        Do it using a kd-tree from ann package
+        Returns the indexes of the closest code.
+        """
+        res =  self._ann.knn(samples,1)
+        return map(lambda x: int(x),res[0].flatten())
+
     def closest_code_ann_approx(self,sample,eps=.001):
         """
         Finds the closest code to a given sample.
@@ -221,11 +230,19 @@ if __name__ == '__main__':
     timeann = 0
     timebatch = 0
     timeann2 = 0
+    timeannbatch = 0
     tstart = time.time()
     cb = Codebook(codebook)
     print 'initialized codebook in',time.time()-tstart,'seconds.'
 
+    # batch
+    tstart = time.time()
+    idxes = cb.closest_codes_ann_batch(samples)
+    timeannbatch = time.time() - tstart
+    # per sample
+    sampleidx = -1
     for sample in samples:
+        sampleidx += 1
         # debug
         tstart = time.time()
         idx2 = cb.closest_code_debug(sample)
@@ -257,14 +274,17 @@ if __name__ == '__main__':
         assert idx2 == idx5 or (cb[idx2] == cb[idx5]).all()
         assert idx2 == idx6 or (cb[idx2] == cb[idx6]).all()
         assert idx2 == idx7 or (cb[idx2] == cb[idx7]).all()
+        assert idx2 == idxes[sampleidx] or (cb[idx2] == cb[idxes[sampleidx]]).all()
 
     #print 'time for fast algo:',timefast,'seconds.'
     print 'time for slow algo:        ',timeslow,'seconds.'
     print 'time for kd algo:          ',timekd,'seconds.'
     print 'time for ckd algo:         ',timeckd,'seconds.'
     print 'time for ann algo:         ',timeann,'seconds.'
+    print 'time for ann batch:        ',timeannbatch,'seconds.'
     print 'time for batch algo:       ',timebatch,'seconds.'
     print 'time for ann2 algo:        ',timeann2,'seconds.'
+
 
 
 
