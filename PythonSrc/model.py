@@ -75,10 +75,7 @@ class Model():
         # ann
         use_ann = feats.shape[0] > 200
         if use_ann:
-            if sys.version_info[1] == 5: # problems on boar...
-                use_ann = False
-            else:
-                kdtree = ann.kdtree(self._codebook)
+            kdtree = ann.kdtree(self._codebook)
         # prepare result
         best_code_per_p = np.zeros(feats.shape[0])
         avg_dists = np.zeros(feats.shape[0])
