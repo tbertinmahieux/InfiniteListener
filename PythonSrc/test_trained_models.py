@@ -195,6 +195,13 @@ if __name__ == '__main__':
     # in case we plot or something else, release memory
     del data
 
+    # best result
+    smallest_dist_idx = np.argmin(np.array(dists))
+    smallest_dist = np.array(dists)[smallest_dist_idx]
+    smallest_dist_npatterns = np.array(patterns)[smallest_dist_idx]
+    print_write('******************************',output)
+    print_write('smallest dist: '+str(smallest_dist)+' after '+str(smallest_dist_npatterns)+' patterns.',output)
+
     # plot
     if doplot:
         if len(dists) == 1:
