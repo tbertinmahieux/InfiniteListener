@@ -139,7 +139,7 @@ def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
             if feats == None:
                 continue
             # remove empty pattenrs
-            feats = feats[np.where(np.sum(feats,axis=1)>0)]
+            feats = feats[np.nonzero(np.sum(feats,axis=1))]
             if feats.shape[0] == 0:
                 continue
             # stats
