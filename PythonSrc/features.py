@@ -219,10 +219,7 @@ def get_time_warp_matrix(segstart, btstart, duration):
     #    seglen.shape = (708,)
     #    btlen.shape = (304,)
     #    duration = 238.91546    meaning approx. 3min59s
-    try:
-        seglen = np.concatenate((segstart[1:], [duration])) - segstart
-    except TypeError:
-        raise NoSegError
+    seglen = np.concatenate((segstart[1:], [duration])) - segstart
     btlen = np.concatenate((btstart[1:], [duration])) - btstart
 
     warpmat = np.zeros((len(segstart), len(btstart)))
@@ -238,12 +235,13 @@ def get_time_warp_matrix(segstart, btstart, duration):
         except IndexError:
             # no segment start after that beats, can happen close
             # to the end, simply ignore, maybe even break?
-            continue
+            break
         # find first segment that starts after beat ends
-        try:
-            end_idx = np.nonzero((segstart - end) >= 0)[0][0]
-        except IndexError:
+        segs_after =  np.nonzero((segstart - end) >= 0)[0]
+        if segs_after.shape[0] == 0:
             end_idx = start_idx
+        else:
+            end_idx = segs_after[0]
         # fill col of warpmat with 1 for the elem in between
         # (including start_idx, excluding end_idx)
         warpmat[start_idx:end_idx, n] = 1
