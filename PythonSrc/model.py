@@ -73,21 +73,23 @@ class Model():
         Threshold set at 200 features.
         """
         # ann
-        use_ann = feats.shape[0] > 200
+        use_ann = feats.shape[0] > 50
         if use_ann:
             kdtree = ann.kdtree(self._codebook)
-        # prepare result
-        best_code_per_p = np.zeros(feats.shape[0])
-        avg_dists = np.zeros(feats.shape[0])
-        idx = -1
-        for f in feats:
-            idx += 1
-            if use_ann:
-                code,dist = self._closest_code_ann(f,kdtree)
-            else:
+            best_code_per_p, dists = self._closest_code_ann(feats,kdtree)
+            # note that dists is already squared euclidean distance
+            avg_dists = map(lambda x: x * 1. /feats.shape[1],dists)
+        else:
+            # prepare result
+            best_code_per_p = np.zeros(feats.shape[0])
+            avg_dists = np.zeros(feats.shape[0])
+            idx = -1
+            # iterate over features
+            for f in feats:
+                idx += 1
                 code,dist = self._closest_code_batch(f)
-            best_code_per_p[idx] = int(code)
-            avg_dists[idx] = dist * dist * 1. / feats.shape[1]
+                best_code_per_p[idx] = int(code)
+                avg_dists[idx] = dist * dist * 1. / feats.shape[1]
         # done, return two list
         return best_code_per_p, avg_dists
 
@@ -104,16 +106,15 @@ class Model():
         return bestidx,dists[bestidx]
 
 
-    def _closest_code_ann(self,sample,kdtree):
+    def _closest_code_ann(self,samples,kdtree):
         """
-        Finds the closest code to a given sample.
+        Finds the closest code to any number of given samples.
         Do it using a kd-tree, good if the codebook is not modified.
         Returns the index of the closest code
-        and euclidean distance
+        and SQUARED euclidean distance (unlike _closest_code_batch)
         """
-        res = kdtree.knn(sample,1)
-        return res[0][0][0], res[1][0][0]  
-
+        res = kdtree.knn(samples,1)
+        return map(lambda x: int(x),res[0].flatten()), res[1].flatten()
 
 
 
