@@ -12,6 +12,7 @@ import sys
 import time
 import copy
 import pickle
+import cProfile
 import traceback
 import numpy as np
 import scipy as sp
@@ -168,7 +169,7 @@ def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
                 print formatted_lines[-2]
             print formatted_lines[-1]
             print '*********************************************'
-            print 'Stoping after', main_iterations, 'iterations.'
+            print 'Stoping after', main_iterations - 1, 'iterations.'
         # save
         print 'saving...'
         savedir = save_experiment(expdir,model,starttime,statlog,params,
@@ -336,6 +337,7 @@ def die_with_usage():
     print ' -oraclemat d      matfiles oracle, d: matfiles dir'
     print ' -nIters n         maximum number of iterations'
     print ' -useModel N       model name, VQ (default), VQFILT'
+    print ' -profile f        use profiler, output to f, limits iters to 100'
     print ''
     print 'typical command to initialize from codebook:'
     print '  python -O trainer.py -pSize 8 -usebars 2 -lrate 1e-5 -artistsdb artists28March.db -expdir ~/experiment_dir codebook.mat'
@@ -366,6 +368,7 @@ if __name__ == '__main__':
     matdir = ''
     nIterations = 1e7
     useModel = 'VQ'
+    profile = ''
     while True:
         if sys.argv[1] == '-expdir':
             expdir = os.path.abspath(sys.argv[2])
@@ -416,6 +419,14 @@ if __name__ == '__main__':
             useModel = sys.argv[2]
             sys.argv.pop(1)
             print 'use model =', useModel
+        elif sys.argv[1] == '-profile':
+            profile = sys.argv[2]
+            nIterations = 100
+            import pstats
+            sys.argv.pop(1)
+            print 'use profiler, save result to:',profile
+            print 'nIterations =', nIterations
+            
         else:
             break
         sys.argv.pop(1)
@@ -424,9 +435,21 @@ if __name__ == '__main__':
     savedmodel = os.path.abspath(sys.argv[1])
     print 'starting from model =', savedmodel
 
+
     # launch training
-    train(savedmodel, expdir=expdir, pSize=pSize,usebars=usebars,keyInv=keyInv,
-          songKeyInv=songKeyInv, positive=positive,
-          do_resample=do_resample, lrate=lrate,
-          nThreads=nThreads, oracle=oracle, artistsdb=artistsdb,
-          matdir=matdir, nIterations=nIterations, useModel=useModel)
+    if profile == '':
+        train(savedmodel, expdir=expdir, pSize=pSize,usebars=usebars,
+              keyInv=keyInv,songKeyInv=songKeyInv, positive=positive,
+              do_resample=do_resample, lrate=lrate,
+              nThreads=nThreads, oracle=oracle, artistsdb=artistsdb,
+              matdir=matdir, nIterations=nIterations, useModel=useModel)
+
+    else:
+        cProfile.run(\
+            'train(savedmodel, expdir=expdir, pSize=pSize,usebars=usebars, keyInv=keyInv,songKeyInv=songKeyInv, positive=positive, do_resample=do_resample, lrate=lrate, nThreads=nThreads, oracle=oracle, artistsdb=artistsdb, matdir=matdir, nIterations=nIterations, useModel=useModel)',
+            filename=profile)
+        # load and print stats
+        stats = pstats.Stats(profile)
+        print 'top 20 lengthiest functions:'
+        stats.strip_dirs().sort_stats('time').print_stats(20)
+
