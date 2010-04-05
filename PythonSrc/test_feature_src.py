@@ -138,14 +138,14 @@ if __name__ == '__main__':
     P.title('mat feats old school')
     P.show()
 
-    if (mat_feats[:min_len,:] - featsNorm[:min_len,:]).max() < .01:
+    if (mat_feats[:min_len,:] - featsNorm[:min_len,:]).max() < .02:
         print 'ALL GOOD, identical feats between old school and new mat feats'
     else:
-        print 'PROBLEM, features differ'
+        print 'PROBLEM, features differ between old school and new mat feats, max diff:',(mat_feats[:min_len,:] - featsNorm[:min_len,:]).max()
 
 
     # matfiles and online feats fit
-    if (mat_feats[:min_len,:] == online_feats[:min_len,:]).all():
+    if (mat_feats[:min_len,:] - online_feats[:min_len,:]).max()< .02:
         print 'ALL GOOD, identical features between mat and online feats'
     else:
-        print 'PROBLEM, features differ'
+        print 'PROBLEM, features differ between mat and online feats, max diff:',(mat_feats[:min_len,:] - online_feats[:min_len,:]).max()
