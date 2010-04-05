@@ -146,6 +146,7 @@ def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
             statlog.patternsSeen(feats.shape[0])
             # update model
             avg_dist = model.update(feats,lrate=lrate)
+            assert not np.isnan(avg_dist)
             # add to dist_estimate
             dist_estimate.append(avg_dist)
             if len(dist_estimate) > dist_estimate_len:
