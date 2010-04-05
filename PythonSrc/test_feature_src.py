@@ -49,6 +49,8 @@ if __name__ == '__main__':
     tmpfilemat = os.path.abspath(sys.argv[2])
     if tmpfilemat[-4:] != '.mat':
         tmpfilemat += '.mat'
+    if os.path.isfile(tmpfilemat):
+        os.remove(tmpfilemat)
 
     # first encode song with tzanetakis code from HackDay
     TZAN.filename_to_beatfeat_mat(songfile,tmpfilemat)
@@ -65,17 +67,17 @@ if __name__ == '__main__':
                      'duration':duration}
     print 'analysis retrieved from Echo Nest'
 
-    # features from online
+    # features from online (positive=False to compare with old school method)
     online_feats = features.get_features(analysis_dict,pSize=8,usebars=2,
                                          keyInv=True,songKeyInv=False,
-                                         positive=True,do_resample=True,
+                                         positive=False,do_resample=True,
                                          btchroma_barbts=None)
     online_feats = online_feats[np.nonzero(np.sum(online_feats,axis=1))]
     print 'features from online computed, shape =',online_feats.shape
 
     # retrieve feature using TZAN and compare to what we got
-    """
     print 'comparing features from upload and online'
+    print 'reuploading songfile =',songfile
     a,b,c,d,e =  TZAN.get_en_feats(songfile)
     pitches, seg_start, beat_start, bar_start, duration = a,b,c,d,e
     print'number of segments (upload/online):',np.array(seg_start).shape,',',np.array(analysis_dict['segstart']).shape
@@ -83,19 +85,18 @@ if __name__ == '__main__':
     b = np.array(analysis_dict['segstart'])
     assert a.shape == b.shape
     a - b
-    assert np.max(np.array(seg_start).flatten()-np.array(analysis_dict['segstart']).flatten()) < .01
-    assert np.max(np.array(beat_start).flatten()-np.array(analysis_dict['beatstart']).flatten()) < .01
-    assert np.max(np.array(bar_start).flatten()-np.array(analysis_dict['barstart']).flatten()) < .01
+    assert np.abs(np.array(seg_start).flatten()-np.array(analysis_dict['segstart']).flatten()).max() < .001
+    assert np.abs(np.array(beat_start).flatten()-np.array(analysis_dict['beatstart']).flatten()).max() < .001
+    assert np.abs(np.array(bar_start).flatten()-np.array(analysis_dict['barstart']).flatten()).max() < .001
     assert duration == analysis_dict['duration']
-    assert pitches == analysis_dict['chromas']
-    print 'got same feature by upload than by calling using track ID'
-    """
+    assert np.abs(pitches - analysis_dict['chromas']).max() < .02
+    print 'got same feature by upload than by calling using track ID, max chroma distance:',np.abs(pitches - analysis_dict['chromas']).max()
 
     
     # feature from matfile
     mat_feats = features.features_from_matfile(tmpfilemat,pSize=8,usebars=2,
                                                keyInv=True,songKeyInv=False,
-                                               positive=True,do_resample=True)
+                                               positive=False,do_resample=True)
     mat_feats = mat_feats[np.nonzero(np.sum(mat_feats,axis=1))]
     print 'features from matfile computed, shape =',mat_feats.shape
 
@@ -115,8 +116,8 @@ if __name__ == '__main__':
     
     # compare
     min_len = min(mat_feats.shape[0],online_feats.shape[0],featsNorm.shape[0])
-    if mat_feats.shape != online_feats:
-        print 'wrong shape...'
+    if mat_feats.shape != online_feats.shape:
+        print 'wrong shape between online and mat feats...'
 
     # plot matfile features
     P.figure()
@@ -139,13 +140,13 @@ if __name__ == '__main__':
     P.show()
 
     if (mat_feats[:min_len,:] - featsNorm[:min_len,:]).max() < .02:
-        print 'ALL GOOD, identical feats between old school and new mat feats'
+        print 'GOOD, identical feats between old school and new mat feats'
     else:
-        print 'PROBLEM, features differ between old school and new mat feats, max diff:',(mat_feats[:min_len,:] - featsNorm[:min_len,:]).max()
+        print 'PROBLEM, features differ between old school and new mat feats, max diff:',np.abs(mat_feats[:min_len,:] - featsNorm[:min_len,:]).max()
 
 
     # matfiles and online feats fit
-    if (mat_feats[:min_len,:] - online_feats[:min_len,:]).max()< .02:
-        print 'ALL GOOD, identical features between mat and online feats'
+    if np.abs(mat_feats[:min_len,:] - online_feats[:min_len,:]).max()< .02:
+        print 'GOOD, identical features between mat and online feats'
     else:
-        print 'PROBLEM, features differ between mat and online feats, max diff:',(mat_feats[:min_len,:] - online_feats[:min_len,:]).max()
+        print 'PROBLEM, features differ between mat and online feats, max diff:',np.abs(mat_feats[:min_len,:] - online_feats[:min_len,:]).max()
