@@ -138,7 +138,7 @@ if __name__ == '__main__':
     P.title('mat feats old school')
     P.show()
 
-    if (mat_feats[:min_len,:] == featsNorm[:min_len,:]).all():
+    if (mat_feats[:min_len,:] - featsNorm[:min_len,:]).max() < .01:
         print 'ALL GOOD, identical feats between old school and new mat feats'
     else:
         print 'PROBLEM, features differ'
