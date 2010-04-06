@@ -318,7 +318,7 @@ def die_with_usage():
     print 'trainer.py by T. Bertin-Maheux (2010) Columbia University'
     print 'tb2332@columbia.edu'
     print ''
-    print 'Train a model with EchoNest data'
+    print 'Train a model with EchoNest data or with saved data.'
     print 'usage:'
     print '   python -O trainer.py [flags] <savedmodel>'
     print 'PARAMS'
