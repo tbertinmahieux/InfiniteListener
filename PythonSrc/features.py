@@ -193,8 +193,8 @@ def create_beat_synchro_chromagram(analysis_dict):
         return None, None
     assert btchroma.shape[0] == 12, 'bad btchroma shape'
 
-    # Renormalize.
-    btchroma = (btchroma.T / btchroma.max(axis=1)).T
+    # Renormalize. Each column max is 1.
+    btchroma = (btchroma / btchroma.max(axis=0))
 
     # get the bars in number of beats, do I need that?
     barbts = np.zeros(barstart.shape)
@@ -235,6 +235,7 @@ def get_time_warp_matrix(segstart, btstart, duration):
         except IndexError:
             # no segment start after that beats, can happen close
             # to the end, simply ignore, maybe even break?
+            # (catching faster than ckecking... it happens rarely?)
             break
         # find first segment that starts after beat ends
         segs_after =  np.nonzero((segstart - end) >= 0)[0]
