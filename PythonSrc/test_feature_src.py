@@ -65,6 +65,7 @@ if __name__ == '__main__':
     analysis_dict = {'segstart':segstart,'chromas':chromas,
                      'beatstart':beatstart,'barstart':barstart,
                      'duration':duration}
+    del a,b,c,d,e,segstart,chromas,beatstart,barstart,duration
     print 'analysis retrieved from Echo Nest'
 
     # features from online (positive=False to compare with old school method)
@@ -92,6 +93,17 @@ if __name__ == '__main__':
     assert np.abs(pitches - analysis_dict['chromas']).max() < .02
     print 'got same feature by upload than by calling using track ID, max chroma distance:',np.abs(pitches - analysis_dict['chromas']).max()
 
+
+    # analysis_dict2
+    analysis_dict2 = {'segstart':seg_start,'chromas':pitches,
+                      'beatstart':beat_start,'barstart':bar_start,
+                      'duration':duration}
+    tzan_feats = features.get_features(analysis_dict2,pSize=8,usebars=2,
+                                       keyInv=True,songKeyInv=False,
+                                       positive=False,do_resample=True,
+                                       btchroma_barbts=None)
+    tzan_feats = tzan_feats[np.nonzero(np.sum(tzan_feats,axis=1))]
+    print 'features from tzan data computed, shape =',tzan_feats.shape
     
     # feature from matfile
     mat_feats = features.features_from_matfile(tmpfilemat,pSize=8,usebars=2,
@@ -131,6 +143,12 @@ if __name__ == '__main__':
             interpolation='nearest',aspect='auto',cmap=P.cm.gray_r,
             subplot=(1,3),colorbar=False)
     P.title('online feats')
+    # plot tzan features
+    P.figure()
+    plotall([x.reshape(12,tzan_feats.shape[1]/12) for x in tzan_feats[:3]],
+            interpolation='nearest',aspect='auto',cmap=P.cm.gray_r,
+            subplot=(1,3),colorbar=False)
+    P.title('tzan feats')
     # plot matfile features old school
     P.figure()
     plotall([x.reshape(12,featsNorm.shape[1]/12) for x in featsNorm[:3]],
