@@ -53,7 +53,7 @@ if __name__ == '__main__':
         os.remove(tmpfilemat)
 
     # first encode song with tzanetakis code from HackDay
-    TZAN.filename_to_beatfeat_mat(songfile,tmpfilemat)
+    TZAN.filename_to_beatfeat_mat(songfile,savefile=tmpfilemat)
     print 'song encoded to matfile'
 
     # then retrieve stuff from EchoNest
