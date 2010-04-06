@@ -15,6 +15,9 @@ import numpy as np
 import scipy as sp
 import scipy.io
 
+import oracle_en
+import oracle_matfiles
+
 
 
 def initialize(nCodes,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
@@ -35,7 +38,7 @@ def initialize(nCodes,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
 
     # create codebook
     assert nCodes > 0,'nCodes inferior to 1? come on... codebook size!'
-    codebook = np.zeros([nCodes,pSize])
+    codebook = np.zeros([nCodes,12*pSize])
     cbidx = 0 # which code are we initializing
 
 
@@ -64,6 +67,11 @@ def initialize(nCodes,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
         # select random feature, add it
         rand_feat_idx = np.random.randint(feats.shape[0])
         codebook[cbidx,:] = feats[rand_feat_idx,:]
+        cbidx += 1
+        # verbose
+        if cbidx == np.round(nCodes * .25): print '25% done'
+        elif cbidx == np.round(nCodes * .50): print '50% done'
+        elif cbidx == np.round(nCodes * .75): print '75% done'
 
     # done, return codebook
     return codebook
