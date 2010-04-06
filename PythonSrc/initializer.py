@@ -168,7 +168,10 @@ if __name__ == '__main__' :
     filename = os.path.abspath(sys.argv[2])
 
     # launch initialization
-    codebook = initialize()
+    codebook = initialize(nCodes,pSize=pSize,usebars=usebars,keyInv=keyInv,
+                          songKeyInv=songKeyInv,positive=positive,
+                          do_resample=do_resample,nThreads=nThreads,
+                          oracle=oracle,artistsdb=artistsdb,matdir=matdir)
 
     # save codebook
     scipy.io.savemat(filename,{'codebook':codebook})
