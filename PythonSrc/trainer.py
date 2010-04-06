@@ -321,7 +321,7 @@ def die_with_usage():
     print 'Train a model with EchoNest data'
     print 'usage:'
     print '   python -O trainer.py [flags] <savedmodel>'
-    print 'INPUT'
+    print 'PARAMS'
     print ' <savedmodel> directory or codebook saved as matfile'
     print 'FLAGS'
     print ' -expdir d         directory to save model, when initializing'
