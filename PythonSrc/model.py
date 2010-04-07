@@ -78,11 +78,10 @@ class Model():
         if use_ann:
             kdtree = ann.kdtree(self._codebook)
             best_code_per_p, dists = self._closest_code_ann(feats,kdtree)
-            if not np.isnan(dists).any():
-                # note that dists is already squared euclidean distance
-                best_code_per_p = np.array(best_code_per_p)
-                avg_dists = np.array(map(lambda x: x * 1. /feats.shape[1],dists))
-            else:
+            best_code_per_p = np.array(best_code_per_p)
+            # note that dists is already squared euclidean distance
+            avg_dists = np.array(map(lambda x: x * 1. /feats.shape[1],dists))
+            if np.isnan(dists).any():
                 # sometimes ann has numerical errors, redo wrong ones
                 nan_idx = np.where(np.isnan(avg_dists))[0]
                 for idx in nan_idx:
