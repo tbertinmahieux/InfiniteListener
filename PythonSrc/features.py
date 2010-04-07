@@ -60,6 +60,8 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
     else:
         btchroma, barbts = btchroma_barbts
         barbts = barbts.flatten()
+    assert not np.isnan(btchroma).any(),'features: btchroma have NaN'
+    assert not np.isnan(barbts).any(),'features: barbts have NaN'
 
     # song invariance
     if songKeyInv:
@@ -194,7 +196,9 @@ def create_beat_synchro_chromagram(analysis_dict):
     assert btchroma.shape[0] == 12, 'bad btchroma shape'
 
     # Renormalize. Each column max is 1.
-    btchroma = (btchroma / btchroma.max(axis=0))
+    maxs = btchroma.max(axis=0)
+    maxs[np.where(maxs==0)] = 1.
+    btchroma = (btchroma / maxs)
 
     # get the bars in number of beats, do I need that?
     barbts = np.zeros(barstart.shape)
