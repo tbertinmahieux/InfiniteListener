@@ -142,6 +142,7 @@ def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
             feats = feats[np.nonzero(np.sum(feats,axis=1))]
             if feats.shape[0] == 0:
                 continue
+            assert not np.isnan(feats).any(),'features have NaN???'
             # stats
             statlog.patternsSeen(feats.shape[0])
             # update model
