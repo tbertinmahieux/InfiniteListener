@@ -80,7 +80,8 @@ class Model():
             best_code_per_p, dists = self._closest_code_ann(feats,kdtree)
             if not np.isnan(dists).any():
                 # note that dists is already squared euclidean distance
-                avg_dists = map(lambda x: x * 1. /feats.shape[1],dists)
+                best_code_per_p = np.array(best_code_per_p)
+                avg_dists = np.array(map(lambda x: x * 1. /feats.shape[1],dists))
                 assert not np.isnan(avg_dists).any(),'NaN with ann'
             else:
                 # sometimes ann has numerical errors...
@@ -207,6 +208,9 @@ class ModelFilter(Model):
         # FILTER
         probs = np.array(map(lambda k: self._accept_prob(dists[k],int(best_code_per_p[k])),range(feats.shape[0])))
         idxs_to_keep = np.where((probs - np.random.rand(feats.shape[0]))>0)[0]
+        if idxs_to_keep.shape[0] == 0:
+            print 'UpdateFilter: kept 0 /',feats.shape[0],'patterns.'
+            return np.average(dists)
         best_code_per_p_select = best_code_per_p[idxs_to_keep]
         dists_select = dists[idxs_to_keep]
         feats_select = feats[idxs_to_keep]
