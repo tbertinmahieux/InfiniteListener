@@ -82,10 +82,14 @@ class Model():
                 # note that dists is already squared euclidean distance
                 best_code_per_p = np.array(best_code_per_p)
                 avg_dists = np.array(map(lambda x: x * 1. /feats.shape[1],dists))
-                assert not np.isnan(avg_dists).any(),'NaN with ann'
             else:
-                # sometimes ann has numerical errors...
-                use_ann = False
+                # sometimes ann has numerical errors, redo wrong ones
+                nan_idx = np.where(np.isnan(avg_dists))
+                for idx in nan_idx:
+                    code,dist = self._closest_code_batch(feats[idx])
+                    best_code_per_p[idx] = int(code)
+                    avg_dists[idx] = dist * dist * 1. / feats.shape[1]
+                assert not np.isnan(avg_dists).any(),'NaN with ann not fixed'
         if not use_ann:
             # prepare result
             best_code_per_p = np.zeros(feats.shape[0])
