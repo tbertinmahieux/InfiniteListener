@@ -84,7 +84,7 @@ class Model():
                 avg_dists = np.array(map(lambda x: x * 1. /feats.shape[1],dists))
             else:
                 # sometimes ann has numerical errors, redo wrong ones
-                nan_idx = np.where(np.isnan(avg_dists))
+                nan_idx = np.where(np.isnan(avg_dists))[0]
                 for idx in nan_idx:
                     code,dist = self._closest_code_batch(feats[idx])
                     best_code_per_p[idx] = int(code)
