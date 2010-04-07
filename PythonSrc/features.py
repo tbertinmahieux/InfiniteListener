@@ -60,8 +60,10 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
     else:
         btchroma, barbts = btchroma_barbts
         barbts = barbts.flatten()
-    assert not np.isnan(btchroma).any(),'features: btchroma have NaN'
-    assert not np.isnan(barbts).any(),'features: barbts have NaN'
+    #assert not np.isnan(btchroma).any(),'features: btchroma have NaN'
+    #assert not np.isnan(barbts).any(),'features: barbts have NaN'
+    if np.isnan(btchroma).any():
+        return None
 
     # song invariance
     if songKeyInv:
