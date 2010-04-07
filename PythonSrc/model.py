@@ -72,14 +72,20 @@ class Model():
         a large database, t's worth having the kdtree.
         Threshold set at 200 features.
         """
+        assert feats.shape[1] > 0,'empty feats???'
         # ann
         use_ann = feats.shape[0] > 50
         if use_ann:
             kdtree = ann.kdtree(self._codebook)
             best_code_per_p, dists = self._closest_code_ann(feats,kdtree)
-            # note that dists is already squared euclidean distance
-            avg_dists = map(lambda x: x * 1. /feats.shape[1],dists)
-        else:
+            if not np.isnan(dists).any():
+                # note that dists is already squared euclidean distance
+                avg_dists = map(lambda x: x * 1. /feats.shape[1],dists)
+                assert not np.isnan(avg_dists).any(),'NaN with ann'
+            else:
+                # sometimes ann has numerical errors...
+                use_ann = False
+        if not use_ann:
             # prepare result
             best_code_per_p = np.zeros(feats.shape[0])
             avg_dists = np.zeros(feats.shape[0])
@@ -90,6 +96,7 @@ class Model():
                 code,dist = self._closest_code_batch(f)
                 best_code_per_p[idx] = int(code)
                 avg_dists[idx] = dist * dist * 1. / feats.shape[1]
+            assert not np.isnan(avg_dists).any(),'NaN with regular code'
         # done, return two list
         return best_code_per_p, avg_dists
 
