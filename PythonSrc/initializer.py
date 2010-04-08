@@ -38,7 +38,10 @@ def initialize(nCodes,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
 
     # create codebook
     assert nCodes > 0,'nCodes inferior to 1? come on... codebook size!'
-    codebook = np.zeros([nCodes,12*pSize])
+    if partialbar == 0:
+        codebook = np.zeros([nCodes,12*pSize])
+    else:
+        codebook = np.zeros([nCodes,12*partialbar])
     cbidx = 0 # which code are we initializing
 
 
