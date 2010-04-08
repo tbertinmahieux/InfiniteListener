@@ -25,10 +25,10 @@ import features
 import model as MODEL
 
 
-def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
-          songKeyInv=False,positive=True,do_resample=True,lrate=1e-5,
-          nThreads=4,oracle='EN',artistsdb='',matdir='', nIterations=1e7,
-          useModel='VQ'):
+def train(savedmodel, expdir='', pSize=8, usebars=2, keyInv=True,
+          songKeyInv=False, positive=True, do_resample=True, partialbar=0,
+          lrate=1e-5, nThreads=4, oracle='EN', artistsdb='', matdir='',
+          nIterations=1e7, useModel='VQ'):
     """
     Performs training
     Grab track data from oracle
@@ -41,6 +41,9 @@ def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
       pSize         - pattern size
       usebars       - how many bars per pattern
       keyInv        - perform 'key invariance' on patterns
+      positive      - replace negative values by 0
+      do_resample   - if false, crop
+      partialbar    - actual size, divides pSize
       lrate         - learning rate
       nThreads      - number of threads for the oracle, default=4
       oracle        - EN (EchoNest) or MAT (matfiles)
@@ -93,10 +96,10 @@ def train(savedmodel,expdir='',pSize=8,usebars=2,keyInv=True,
               'pSize':pSize, 'usebars':usebars,
               'keyInv':keyInv, 'songKeyInv':songKeyInv,
               'positive':positive, 'do_resample':do_resample,
-              'lrate':lrate, 'nThreads':nThreads,
-              'oracle':oracle, 'artistsdb':artistsdb,
-              'matdir':matdir, 'nIterations':nIterations,
-              'useModel':useModel}
+              'partialbar':partialbar, 'lrate':lrate,
+              'nThreads':nThreads, 'oracle':oracle,
+              'artistsdb':artistsdb, 'matdir':matdir,
+              'nIterations':nIterations, 'useModel':useModel}
 
     # creates the experiment folder
     if not os.path.isdir(expdir):
@@ -332,6 +335,7 @@ def die_with_usage():
     print ' -songKeyInv       perform key invariance on song level'
     print ' -notpositive      do not replace negative values by zero'
     print ' -dont_resample    pad or crop instead'
+    print ' -partialbar n     size of the partial, divides pSize'
     print ' -lrate r          learning rate for the algorithm'
     print ' -nThreads n       launch n threads for the EchoNest oracle'
     print ' -artistsdb db     SQLlite database containing artist names'
@@ -363,6 +367,7 @@ if __name__ == '__main__':
     songKeyInv = False
     positive = True
     do_resample = True
+    partialbar = 0
     lrate = 1e-5
     nThreads = 4
     oracle = 'EN'
@@ -396,6 +401,10 @@ if __name__ == '__main__':
         elif sys.argv[1] == '-dont_resample':
             do_resample = False
             print 'do_resample =', do_resample
+        elif sys.argv[1] == '-partialbar':
+            partialbar = int(sys.argv[2])
+            sys.argv.pop(1)
+            print 'partialbar =', partialbar
         elif sys.argv[1] == '-lrate':
             lrate = float(sys.argv[2])
             sys.argv.pop(1)
@@ -442,13 +451,13 @@ if __name__ == '__main__':
     if profile == '':
         train(savedmodel, expdir=expdir, pSize=pSize,usebars=usebars,
               keyInv=keyInv,songKeyInv=songKeyInv, positive=positive,
-              do_resample=do_resample, lrate=lrate,
+              do_resample=do_resample, partialbar=partialbar, lrate=lrate,
               nThreads=nThreads, oracle=oracle, artistsdb=artistsdb,
               matdir=matdir, nIterations=nIterations, useModel=useModel)
 
     else:
         cProfile.run(\
-            'train(savedmodel, expdir=expdir, pSize=pSize,usebars=usebars, keyInv=keyInv,songKeyInv=songKeyInv, positive=positive, do_resample=do_resample, lrate=lrate, nThreads=nThreads, oracle=oracle, artistsdb=artistsdb, matdir=matdir, nIterations=nIterations, useModel=useModel)',
+            'train(savedmodel, expdir=expdir, pSize=pSize,usebars=usebars, keyInv=keyInv,songKeyInv=songKeyInv, positive=positive, do_resample=do_resample, partialbar=partialbar, lrate=lrate, nThreads=nThreads, oracle=oracle, artistsdb=artistsdb, matdir=matdir, nIterations=nIterations, useModel=useModel)',
             filename=profile)
         # load and print stats
         stats = pstats.Stats(profile)
