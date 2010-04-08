@@ -311,6 +311,8 @@ def get_our_analysis(track_id):
 
     Return them in order, or 5 None if one of them fails
     """
+    # OLD SLOW CODE
+    """
     try:
         # duration
         duration = get_duration(track_id)
@@ -331,6 +333,35 @@ def get_our_analysis(track_id):
     except IOError:
         print 'IOError on', time.ctime(),': check connection if happens often.'
         return None,None,None,None,None
+    """
+    # use with new call: alpha_get_analysis
+    # build call
+    url = 'http://developer.echonest.com/api/alpha_get_analysis?api_key='
+    url += _api_dev_key
+    url += '&trackID=' + track_id
+    try:
+        analysis = do_dict_call(url)
+    except IOError:
+        print 'IOError on', time.ctime(),': check connection if happens often.'
+        return None,None,None,None,None
+    # success?
+    if analysis['status'] != 'ok':
+        return None,None,None,None,None
+    analysis = analysis['analysis']
+    # duration
+    duration = analysis['track']['duration']
+    # bars
+    barstart = [x['start'] for x in analysis['bars']]
+    # beats
+    beatstart = [x['start'] for x in analysis['beats']]
+    # segments
+    segstart = [x['start'] for x in analysis['segments']]
+    # chromas
+    chromas = np.zeros([12,len(segstart)])
+    idx = 0
+    for k in analysis['segments']:
+        chromas[:,idx] = k['pitches']
+        idx += 1    
     # done, return
     return segstart, chromas, beatstart, barstart, duration
     
