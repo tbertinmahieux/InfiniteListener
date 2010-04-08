@@ -92,7 +92,11 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
     # allocate space for answer
     nSubPieces = 1
     realSize = pSize # or partialb if partialbar > 0
-    feats = np.zeros([len(splits)-1,12*pSize])
+    if partialbar > 0:
+        assert pSize % partialbar == 0,'bad partialbar: does not divide pSize'
+        realSize = partialbar
+        nSubPieces = pSize / partialbar
+    feats = np.zeros([(len(splits)-1)*nSubPieces,12*realSize])
 
     # iterate on patterns
     for k in range(feats.shape[0]):
