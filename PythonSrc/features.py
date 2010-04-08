@@ -123,19 +123,6 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
     if positive:
         feats[np.where(feats<0)] = 0
 
-    # partialbar
-    #if partialbar > 0:
-        # compute exact number of pieces
-    #    assert pSize % partialbar == 0,'partial size does not fit pSize'
-    #    nSubPieces = pSize / partialbar
-        # stack all patterns horizontaly
-    #    hpats = np.concatenate([x.reshape(12,pSize) for x in feats],axis=1)
-        # cut it feats.shape[0] * nSubPieces
-    #    cutpats = np.split(hpats,feats.shape[0]*nSubPieces,axis=1)
-        # flatten and reform
-    #    feats = np.concatenate([x.reshape(1,12*pSize/nSubPieces) for x in cutpats],axis=0)
-    #    assert feats.shape[1] == 12 * pSize / nSubPieces,'bad partial calculation'
-
     # done, return features
     return feats
 
