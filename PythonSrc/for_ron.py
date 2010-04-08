@@ -21,12 +21,24 @@ import initializer
 import trainer
 
 
+
+featsDir = os.path.expanduser('~/projects/ismir10-patterns/beatFeats')
+#testFeatsDir = os.path.expanduser('~/projects/ismir10-patterns/uspop_mat')
+#outputDir = os.path.expanduser('~/projects/ismir10-patterns/experiments')
+outputDir = ''
+assert outputDir != '','SET OUTPUT DIR TO SOMETHING!!!!'
+
+
 def do_experiment(experiment_dir,beats=0,bars=0,nCodes=0,nIter=1e7,
                   partialbar=0,keyInv=False,songKeyInv=True,lrate=1e-3,
                   mat_dir=''):
     """
     Main function to run an experiment, train a model and save to dir.
     """
+
+    # check for 'done' file
+    if os.path.exists(os.path.join(experiment_dir,'DONE.txt')):
+        return
 
     # check if saved model exists
     alldirs = glob.glob(os.path.join(experiment_dir,'*'))
@@ -58,11 +70,27 @@ def do_experiment(experiment_dir,beats=0,bars=0,nCodes=0,nIter=1e7,
                       nThreads=4, oracle='MAT', artistsdb='',
                       matdir=mat_dir, nIterations=nIter, useModel='VQ')
 
+    # write done file
+    f = open(os.path.join(experiment_dir,'DONE.txt'),'w')
+    f.write('experiment appear to be done\n')
+    f.close()
 
 
-def do_experiment_wrapper(args,argsdict):
-    """ launch experiments given params, either as list or dict """
+def do_experiment_wrapper(args):
+    """
+    launch experiments given params
+    Receives a pair: args and argsdict!
+    """
+    args,argsdict = args
     return do_experiment(*args,**argsdict)
+
+
+
+experiment_args = []
+# experiment set 1
+args1 = [os.path.join(outputDir,'set1exp1')]
+argsd1 = {'mat_dir':featsDir,'beats':4,'bars':1,'nCodes':100}
+experiment_args.append( [(args1,argsd1),] )
 
 
 
@@ -78,5 +106,19 @@ def die_with_usage():
 if __name__ == '__main__':
 
     # help menu
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 4:
         die_with_usage()
+
+    # setup
+    nprocesses = int(sys.argv[2])
+    pool = multiprocessing.Pool(processes=nprocesses)
+    # Python indexes from 0, the argument indexes from 1.
+    experiment_set_number = int(sys.argv[3]) - 1
+    args = experiment_args[experiment_set_number]
+    try:
+        args = [args[int(sys.argv[4]) - 1]] # subset exp? nice ;)
+    except IndexError:
+        pass
+
+    # launch experiments
+    pool.map(do_experiment_wrapper, args)
