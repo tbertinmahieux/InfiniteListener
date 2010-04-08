@@ -20,7 +20,8 @@ import numpy as np
 
 
 def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
-                 positive=True,do_resample=True,btchroma_barbts=None):
+                 positive=True,do_resample=True,partialbar=0,
+                 btchroma_barbts=None):
     """
     Main function, similar to those in demos.py for BostonHackDay
     Receives a dictionary containing:
@@ -43,6 +44,7 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
       songKeyInv         same as keyInv, but over songs
       positive           negative numbers (due to rescaling) set to 0
       do_resample        if True resample, otherwise pad with zeros or crop
+      partialbar         cut bars into pieces of size partialbar
       btchroma_barbts    pair(btchroma,barbts) if info known (set dict to None)
 
     RETURN:
@@ -109,13 +111,28 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
     if positive:
         feats[np.where(feats<0)] = 0
 
+    # partialbar
+    if partialbar > 0:
+        assert usebars == 1,'partialbar must be used with usebars=1'
+        # compute exact number of pieces
+        assert pSize % partialbar == 0,'partial size does not fit pSize'
+        nSubPieces = pSize / partialbar
+        # stack all patterns horizontaly
+        hpats = np.concatenate([x.reshape(12,pSize) for x in feats],axis=1)
+        # cut it feats.shape[0] * nSubPieces
+        cutpats = np.split(hpats,feats.shape[0]*nSubPieces,axis=1)
+        # flatten and reform
+        feats = np.concatenate([x.reshape(1,pSize/nSubPieces) for x in cutpats],axis=0)
+        assert feats.shape[1] == 12 * pSize / nSubPieces,'bad partial calculation'
+
     # done, return features
     return feats
 
 
 
 def features_from_matfile(filename,pSize=8,usebars=2,keyInv=True,
-                          songKeyInv=False,positive=True,do_resample=True):
+                          songKeyInv=False,positive=True,do_resample=True,
+                          partialbar=0):
     """
     Function to help the transition from the BostonHackDay project.
     Loads a matlab file containing beat features.
@@ -147,7 +164,7 @@ def features_from_matfile(filename,pSize=8,usebars=2,keyInv=True,
     return get_features(None,pSize=pSize,usebars=usebars,
                         keyInv=keyInv,songKeyInv=songKeyInv,
                         positive=positive,do_resample=do_resample,
-                        btchroma_barbts=analysis)
+                        partialbar=partialbar,btchroma_barbts=analysis)
 
 
 def create_beat_synchro_chromagram(analysis_dict):
