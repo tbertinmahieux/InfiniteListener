@@ -37,6 +37,8 @@ class OracleMatfiles():
         self._songKeyInv = params['songKeyInv']
         self._positive = params['positive']
         self._do_resample = params['do_resample']
+        self._partialbar = 0
+        if params.has_key('partialbar'):self._partialbar = params['partialbar']
         # find all matfiles
         self._matfiles = get_all_matfiles(folder)
         assert len(self._matfiles) > 0,'no matfiles found in %s'%folder
@@ -68,7 +70,8 @@ class OracleMatfiles():
                                               keyInv=self._keyInv,
                                               songKeyInv=self._songKeyInv,
                                               positive=self._positive,
-                                              do_resample=self._do_resample)
+                                              do_resample=self._do_resample,
+                                              partialbar=self._partialbar)
 
     def tracksGiven(self):
         """
