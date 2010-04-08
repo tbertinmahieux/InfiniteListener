@@ -113,7 +113,6 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
 
     # partialbar
     if partialbar > 0:
-        assert usebars == 1,'partialbar must be used with usebars=1'
         # compute exact number of pieces
         assert pSize % partialbar == 0,'partial size does not fit pSize'
         nSubPieces = pSize / partialbar
