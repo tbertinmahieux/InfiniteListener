@@ -148,6 +148,8 @@ class OracleEN():
         self._songKeyInv = params['songKeyInv']
         self._positive = params['positive']
         self._do_resample = params['do_resample']
+        self._partialbar = 0
+        if params.has_key('partialbar'):self._partialbar = params['partialbar']
         # start a number of EN threads
         nThreads = params['nThreads']
         assert nThreads > 0,'you need at least one thread'
@@ -186,6 +188,7 @@ class OracleEN():
                                      songKeyInv=self._songKeyInv,
                                      positive=self._positive,
                                      do_resample=self._do_resample,
+                                     partialbar=self._partialbar,
                                      btchroma_barbts=None)
 
     def tracksGiven(self):
