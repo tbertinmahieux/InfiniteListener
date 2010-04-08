@@ -99,19 +99,23 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
     feats = np.zeros([(len(splits)-1)*nSubPieces,12*realSize])
 
     # iterate on patterns
-    for k in range(feats.shape[0]):
+    splitidx = -1
+    for k in range(0,feats.shape[0],nSubPieces):
         # pattern before resize and invariance
-        pattern = btchroma[:,splits[k]:splits[k+1]]
+        splitidx += 1
+        pattern = btchroma[:,splits[splitidx]:splits[splitidx+1]]
         # resize by resampling on pad/crop
         if do_resample:
             patterns = [resample(pattern,pSize)]
         else:
             patterns = [pad_crop(pattern,pSize)]
         # partialbar
-        # ...
+        if partialbar > 0:
+            nPatterns = len(patterns)
+            patterns = np.split(np.concatenate(patterns,axis=1),nPatterns*nSubPieces,axis=1)
         # key invariance
         if keyInv:
-            pattern = [keyinvariance(p) for p in patterns]
+            patterns = [keyinvariance(p) for p in patterns]
         # add it to feats
         feats[k:k+nSubPieces,:] = np.concatenate([p.reshape(1,realSize*12) for p in patterns],axis=0)
 
@@ -120,17 +124,17 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
         feats[np.where(feats<0)] = 0
 
     # partialbar
-    if partialbar > 0:
+    #if partialbar > 0:
         # compute exact number of pieces
-        assert pSize % partialbar == 0,'partial size does not fit pSize'
-        nSubPieces = pSize / partialbar
+    #    assert pSize % partialbar == 0,'partial size does not fit pSize'
+    #    nSubPieces = pSize / partialbar
         # stack all patterns horizontaly
-        hpats = np.concatenate([x.reshape(12,pSize) for x in feats],axis=1)
+    #    hpats = np.concatenate([x.reshape(12,pSize) for x in feats],axis=1)
         # cut it feats.shape[0] * nSubPieces
-        cutpats = np.split(hpats,feats.shape[0]*nSubPieces,axis=1)
+    #    cutpats = np.split(hpats,feats.shape[0]*nSubPieces,axis=1)
         # flatten and reform
-        feats = np.concatenate([x.reshape(1,12*pSize/nSubPieces) for x in cutpats],axis=0)
-        assert feats.shape[1] == 12 * pSize / nSubPieces,'bad partial calculation'
+    #    feats = np.concatenate([x.reshape(1,12*pSize/nSubPieces) for x in cutpats],axis=0)
+    #    assert feats.shape[1] == 12 * pSize / nSubPieces,'bad partial calculation'
 
     # done, return features
     return feats
