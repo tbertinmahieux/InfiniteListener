@@ -121,7 +121,7 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
         # cut it feats.shape[0] * nSubPieces
         cutpats = np.split(hpats,feats.shape[0]*nSubPieces,axis=1)
         # flatten and reform
-        feats = np.concatenate([x.reshape(1,pSize/nSubPieces) for x in cutpats],axis=0)
+        feats = np.concatenate([x.reshape(1,12*pSize/nSubPieces) for x in cutpats],axis=0)
         assert feats.shape[1] == 12 * pSize / nSubPieces,'bad partial calculation'
 
     # done, return features
