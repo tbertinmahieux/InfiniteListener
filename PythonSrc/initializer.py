@@ -21,8 +21,8 @@ import oracle_matfiles
 
 
 def initialize(nCodes,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
-               positive=True,do_resample=True,nThreads=4,oracle='EN',
-               artistsdb='',matdir=''):
+               positive=True,do_resample=True,partialbar=0,nThreads=4,
+               oracle='EN',artistsdb='',matdir=''):
     """
     Function to initialize a codebook, return the codebook as numpy array.
     """
@@ -31,9 +31,9 @@ def initialize(nCodes,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
     params = {'nCodes':nCodes, 'pSize':pSize,
               'usebars':usebars, 'keyInv':keyInv,
               'songKeyInv':songKeyInv, 'positive':positive,
-              'do_resample':do_resample, 'nThreads':nThreads,
-              'oracle':oracle, 'artistsdb':artistsdb,
-              'matdir':matdir}
+              'do_resample':do_resample, 'partialbar':partialbar,
+              'nThreads':nThreads, 'oracle':oracle,
+              'artistsdb':artistsdb, 'matdir':matdir}
 
 
     # create codebook
@@ -98,6 +98,7 @@ def die_with_usage():
     print ' -songKeyInv       perform key invariance on song level'
     print ' -notpositive      do not replace negative values by zero'
     print ' -dont_resample    pad or crop instead'
+    print ' -partialbar n     size of the partial, divides pSize'
     print ' -nThreads n       launch n threads for the EchoNest oracle'
     print ' -artistsdb db     SQLlite database containing artist names'
     print '                   used by EchoNest oracle'
@@ -128,6 +129,7 @@ if __name__ == '__main__' :
     songKeyInv = False
     positive = True
     do_resample = True
+    partialbar = 0
     nThreads = 4
     oracle = 'EN'
     artistsdb = ''
@@ -153,6 +155,10 @@ if __name__ == '__main__' :
         elif sys.argv[1] == '-dont_resample':
             do_resample = False
             print 'do_resample =', do_resample
+        elif sys.argv[1] == '-partialbar':
+            partialbar = int(sys.argv[2])
+            sys.argv.pop(1)
+            print 'partialbar =', partialbar
         elif sys.argv[1] == '-nThreads':
             nThreads = int(sys.argv[2])
             sys.argv.pop(1)
@@ -178,8 +184,9 @@ if __name__ == '__main__' :
     # launch initialization
     codebook = initialize(nCodes,pSize=pSize,usebars=usebars,keyInv=keyInv,
                           songKeyInv=songKeyInv,positive=positive,
-                          do_resample=do_resample,nThreads=nThreads,
-                          oracle=oracle,artistsdb=artistsdb,matdir=matdir)
+                          do_resample=do_resample,partialbar=partialbar,
+                          nThreads=nThreads,oracle=oracle,artistsdb=artistsdb,
+                          matdir=matdir)
 
     # save codebook
     scipy.io.savemat(filename,{'codebook':codebook})
