@@ -90,6 +90,8 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
         return None
 
     # allocate space for answer
+    nSubPieces = 1
+    realSize = pSize # or partialb if partialbar > 0
     feats = np.zeros([len(splits)-1,12*pSize])
 
     # iterate on patterns
@@ -98,14 +100,16 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
         pattern = btchroma[:,splits[k]:splits[k+1]]
         # resize by resampling on pad/crop
         if do_resample:
-            pattern = resample(pattern,pSize)
+            patterns = [resample(pattern,pSize)]
         else:
-            pattern = pad_crop(pattern,pSize)
+            patterns = [pad_crop(pattern,pSize)]
+        # partialbar
+        # ...
         # key invariance
         if keyInv:
-            pattern = keyinvariance(pattern)
+            pattern = [keyinvariance(p) for p in patterns]
         # add it to feats
-        feats[k,:] = pattern.flatten()
+        feats[k:k+nSubPieces,:] = np.concatenate([p.reshape(1,realSize*12) for p in patterns],axis=0)
 
     # remove negative numbers
     if positive:
