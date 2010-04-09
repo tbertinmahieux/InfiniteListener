@@ -52,13 +52,11 @@ def do_dict_call(url):
     Used by alpha API calls like search_tracks
     Returns dictionary
     """
-    # call the url, save the output to file
-    filename,httpmessage = urllib.urlretrieve(url)
-    # open the file
-    f = open(filename,'r')
+    # open the connection
+    f = urllib.urlopen(url)
     # read the line (hope there is only one...)
     data = f.readline().strip()
-    # close the file
+    # close the connection
     f.close()
     # eval
     d = eval(data)
