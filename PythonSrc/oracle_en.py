@@ -67,7 +67,7 @@ def _thread_en(artistsdb):
                 continue
             for k in artist_list:
                 waiting_artists.append(k)
-        artist = waiting_artists.pop()
+        artist = waiting_artists.pop() # no thread concurrency here
 
         # get song
         tids,tmp_titles,tmp_aids,tmp_artists = en_extras.search_tracks(artist)
