@@ -50,7 +50,7 @@ def do_dict_call(url):
     Calls EchoNest with a given command, expect the string
     representation of a python dictionary.
     Used by alpha API calls like search_tracks
-    Returns dictionary
+    Returns dictionary, or None if major problem
     """
     # open the connection
     f = urllib.urlopen(url)
@@ -59,7 +59,11 @@ def do_dict_call(url):
     # close the connection
     f.close()
     # eval
-    d = eval(data)
+    try:
+        d = eval(data)
+    except SyntaxError:
+        print 'en_extras, SyntaxError when downloading dict'
+        return None
     # return dictionary
     return d
 
@@ -182,7 +186,7 @@ def search_tracks(artist,title='',max_results=100):
     # call, get XML
     d = do_dict_call(url)
     # check success
-    if not d['status'] == 'ok':
+    if (d == None) or (not d['status'] == 'ok'):
         return None, None, None, None
     results = d['results']
     if len(results) == 0:
@@ -343,7 +347,7 @@ def get_our_analysis(track_id):
         print 'IOError on', time.ctime(),': check connection if happens often.'
         return None,None,None,None,None
     # success?
-    if analysis['status'] != 'ok':
+    if (analysis==None) or (analysis['status'] != 'ok'):
         return None,None,None,None,None
     analysis = analysis['analysis']
     # duration
