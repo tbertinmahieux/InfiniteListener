@@ -12,7 +12,9 @@ import sys
 import time
 import copy
 import thread
+import threading
 from collections import deque
+import mutex
 import numpy as np
 # features stuff
 import features
@@ -36,7 +38,40 @@ _en_queue_size = 100
 # to keep in song data
 _thread_en_song_data = deque()
 # lock for the song_data
-#_thread_en_lock = thread.allocate_lock() # deque supposed to be thread safe
+# deque is thread-save for pop and append, but not length. Trying to repeatedly
+# pop and catching InderError is super inefficient!
+# regular queue lock must be dumb, sempahore should improve things
+_thread_en_sem = threading.BoundedSemaphore()
+
+
+def _add_data(data):
+    """
+    Add data and release mutex
+    """
+    # get lock
+    _thread_en_sem.acquire()
+    # add
+    _thread_en_song_data.appendleft(data)
+    # release mutex
+    _thread_en_sem.release()
+
+def _get_data():
+    """
+    Returns data or None if queue empty, and release mutex
+    """
+    # get lock
+    _thread_en_sem.acquire()
+    # get data
+    try:
+        data = _thread_en_song_data.pop()
+    except IndexError:
+        data = None
+    # relase semaphore
+    _thread_en_sem.release()
+    # return
+    return data
+
+
 def _thread_en(artistsdb):
     """
     Thread that load EN data
@@ -81,9 +116,9 @@ def _thread_en(artistsdb):
             continue
         d = {'segstart':segstart,'chromas':chromas,
              'beatstart':beatstart,'barstart':barstart,'duration':duration}
-
-        # put data in queue, deque is supposed to be thread safe
-        _thread_en_song_data.appendleft(d)
+        # put data in queue, deque is supposed to be thread safe but we have
+        # an extra semaphore
+        _add_data(d)
         #print 'added data (artist :',artist,') to _en_queue' #debugging
         # success rate too low? print WARNING
         cnt_provided += 1
@@ -173,14 +208,12 @@ class OracleEN():
         Take it from the queue (waits infinitely if needed...!)
         Sleep time between iterations when waiting is sleep_time (seconds)
         """
-        # make sure there is something in queue
-        while True:
-            if len(_thread_en_song_data) > 0:
-                break
+        # get data
+        data = None
+        while data == None:
+            data = _get_data()
             time.sleep(sleep_time)
-        # data
         self._nTracksGiven += 1
-        data = _thread_en_song_data.pop()
         # get features
         return features.get_features(data,pSize=self._pSize,
                                      usebars=self._usebars,
