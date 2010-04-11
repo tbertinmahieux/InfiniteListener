@@ -46,14 +46,21 @@ _thread_en_sem = threading.BoundedSemaphore()
 
 def _add_data(data):
     """
-    Add data and release mutex
+    Add data (if queue not full) and release semaphore
+    Return number of elements in queue
     """
     # get lock
     _thread_en_sem.acquire()
+    # get queue size
+    qs = len(_thread_en_song_data)
     # add
-    _thread_en_song_data.appendleft(data)
+    if qs < _en_queue_size:
+        _thread_en_song_data.appendleft(data)
+        qs += 1
     # release mutex
     _thread_en_sem.release()
+    # return queue size
+    return qs
 
 def _get_data():
     """
@@ -87,12 +94,6 @@ def _thread_en(artistsdb):
         # debug
         cnt_iter += 1
 
-        # queue full?
-        if len(_thread_en_song_data) > _en_queue_size :
-            time.sleep(0.050) # sleep for 50 milliseconds
-            cnt_iter -= 1
-            continue
-
         # get artist
         if len(waiting_artists) == 0:
             artist_list = get_artists_from_db(artistsdb)
@@ -118,7 +119,14 @@ def _thread_en(artistsdb):
              'beatstart':beatstart,'barstart':barstart,'duration':duration}
         # put data in queue, deque is supposed to be thread safe but we have
         # an extra semaphore
-        _add_data(d)
+        queue_size = _add_data(d)
+
+        # queue full?        
+        if queue_size >= _en_queue_size :
+            time.sleep(5) # sleep for 5 seconds
+            cnt_iter -= 1
+            continue
+
         #print 'added data (artist :',artist,') to _en_queue' #debugging
         # success rate too low? print WARNING
         cnt_provided += 1
@@ -209,12 +217,16 @@ class OracleEN():
         Sleep time between iterations when waiting is sleep_time (seconds)
         """
         # get data
+        print 'oracle, get data'
+        sys.stdout.flush()
         data = None
         while data == None:
             data = _get_data()
             time.sleep(sleep_time)
         self._nTracksGiven += 1
         # get features
+        print 'oracle, return features'
+        sys.stdout.flush()
         return features.get_features(data,pSize=self._pSize,
                                      usebars=self._usebars,
                                      keyInv=self._keyInv,
