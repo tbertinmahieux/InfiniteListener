@@ -90,7 +90,7 @@ if __name__ == '__main__':
 
     # go through them, add some to the 'remove set'
     to_delete = []
-    first_time = ANALYZE.stop_time(traceback[0])
+    first_time = ANALYZE.stop_time(all_in_folder[0])
     current_time = first_time
     # iterate over directories in trimdir
     for d in all_in_folder:
