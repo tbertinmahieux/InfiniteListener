@@ -141,7 +141,7 @@ def train(savedmodel, expdir='', pSize=8, usebars=2, keyInv=True,
             feats = oracle.next_track()
             if feats == None:
                 continue
-            # remove empty pattenrs
+            # remove empty pattenrns
             feats = feats[np.nonzero(np.sum(feats,axis=1))]
             if feats.shape[0] == 0:
                 continue
