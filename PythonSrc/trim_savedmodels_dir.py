@@ -14,6 +14,7 @@ import os
 import sys
 import glob
 import numpy as np
+import shutil
 
 import analyze_saved_model as ANALYZE
 from trainer import StatLog
@@ -128,5 +129,5 @@ if __name__ == '__main__':
     # if not dry run, remove
     if not dryrun:
         for k in to_delete:
-            os.rmdir(k)
+            shutil.rmtree(k)
 
