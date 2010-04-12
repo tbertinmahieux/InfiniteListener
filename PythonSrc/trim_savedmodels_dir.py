@@ -54,7 +54,7 @@ if __name__ == '__main__':
         die_with_usage()
 
     # flags
-    dryrun = True # debug, change to False
+    dryrun = False
     while True:
         if sys.argv[1] == '-dryrun':
             print 'we do a dry run, nothing will be deleted'
