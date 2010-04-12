@@ -64,7 +64,7 @@ if __name__ == '__main__':
         sys.argv.pop(1)
 
     # last saved model
-    savedmodel = os.path.abspath(sys.argv[1])
+    savedmodel = os.path.realpath(sys.argv[1])
     trimdir = os.path.dirname(savedmodel)
     print 'most recent saved model:',savedmodel
     print 'directory to trim:',trimdir
