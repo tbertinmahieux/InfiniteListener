@@ -78,9 +78,6 @@ if __name__ == '__main__':
     print '***********************************'
     # keep only folders
     traceback = filter(lambda x: os.path.isdir(x), traceback)
-    print 'time of traceback:'
-    for k in traceback:
-        print ANALYZE.stop_time(k)
 
     # get all dirs in trimdir, in order
     all_in_folder = glob.glob(os.path.join(trimdir,'*'))
@@ -129,5 +126,7 @@ if __name__ == '__main__':
 
 
     # if not dry run, remove
-
+    if not dryrun:
+        for k in to_delete:
+            os.rmdir(k)
 
