@@ -104,9 +104,11 @@ if __name__ == '__main__':
             continue
         # less than two hours? keep safe
         if stop_time - first_time < 60 * 60 * 2:
+            assert stop_time - first_time >= 0,'did not start from most recent saved model?'
             continue
         # otherwise
         if stop_time - current_time < 60 * 60:
+            assert stop_time - current_time >= 0,'did not start from most recent saved model?'
             # less than an hour from most recent one? delete
             to_delete.append(d)
         else:
