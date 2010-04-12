@@ -83,6 +83,7 @@ if __name__ == '__main__':
     all_in_folder = glob.glob(os.path.join(trimdir,'*'))
     all_in_folder = filter(lambda x: os.path.isdir(x), all_in_folder)
     all_in_folder = np.sort(all_in_folder)
+    print 'number of folders found in main folder:',len(all_in_folder)
 
     # go through them, add some to the 'remove set'
     to_delete = []
