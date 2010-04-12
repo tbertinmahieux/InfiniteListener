@@ -217,16 +217,12 @@ class OracleEN():
         Sleep time between iterations when waiting is sleep_time (seconds)
         """
         # get data
-        print 'oracle, get data'
-        sys.stdout.flush()
         data = None
         while data == None:
             data = _get_data()
             time.sleep(sleep_time)
         self._nTracksGiven += 1
         # get features
-        print 'oracle, return features'
-        sys.stdout.flush()
         return features.get_features(data,pSize=self._pSize,
                                      usebars=self._usebars,
                                      keyInv=self._keyInv,
