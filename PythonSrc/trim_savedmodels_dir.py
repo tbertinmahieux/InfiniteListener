@@ -104,6 +104,8 @@ if __name__ == '__main__':
             continue
         # less than two hours? keep safe
         if stop_time - first_time < 60 * 60 * 2:
+            print 'stop time:', stop_time
+            print 'first time:',first_time
             assert stop_time - first_time >= 0,'did not start from most recent saved model?'
             continue
         # otherwise
