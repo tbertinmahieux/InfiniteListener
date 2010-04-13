@@ -17,7 +17,9 @@ import time
 import copy
 import xml
 from xml.dom import minidom
+import signal
 import urllib
+import urllib2
 import urlparse
 import numpy as np
 
@@ -27,6 +29,16 @@ except:
     _api_dev_key = os.environ['ECHONEST_API_KEY']
 
 
+#def handler(signum,frame):
+#    """
+#    Handle to catch alarm when a device takes too long to open.
+#    Raise IOError
+#    """
+#    raise IOError("Couldn't open device, took too long")
+# set SIGALRM to be handled by handler
+# CAN ONLY BE CALLED FROM THE MAIN THREAD!!!
+#signal.signal(signal.SIGALRM,handler)
+
 def do_xml_call(url):
     """
     Calls echonest with a given command, expect XML document
@@ -34,7 +46,7 @@ def do_xml_call(url):
     """
     try:
         # open stream
-        stream = urllib.urlopen(url)
+        stream = urllib2.urlopen(url)
         # directly parse it to XML
         xmldoc = minidom.parse(stream).documentElement
         # close stream
@@ -52,17 +64,31 @@ def do_dict_call(url):
     Used by alpha API calls like search_tracks
     Returns dictionary, or None if major problem
     """
-    # open the connection
-    f = urllib.urlopen(url)
-    # read the line (hope there is only one...)
-    data = f.readline().strip()
-    # close the connection
-    f.close()
-    # eval
     try:
-        d = eval(data)
-    except SyntaxError:
-        print 'en_extras, SyntaxError when downloading dict'
+        # open the connection
+        f = urllib2.urlopen(url,timeout=30.)
+        # read the line (hope there is only one...)
+        # use to do (should still work): data = f.readline()
+        try:
+            data = f.next()
+        except StopIteration:
+            print 'en_extras, data cant be read (next) when downloading dict'
+            return None
+        # close the connection
+        f.close()
+        # eval
+        try:
+            d = eval(data)
+        except SyntaxError:
+            return None
+    except IOError:
+        print 'IOError on', time.ctime(),': check connection if happens often.'
+        return None
+    except urllib2.URLError:
+        print 'URLError', time.ctime(),': check connection if happens often.'
+        return None
+    except socket.timeout:
+        print 'socket timeout on', time.ctime(),': check connection if happens often.'
         return None
     # return dictionary
     return d
@@ -341,11 +367,8 @@ def get_our_analysis(track_id):
     url = 'http://developer.echonest.com/api/alpha_get_analysis?api_key='
     url += _api_dev_key
     url += '&trackID=' + track_id
-    try:
-        analysis = do_dict_call(url)
-    except IOError:
-        print 'IOError on', time.ctime(),': check connection if happens often.'
-        return None,None,None,None,None
+    # call
+    analysis = do_dict_call(url)
     # success?
     if (analysis==None) or (analysis['status'] != 'ok'):
         return None,None,None,None,None
