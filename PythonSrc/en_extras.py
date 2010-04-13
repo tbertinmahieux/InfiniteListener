@@ -197,13 +197,14 @@ def search_tracks(artist,title='',max_results=100):
     titles = []
     aids = []
     artists = []
-    for res in results:
-        if not res.has_key('trackID') or not res.has_key('title') or not res.has_key('artistID') or not res.has_key('artist'):
-            continue
-        tids.append(res['trackID'])
-        titles.append(res['title'])
-        aids.append(res['artistID'])
-        artists.append(res['artist'])
+    try:
+        for res in results:
+            tids.append(res['trackID'])
+            titles.append(res['title'])
+            aids.append(res['artistID'])
+            artists.append(res['artist'])
+    except KeyError:
+        return None, None, None, None
     # done
     return tids, titles, aids, artists
 
