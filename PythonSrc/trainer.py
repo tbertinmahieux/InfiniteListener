@@ -175,6 +175,8 @@ def train(savedmodel, expdir='', pSize=8, usebars=2, keyInv=True,
             print formatted_lines[-1]
             print '*********************************************'
             print 'Stoping after', main_iterations - 1, 'iterations.'
+        # EN oracle, try to stop/slow down threads
+        oracle_en._en_queue_size = 0
         # save
         print 'saving...'
         savedir = save_experiment(expdir,model,starttime,statlog,params,
