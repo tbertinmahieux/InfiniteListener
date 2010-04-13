@@ -18,6 +18,7 @@ import copy
 import xml
 from xml.dom import minidom
 import urllib
+import urllib2
 import urlparse
 import numpy as np
 
@@ -34,7 +35,7 @@ def do_xml_call(url):
     """
     try:
         # open stream
-        stream = urllib.urlopen(url)
+        stream = urllib2.urlopen(url)
         # directly parse it to XML
         xmldoc = minidom.parse(stream).documentElement
         # close stream
@@ -53,7 +54,7 @@ def do_dict_call(url):
     Returns dictionary, or None if major problem
     """
     # open the connection
-    f = urllib.urlopen(url)
+    f = urllib2.urlopen(url)
     # read the line (hope there is only one...)
     data = f.readline().strip()
     # close the connection
@@ -197,6 +198,8 @@ def search_tracks(artist,title='',max_results=100):
     aids = []
     artists = []
     for res in results:
+        if not res.has_key('trackID') or not res.has_key('title') or not res.has_key('artistID') or not res.has_key('artist'):
+            continue
         tids.append(res['trackID'])
         titles.append(res['title'])
         aids.append(res['artistID'])
