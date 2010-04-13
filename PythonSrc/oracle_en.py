@@ -14,7 +14,6 @@ import copy
 import thread
 import threading
 from collections import deque
-import mutex
 import numpy as np
 # features stuff
 import features
@@ -64,14 +63,14 @@ def _add_data(data):
 
 def _get_data():
     """
-    Returns data or None if queue empty, and release mutex
+    Returns data or None if queue empty, and release semaphore
     """
     # get lock
     _thread_en_sem.acquire()
     # get data
-    try:
+    if len(_thread_en_song_data) > 0:
         data = _thread_en_song_data.pop()
-    except IndexError:
+    else:
         data = None
     # relase semaphore
     _thread_en_sem.release()
@@ -195,6 +194,7 @@ class OracleEN():
         if params.has_key('partialbar'):self._partialbar = params['partialbar']
         # start a number of EN threads
         nThreads = params['nThreads']
+        nThreads = 1 # DEBUG !!!!!!
         assert nThreads > 0,'you need at least one thread'
         assert nThreads <= 15,'15 threads is the limit, that is a lot!'
         for k in range(nThreads):
@@ -210,16 +210,17 @@ class OracleEN():
         _stop_en_thread = True
 
 
-    def next_track(self,sleep_time=0.05):
+    def next_track(self,sleep_time=5.0):
         """
         Get the next song features
         Take it from the queue (waits infinitely if needed...!)
         Sleep time between iterations when waiting is sleep_time (seconds)
         """
         # get data
-        data = None
-        while data == None:
+        while True:
             data = _get_data()
+            if data != None:
+                break
             time.sleep(sleep_time)
         self._nTracksGiven += 1
         # get features
