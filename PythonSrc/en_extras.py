@@ -351,23 +351,27 @@ def get_our_analysis(track_id):
         print 'IOError on', time.ctime(),': check connection if happens often.'
         return None,None,None,None,None
     # success?
-    if (analysis==None) or (analysis['status'] != 'ok'):
+    try:
+        if (analysis==None) or (analysis['status'] != 'ok'):
+            return None,None,None,None,None
+        analysis = analysis['analysis']
+        # duration
+        duration = analysis['track']['duration']
+        # bars
+        barstart = [x['start'] for x in analysis['bars']]
+        # beats
+        beatstart = [x['start'] for x in analysis['beats']]
+        # segments
+        segstart = [x['start'] for x in analysis['segments']]
+        # chromas
+        chromas = np.zeros([12,len(segstart)])
+        idx = 0
+        for k in analysis['segments']:
+            chromas[:,idx] = k['pitches']
+            idx += 1
+    except KeyError:
+        print 'KeyError from downloaded info'
         return None,None,None,None,None
-    analysis = analysis['analysis']
-    # duration
-    duration = analysis['track']['duration']
-    # bars
-    barstart = [x['start'] for x in analysis['bars']]
-    # beats
-    beatstart = [x['start'] for x in analysis['beats']]
-    # segments
-    segstart = [x['start'] for x in analysis['segments']]
-    # chromas
-    chromas = np.zeros([12,len(segstart)])
-    idx = 0
-    for k in analysis['segments']:
-        chromas[:,idx] = k['pitches']
-        idx += 1    
     # done, return
     return segstart, chromas, beatstart, barstart, duration
     
