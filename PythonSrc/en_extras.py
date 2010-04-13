@@ -64,24 +64,6 @@ def do_dict_call(url):
     Used by alpha API calls like search_tracks
     Returns dictionary, or None if major problem
     """
->>>>>>>>>>>>>>>>>>>> File 1
-    # open the connection
-    f = urllib2.urlopen(url)
-    # read the line (hope there is only one...)
-    data = f.readline().strip()
-    # close the connection
-    f.close()
-    # eval
->>>>>>>>>>>>>>>>>>>> File 2
-    # open the connection
-    f = urllib.urlopen(url)
-    # read the line (hope there is only one...)
-    data = f.readline().strip()
-    # close the connection
-    f.close()
-    # eval
->>>>>>>>>>>>>>>>>>>> File 3
-<<<<<<<<<<<<<<<<<<<<
     try:
         # open the connection
         f = urllib2.urlopen(url,timeout=30.)
