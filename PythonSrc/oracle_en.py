@@ -194,7 +194,6 @@ class OracleEN():
         if params.has_key('partialbar'):self._partialbar = params['partialbar']
         # start a number of EN threads
         nThreads = params['nThreads']
-        nThreads = 1 # DEBUG !!!!!!
         assert nThreads > 0,'you need at least one thread'
         assert nThreads <= 15,'15 threads is the limit, that is a lot!'
         for k in range(nThreads):
