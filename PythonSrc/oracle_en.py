@@ -85,6 +85,10 @@ def _thread_en(artistsdb,filename=''):
     Thread that load EN data
     For artists receives a SQLlite database containing a table 'artists' with
     a field 'name'.
+    Filename is used when downloading a dict from EN. If a filename is provided,
+    we retrieve the uri to this file. Therefore, filename must be unique
+    for each thread. If no filename is provided, we read straight from
+    the stream, and we eventually seg fault.
     """
     cnt_iter = 0
     cnt_provided = 0
