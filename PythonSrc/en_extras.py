@@ -17,7 +17,6 @@ import time
 import copy
 import xml
 from xml.dom import minidom
-import signal
 import urllib
 import urllib2
 import urlparse
@@ -28,16 +27,6 @@ try:
 except:
     _api_dev_key = os.environ['ECHONEST_API_KEY']
 
-
-#def handler(signum,frame):
-#    """
-#    Handle to catch alarm when a device takes too long to open.
-#    Raise IOError
-#    """
-#    raise IOError("Couldn't open device, took too long")
-# set SIGALRM to be handled by handler
-# CAN ONLY BE CALLED FROM THE MAIN THREAD!!!
-#signal.signal(signal.SIGALRM,handler)
 
 def do_xml_call(url):
     """
