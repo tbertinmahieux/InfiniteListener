@@ -71,16 +71,19 @@ def do_experiment(experiment_dir,beats=0,bars=0,nCodes=0,nIter=1e7,
         print 'after initialization, codebook saved to:',codebook_fname
 
         # train (from scratch)
-        trainer.train(codebook_fname, expdir=experiment_dir, pSize=beats,
-                      usebars=bars, keyInv=keyInv, songKeyInv=songKeyInv,
-                      positive=True, do_resample=True, partialbar=partialbar,
-                      lrate=lrate, nThreads=4, oracle='MAT', artistsdb='',
-                      matdir=mat_dir, nIterations=nIter, useModel='VQ')
+        # ec = exit_code, 0 if due to StopIteration, >0 otherwise
+        ec = trainer.train(codebook_fname, expdir=experiment_dir, pSize=beats,
+                           usebars=bars, keyInv=keyInv, songKeyInv=songKeyInv,
+                           positive=True, do_resample=True,
+                           partialbar=partialbar, lrate=lrate, nThreads=4,
+                           oracle='MAT', artistsdb='',
+                           matdir=mat_dir, nIterations=nIter, useModel='VQ')
 
     # write done file
-    f = open(os.path.join(experiment_dir,'DONE.txt'),'w')
-    f.write('experiment appear to be done\n')
-    f.close()
+    if ec == 0:
+        f = open(os.path.join(experiment_dir,'DONE.txt'),'w')
+        f.write('experiment appear to be done\n')
+        f.close()
 
 
 def do_experiment_wrapper(args):
