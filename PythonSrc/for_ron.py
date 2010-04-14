@@ -99,6 +99,8 @@ def die_with_usage():
     HELP MENU
     """
     print 'code to launch experiments on NYU cluster'
+    print 'usage:'
+    print '  python for_ron.py -go <num proc> <exp set> <sub exp (opt)>'
     sys.exit(0)
 
 
