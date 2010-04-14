@@ -26,8 +26,6 @@ from pyechonest import track as trackEN
 from pyechonest import artist as artistEN
 import en_extras
 
-#import pyexpat # probably useless, but has caused seg fault (see Google)
-
 # ECHO NEST THREAD STUFF
 
 # to stop the thread
@@ -111,7 +109,7 @@ def _thread_en(artistsdb,filename=''):
         trackid = tids[np.random.randint(len(tids))]
 
         # save EchoNest data to queue
-        segstart,chromas,beatstart,barstart,duration = en_extras.get_our_analysis(trackid)
+        segstart,chromas,beatstart,barstart,duration = en_extras.get_our_analysis(trackid,filename=filename)
         if segstart == None:
             continue
         d = {'segstart':segstart,'chromas':chromas,
@@ -196,8 +194,10 @@ class OracleEN():
         nThreads = params['nThreads']
         assert nThreads > 0,'you need at least one thread'
         assert nThreads <= 15,'15 threads is the limit, that is a lot!'
+        self._thread_files = []
         for k in range(nThreads):
             thread_file = '.en_thread_file_'+str(k)+'_'+str(time.time())
+            self._thread_files.append(thread_file)
             thread.start_new_thread(_thread_en,(),{'artistsdb':artists,
                                                    'filename':thread_file})
         # statistics
@@ -209,6 +209,12 @@ class OracleEN():
         """
         # stop thread
         _stop_en_thread = True
+        for k in self._thread_files:
+            try:
+                os.remove(k)
+            except:
+                pass
+            self._thread_files = []
 
 
     def next_track(self,sleep_time=5.0):
