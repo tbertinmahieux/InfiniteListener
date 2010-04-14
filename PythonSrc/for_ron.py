@@ -45,6 +45,9 @@ def do_experiment(experiment_dir,beats=0,bars=0,nCodes=0,nIter=1e7,
         print 'creating experiment dir:',experiment_dir
         os.mkdir(experiment_dir)
 
+    # ec = exit code for training, 0 = ok, >0 = bad
+    ec = 1
+
     # check if saved model exists
     alldirs = glob.glob(os.path.join(experiment_dir,'*'))
     alldirs = filter(lambda x: os.path.isdir(x), alldirs)
@@ -54,8 +57,9 @@ def do_experiment(experiment_dir,beats=0,bars=0,nCodes=0,nIter=1e7,
     # continue from saved model
     if continue_training:
         # find most recent saved mdoel, and continue!
+        # ec = exit_code, 0 if due to StopIteration, >0 otherwise
         savedmodel = np.sort(alldirs)[-1]
-        trainer.train(savedmodel)
+        ec = trainer.train(savedmodel)
 
     # no prior saved model
     if not continue_training:
