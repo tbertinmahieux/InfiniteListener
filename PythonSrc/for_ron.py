@@ -22,10 +22,11 @@ import trainer
 
 
 
-featsDir = os.path.expanduser('~/projects/ismir10-patterns/beatFeats')
+featsDir = os.path.expanduser('~/uspop_mat')
 #testFeatsDir = os.path.expanduser('~/projects/ismir10-patterns/uspop_mat')
 #outputDir = os.path.expanduser('~/projects/ismir10-patterns/experiments')
 outputDir = ''
+outputDir = '~/tmp_output_dir'
 assert outputDir != '','SET OUTPUT DIR TO SOMETHING!!!!'
 
 
@@ -63,6 +64,7 @@ def do_experiment(experiment_dir,beats=0,bars=0,nCodes=0,nIter=1e7,
                                           matdir=mat_dir)
         codebook_fname = os.path.join(experiment_dir,'codebook.mat')
         scipy.io.savemat(codebook_fname,{'codebook':codebook})
+        print 'codebook saved to:',codebook_fname
         # train (from scratch)
         trainer.train(codebook_fname, expdir='', pSize=beats, usebars=bars,
                       keyInv=keyinv, songKeyInv=songKeyInv, positive=True,
@@ -99,6 +101,8 @@ def die_with_usage():
     HELP MENU
     """
     print 'code to launch experiments on NYU cluster'
+    print 'usage:'
+    print 'python for_ron.py -go <num proc> <exp set> <sub exp (opt)>'
     sys.exit(0)
 
 
