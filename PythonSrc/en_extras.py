@@ -73,29 +73,41 @@ def do_dict_call(url,filename=''):
         else:
             fname,httpheaders = urllib.urlretrieve(url,filename)
             f = open(fname,'r')
-        # read the line (hope there is only one...)
-        # use to do (should still work): data = f.readline()
-        try:
-            data = f.next()
-        except StopIteration:
-            print 'en_extras, data cant be read (next) when downloading dict'
-            f.close()
-            return None
-        # close the connection
-        f.close()
-        # eval
-        try:
-            d = eval(data)
-        except SyntaxError:
-            return None
     except IOError:
         print 'IOError on', time.ctime(),': check connection if happens often.'
+        try:
+            f.close()
+        except:
+            pass
         return None
     except urllib2.URLError:
         print 'URLError', time.ctime(),': check connection if happens often.'
+        try:
+            f.close()
+        except:
+            pass
         return None
     except socket.timeout:
         print 'socket timeout on', time.ctime(),': check connection if happens often.'
+        try:
+            f.close()
+        except:
+            pass
+        return None
+    # read the line (hope there is only one...)
+    # use to do (should still work): data = f.readline()
+    try:
+        data = f.next()
+    except StopIteration:
+        print 'en_extras, data cant be read (next) when downloading dict'
+        f.close()
+        return None
+    # close the connection
+    f.close()
+    # eval
+    try:
+        d = eval(data)
+    except SyntaxError:
         return None
     # return dictionary
     return d
