@@ -57,22 +57,29 @@ def do_xml_call(url):
         return None
 
 
-def do_dict_call(url):
+def do_dict_call(url,filename=''):
     """
     Calls EchoNest with a given command, expect the string
     representation of a python dictionary.
     Used by alpha API calls like search_tracks
     Returns dictionary, or None if major problem
+
+    If filename provided, saves data to file, then reads it
     """
     try:
         # open the connection
-        f = urllib2.urlopen(url,timeout=30.)
+        if filename == '':
+            f = urllib2.urlopen(url,timeout=30.)
+        else:
+            fname,httpheaders = urllib.urlretrieve(url,filename)
+            f = open(fname,'r')
         # read the line (hope there is only one...)
         # use to do (should still work): data = f.readline()
         try:
             data = f.next()
         except StopIteration:
             print 'en_extras, data cant be read (next) when downloading dict'
+            f.close()
             return None
         # close the connection
         f.close()
@@ -331,7 +338,7 @@ def get_segments(track_id):
     return segstart, chromas
 
 
-def get_our_analysis(track_id):
+def get_our_analysis(track_id,filename=''):
     """
     Get the analysis we need from a given track ID:
     - segment starts
@@ -341,6 +348,7 @@ def get_our_analysis(track_id):
     - duration
 
     Return them in order, or 5 None if one of them fails
+    filename usefull for do_dict_call
     """
     # OLD SLOW CODE
     """
@@ -371,7 +379,7 @@ def get_our_analysis(track_id):
     url += _api_dev_key
     url += '&trackID=' + track_id
     # call
-    analysis = do_dict_call(url)
+    analysis = do_dict_call(url,filename=filename)
     # success?
     try:
         if (analysis==None) or (analysis['status'] != 'ok'):
