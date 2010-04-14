@@ -19,6 +19,7 @@ import xml
 from xml.dom import minidom
 import urllib
 import urllib2
+import socket
 import urlparse
 import numpy as np
 
