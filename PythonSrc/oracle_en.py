@@ -46,12 +46,16 @@ def _add_data(data):
     Add data (if queue not full) and release semaphore
     Return number of elements in queue
     """
+    # get _en_queue_size, if 0 we stop threads
+    max_qs = _en_queue_size
+    if max_qs < 1:
+        _stop_en_thread = True
     # get lock
     _thread_en_sem.acquire()
     # get queue size
     qs = len(_thread_en_song_data)
     # add
-    if qs < _en_queue_size:
+    if qs < max_qs:
         _thread_en_song_data.appendleft(data)
         qs += 1
     # release mutex
