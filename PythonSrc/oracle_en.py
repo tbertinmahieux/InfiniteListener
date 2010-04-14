@@ -199,8 +199,8 @@ class OracleEN():
         assert nThreads > 0,'you need at least one thread'
         assert nThreads <= 15,'15 threads is the limit, that is a lot!'
         self._thread_files = []
+        randint = str(int(np.random.randint(1000000)))
         for k in range(nThreads):
-            randint = str(int(np.random.randint(1000000)))
             thread_file = '.en_thread_file_'+str(k)+'_'+str(time.time())
             thread_file += '_' + randint
             self._thread_files.append(thread_file)
