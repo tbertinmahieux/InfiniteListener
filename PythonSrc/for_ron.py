@@ -22,11 +22,10 @@ import trainer
 
 
 
-featsDir = os.path.expanduser('~/uspop_mat')
+featsDir = os.path.expanduser('~/projects/ismir10-patterns/beatFeats')
 #testFeatsDir = os.path.expanduser('~/projects/ismir10-patterns/uspop_mat')
 #outputDir = os.path.expanduser('~/projects/ismir10-patterns/experiments')
 outputDir = ''
-outputDir = '~/tmp_output_dir'
 assert outputDir != '','SET OUTPUT DIR TO SOMETHING!!!!'
 
 
@@ -102,7 +101,11 @@ def die_with_usage():
     """
     print 'code to launch experiments on NYU cluster'
     print 'usage:'
+<<<<<<< HEAD:PythonSrc/for_ron.py
     print 'python for_ron.py -go <num proc> <exp set> <sub exp (opt)>'
+=======
+    print '  python for_ron.py -go <num proc> <exp set> <sub exp (opt)>'
+>>>>>>> 3914ac999e8fc971f6f8a84076c9b9ed33a16dd0:PythonSrc/for_ron.py
     sys.exit(0)
 
 
