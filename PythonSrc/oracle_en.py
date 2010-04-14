@@ -46,7 +46,7 @@ def _add_data(data):
     Add data (if queue not full) and release semaphore
     Return number of elements in queue
     """
-    # get _en_queue_size, if 0 we stop threads
+    # get _en_queue_size, if 0 or negative we stop threads
     max_qs = _en_queue_size
     if max_qs < 1:
         _stop_en_thread = True
