@@ -26,7 +26,7 @@ from pyechonest import track as trackEN
 from pyechonest import artist as artistEN
 import en_extras
 
-
+import pyexpat # probably useless, but has caused seg fault (see Google)
 
 # ECHO NEST THREAD STUFF
 
@@ -78,7 +78,7 @@ def _get_data():
     return data
 
 
-def _thread_en(artistsdb):
+def _thread_en(artistsdb,filename=''):
     """
     Thread that load EN data
     For artists receives a SQLlite database containing a table 'artists' with
@@ -197,7 +197,9 @@ class OracleEN():
         assert nThreads > 0,'you need at least one thread'
         assert nThreads <= 15,'15 threads is the limit, that is a lot!'
         for k in range(nThreads):
-            thread.start_new_thread(_thread_en,(),{'artistsdb':artists})
+            thread_file = '.en_thread_file_'+str(k)+'_'+str(time.time())
+            thread.start_new_thread(_thread_en,(),{'artistsdb':artists,
+                                                   'filename':thread_file})
         # statistics
         self._nTracksGiven = 0
 
