@@ -101,11 +101,7 @@ def die_with_usage():
     """
     print 'code to launch experiments on NYU cluster'
     print 'usage:'
-<<<<<<< HEAD:PythonSrc/for_ron.py
-    print 'python for_ron.py -go <num proc> <exp set> <sub exp (opt)>'
-=======
     print '  python for_ron.py -go <num proc> <exp set> <sub exp (opt)>'
->>>>>>> 3914ac999e8fc971f6f8a84076c9b9ed33a16dd0:PythonSrc/for_ron.py
     sys.exit(0)
 
 
