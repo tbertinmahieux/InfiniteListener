@@ -26,7 +26,7 @@ from pyechonest import track as trackEN
 from pyechonest import artist as artistEN
 import en_extras
 
-import pyexpat # probably useless, but has caused seg fault (see Google)
+#import pyexpat # probably useless, but has caused seg fault (see Google)
 
 # ECHO NEST THREAD STUFF
 
