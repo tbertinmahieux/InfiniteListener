@@ -40,6 +40,11 @@ def do_experiment(experiment_dir,beats=0,bars=0,nCodes=0,nIter=1e7,
     if os.path.exists(os.path.join(experiment_dir,'DONE.txt')):
         return
 
+    # if experiment folder does not exist, create it
+    if not os.path.exists(experiment_dir):
+        print 'creating experiment dir:',experiment_dir
+        os.mkdir(experiment_dir)
+
     # check if saved model exists
     alldirs = glob.glob(os.path.join(experiment_dir,'*'))
     alldirs = filter(lambda x: os.path.isdir(x), alldirs)
@@ -63,12 +68,13 @@ def do_experiment(experiment_dir,beats=0,bars=0,nCodes=0,nIter=1e7,
                                           matdir=mat_dir)
         codebook_fname = os.path.join(experiment_dir,'codebook.mat')
         scipy.io.savemat(codebook_fname,{'codebook':codebook})
-        print 'codebook saved to:',codebook_fname
+        print 'after initialization, codebook saved to:',codebook_fname
+
         # train (from scratch)
-        trainer.train(codebook_fname, expdir='', pSize=beats, usebars=bars,
-                      keyInv=keyinv, songKeyInv=songKeyInv, positive=True,
-                      do_resample=True, partialbar=partialbar, lrate=lrate,
-                      nThreads=4, oracle='MAT', artistsdb='',
+        trainer.train(codebook_fname, expdir=experiment_dir, pSize=beats,
+                      usebars=bars, keyInv=keyInv, songKeyInv=songKeyInv,
+                      positive=True, do_resample=True, partialbar=partialbar,
+                      lrate=lrate, nThreads=4, oracle='MAT', artistsdb='',
                       matdir=mat_dir, nIterations=nIter, useModel='VQ')
 
     # write done file
