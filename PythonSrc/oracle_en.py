@@ -177,7 +177,7 @@ def get_artists_from_db(dbname,nArtists=100):
 
 # ORACLE CLASS
 
-class OracleEN():
+class OracleEN:
     """
     Class to get EchoNest features
     """
