@@ -14,8 +14,12 @@ import sys
 import time
 import pickle
 
-from trainer import StatLog
-
+import trainer
+try:
+    # caused problem for training using multiprocess, still don't know why
+    from trainer import StatLog
+except:
+    pass
 
 def unpickle(filename):
     """
