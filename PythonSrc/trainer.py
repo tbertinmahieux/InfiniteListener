@@ -328,7 +328,7 @@ def load_codebook(matfile,cbkey='codebook'):
     """
     if not os.path.isfile(matfile):
         return None
-    if sys.version_info[1] == 5:
+    if sys.version_info[1] <= 5:
         mat = sp.io.loadmat(matfile)
     else:
         mat = sp.io.loadmat(matfile, struct_as_record=True)
