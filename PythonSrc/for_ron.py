@@ -90,13 +90,16 @@ def do_experiment(experiment_dir,beats=0,bars=0,nCodes=0,nIter=1e7,
         f.close()
 
 
+
+
 def do_experiment_wrapper(args):
     """
     launch experiments given params
     Receives a pair: args and argsdict!
     """
     args,argsdict = args
-    return do_experiment(*args,**argsdict)
+    #return do_experiment(*args,**argsdict)
+    do_experiment(*args,**argsdict)
 
 
 
@@ -184,6 +187,7 @@ tmp = []
 for k in range(1,23):
     tmp.append(eval( '(args'+str(int(k))+',argsd'+str(int(k))+')' ))
 experiment_args.append(tmp)
+
 
 
 def die_with_usage():
