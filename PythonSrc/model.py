@@ -13,8 +13,13 @@ import copy
 import time
 import numpy as np
 from collections import deque
-import scikits.ann as ann
-
+# too hard to install for python 2.4 (I know, 2.4, pfff)
+try:
+    import scikits.ann as ann
+    _ann_imported = True
+except:
+    print 'working without ann, slower'
+    _ann_imported = False
 
 
 class Model:
@@ -74,7 +79,7 @@ class Model:
         """
         assert feats.shape[1] > 0,'empty feats???'
         # ann
-        use_ann = feats.shape[0] > 50
+        use_ann = feats.shape[0] > 50 and _ann_imported
         if use_ann:
             kdtree = ann.kdtree(self._codebook)
             best_code_per_p, dists = self._closest_code_ann(feats,kdtree)
