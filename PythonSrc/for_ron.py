@@ -23,7 +23,9 @@ import trainer
 
 
 featsDir = os.path.expanduser('~/projects/ismir10-patterns/beatFeats')
+#featsDir = os.path.expanduser('/home/thierry/Columbia/BostonHackDay/tmpPaper/artist20feats')
 #testFeatsDir = os.path.expanduser('~/projects/ismir10-patterns/uspop_mat')
+#outputDir= os.path.expanduser('tmpexps')
 #outputDir = os.path.expanduser('~/projects/ismir10-patterns/experiments')
 outputDir = ''
 assert outputDir != '','SET OUTPUT DIR TO SOMETHING!!!!'
@@ -105,7 +107,7 @@ def do_experiment_wrapper(args):
 experiment_args = []
 # experiment set 1
 args1 = [os.path.join(outputDir,'set1exp1')]
-argsd1 = {'mat_dir':featsDir,'beats':4,'bars':1,'nCodes':100}
+argsd1 = {'mat_dir':featsDir,'beats':4,'bars':1,'nCodes':100,'nIter':1000}
 experiment_args.append( [(args1,argsd1),] )
 # EXPERIMENT SET 2
 # redo the distortion rate experiment: double pSize, square codebook size
@@ -218,4 +220,9 @@ if __name__ == '__main__':
         pass
 
     # launch experiments
-    pool.map(do_experiment_wrapper, args)
+    try:
+        pool.map(do_experiment_wrapper, args)
+    except KeyboardInterrupt:
+        print 'MULTIPROCESSING'
+        print 'stopping multiprocessing due to a keyboard interrupt'
+        
