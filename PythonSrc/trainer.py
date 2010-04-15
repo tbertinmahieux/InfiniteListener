@@ -18,8 +18,12 @@ import numpy as np
 import scipy as sp
 import scipy.io
 from collections import deque
+# oracle_en uses library unknown to python 2.4 (I know, 2.4, pfff)
+try:
+    import oracle_en
+except:
+    'cannot import oracle_en, are you on hog? can only use oracle_matfiles'
 
-import oracle_en
 import oracle_matfiles
 import features
 import model as MODEL
