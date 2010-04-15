@@ -84,6 +84,13 @@ def do_dict_call(url,filename=''):
         except:
             pass
         return None
+    except socket.error:
+        print 'socket error on', time.ctime(),': check connection if happens often.'
+        try:
+            f.close()
+        except:
+            pass
+        return None
     # read the line (hope there is only one...)
     # use to do (should still work): data = f.readline()
     try:
