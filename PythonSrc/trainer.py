@@ -12,7 +12,6 @@ import sys
 import time
 import copy
 import pickle
-import cProfile
 import traceback
 import numpy as np
 import scipy as sp
@@ -479,6 +478,7 @@ if __name__ == '__main__':
               matdir=matdir, nIterations=nIterations, useModel=useModel)
 
     else:
+        import cProfile
         cProfile.run(\
             'train(savedmodel, expdir=expdir, pSize=pSize,usebars=usebars, keyInv=keyInv,songKeyInv=songKeyInv, positive=positive, do_resample=do_resample, partialbar=partialbar, lrate=lrate, nThreads=nThreads, oracle=oracle, artistsdb=artistsdb, matdir=matdir, nIterations=nIterations, useModel=useModel)',
             filename=profile)
