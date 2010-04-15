@@ -26,6 +26,8 @@ import model as MODEL
 import analyze_saved_model as ANALYZE
 
 
+
+
 def train(savedmodel, expdir='', pSize=8, usebars=2, keyInv=True,
           songKeyInv=False, positive=True, do_resample=True, partialbar=0,
           lrate=1e-5, nThreads=4, oracle='EN', artistsdb='', matdir='',
@@ -70,11 +72,13 @@ def train(savedmodel, expdir='', pSize=8, usebars=2, keyInv=True,
     # start from saved model
     if os.path.isdir(savedmodel):
         # load model
+        assert os.path.exists(os.path.join(savedmodel,'model.p')),'loading saved model, model.p does not exist? %s' % (os.path.join(savedmodel,'model.p'),)
         f = open(os.path.join(savedmodel,'model.p'),'r')
         model_unp = pickle.Unpickler(f)
         model = model_unp.load()
         f.close()
         # load params, savedmodel will be modified
+        assert os.path.exists(os.path.join(savedmodel,'params.p')),'loading saved model, params.p does not exist? %s' % (os.path.join(savedmodel,'params.p'),)
         f = open(os.path.join(savedmodel,'params.p'),'r')
         param_unp = pickle.Unpickler(f)
         oldparams = param_unp.load()
