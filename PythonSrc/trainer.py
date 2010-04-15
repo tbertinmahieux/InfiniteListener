@@ -209,7 +209,7 @@ def train(savedmodel, expdir='', pSize=8, usebars=2, keyInv=True,
 
 
 
-class StatLog():
+class StatLog:
     """
     Simple class to keep track of different stats of the trainer
     """
