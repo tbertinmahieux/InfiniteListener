@@ -20,7 +20,7 @@ import features
 
 # ORACLE CLASS
 
-class OracleMatfiles():
+class OracleMatfiles:
     """
     Class to get EchoNest features
     """
