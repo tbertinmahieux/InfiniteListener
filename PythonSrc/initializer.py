@@ -15,7 +15,11 @@ import numpy as np
 import scipy as sp
 import scipy.io
 
-import oracle_en
+# oracle_en uses library unknown to python 2.4 (I know, 2.4, pfff)
+try:
+    import oracle_en
+except:
+    'cannot import oracle_en, are you on hog? can only use oracle_matfiles'
 import oracle_matfiles
 
 
