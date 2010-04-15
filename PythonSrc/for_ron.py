@@ -98,8 +98,7 @@ def do_experiment_wrapper(args):
     Receives a pair: args and argsdict!
     """
     args,argsdict = args
-    #return do_experiment(*args,**argsdict)
-    do_experiment(*args,**argsdict)
+    return do_experiment(*args,**argsdict)
 
 
 
