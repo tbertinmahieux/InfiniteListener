@@ -109,75 +109,75 @@ experiment_args.append( [(args1,argsd1),] )
 # redo the distortion rate experiment: double pSize, square codebook size
 #1
 args1 = [os.path.join(outputDir,'set2exp1')]
-argsd1 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,
+argsd1 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':4e7,
           'beats':4,'bars':1,'nCodes':2,'partialbar':1}
 args2 = [os.path.join(outputDir,'set2exp2')]
-argsd2 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,
+argsd2 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':4e7,
           'beats':4,'bars':1,'nCodes':4,'partialbar':2}
 args3 = [os.path.join(outputDir,'set2exp3')]
-argsd3 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,
+argsd3 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':4e7,
           'beats':4,'bars':1,'nCodes':16}
 args4 = [os.path.join(outputDir,'set2exp4')]
-argsd4 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,
+argsd4 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':4e7,
           'beats':8,'bars':2,'nCodes':256}
 #2
 args5 = [os.path.join(outputDir,'set2exp5')]
-argsd5 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,
+argsd5 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':4e7,
           'beats':4,'bars':1,'nCodes':3,'partialbar':1}
 args6 = [os.path.join(outputDir,'set2exp6')]
-argsd6 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,
+argsd6 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':4e7,
           'beats':4,'bars':1,'nCodes':9,'partialbar':2}
 args7 = [os.path.join(outputDir,'set2exp7')]
-argsd7 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,
+argsd7 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':4e7,
           'beats':4,'bars':1,'nCodes':81}
 args8 = [os.path.join(outputDir,'set2exp8')]
-argsd8 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,
+argsd8 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':4e7,
           'beats':8,'bars':2,'nCodes':6561}
 #3
 args9 = [os.path.join(outputDir,'set2exp9')]
-argsd9 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,
+argsd9 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':4e7,
           'beats':4,'bars':1,'nCodes':2,'partialbar':2}
 args10 = [os.path.join(outputDir,'set2exp10')]
-argsd10 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,
+argsd10 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':4e7,
           'beats':4,'bars':1,'nCodes':4}
 args11 = [os.path.join(outputDir,'set2exp11')]
-argsd11 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,
+argsd11 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':4e7,
           'beats':8,'bars':2,'nCodes':16}
 args12 = [os.path.join(outputDir,'set2exp12')]
-argsd12 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,
+argsd12 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':4e7,
           'beats':16,'bars':4,'nCodes':256}
 #4
 args13 = [os.path.join(outputDir,'set2exp13')]
-argsd13 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,
+argsd13 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':4e7,
           'beats':4,'bars':1,'nCodes':2}
 args14 = [os.path.join(outputDir,'set2exp14')]
-argsd14 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,
+argsd14 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':4e7,
           'beats':8,'bars':2,'nCodes':4}
 args15 = [os.path.join(outputDir,'set2exp15')]
-argsd15 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,
+argsd15 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':4e7,
           'beats':16,'bars':4,'nCodes':16}
 args16 = [os.path.join(outputDir,'set2exp16')]
-argsd16 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,
+argsd16 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':4e7,
           'beats':32,'bars':8,'nCodes':256}
 #5
 args17 = [os.path.join(outputDir,'set2exp17')]
-argsd17 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,
+argsd17 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':4e7,
           'beats':4,'bars':1,'nCodes':7,'partialbar':1}
 args18 = [os.path.join(outputDir,'set2exp18')]
-argsd18 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,
+argsd18 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':4e7,
           'beats':4,'bars':1,'nCodes':49,'partialbar':2}
 args19 = [os.path.join(outputDir,'set2exp19')]
-argsd19 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,
+argsd19 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':4e7,
           'beats':4,'bars':1,'nCodes':2401}
 #6
 args20 = [os.path.join(outputDir,'set2exp20')]
-argsd20 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,
+argsd20 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':4e7,
           'beats':4,'bars':1,'nCodes':7,'partialbar':2}
 args21 = [os.path.join(outputDir,'set2exp21')]
-argsd21 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,
+argsd21 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':4e7,
           'beats':4,'bars':1,'nCodes':49}
 args22 = [os.path.join(outputDir,'set2exp22')]
-argsd22 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,
+argsd22 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':4e7,
           'beats':8,'bars':2,'nCodes':2401}
 # add to exp args
 tmp = []
