@@ -11,6 +11,7 @@ tb2332@columbia.edu
 import os
 import sys
 import glob
+import shutil
 import multiprocessing
 
 import numpy as np
@@ -21,12 +22,17 @@ import initializer
 import trainer
 
 
+# error passing problems
+class KeyboardInterruptError(Exception):pass
+
 
 featsDir = os.path.expanduser('~/projects/ismir10-patterns/beatFeats')
 #featsDir = os.path.expanduser('/home/thierry/Columbia/BostonHackDay/tmpPaper/artist20feats')
+#featsDir = os.path.expanduser('/proj/hog7/cowbell43k/beatFeats')
 #testFeatsDir = os.path.expanduser('~/projects/ismir10-patterns/uspop_mat')
 #outputDir= os.path.expanduser('tmpexps')
 #outputDir = os.path.expanduser('~/projects/ismir10-patterns/experiments')
+#outputDir = os.path.expanduser('~/tmp_output_dir')
 outputDir = ''
 assert outputDir != '','SET OUTPUT DIR TO SOMETHING!!!!'
 
@@ -52,8 +58,11 @@ def do_experiment(experiment_dir,beats=0,bars=0,nCodes=0,nIter=1e7,
 
     # check if saved model exists
     alldirs = glob.glob(os.path.join(experiment_dir,'*'))
-    alldirs = filter(lambda x: os.path.isdir(x), alldirs)
-    alldirs = filter(lambda x: os.path.split(x)[-1][:4] == 'exp_',alldirs)
+    if len(alldirs) > 0:
+        alldirs = filter(lambda x: os.path.isdir(x), alldirs)
+        alldirs = filter(lambda x: os.path.split(x)[-1][:4] == 'exp_',alldirs)
+        # trim badly saved models
+        alldirs = filter(lambda x: check_saved_model_full(x), alldirs)
     continue_training = len(alldirs) > 0
 
     # continue from saved model
@@ -91,7 +100,38 @@ def do_experiment(experiment_dir,beats=0,bars=0,nCodes=0,nIter=1e7,
         f.write('experiment appear to be done\n')
         f.close()
 
+    # assume it's a keyboard interrupt, for multiprocessing purposes
+    else:
+        raise KeyboardInterruptError()
 
+
+
+def check_saved_model_full(savedmodel,trim=True):
+    """
+    Returns True or False, check if a given saved model has all the
+    files that we expect from it.
+    If trim, remove that folder so we don't consider it later on.
+    """
+    ok = True
+    expected_files = ['model.p','params.p','stats.p']
+    variable_files = ['starttime_*.txt']
+    # expected files
+    for f in expected_files:
+        if not os.path.exists(os.path.join(savedmodel,f)):
+            ok = False
+            break
+    # variable files, files with *
+    if ok:
+        for f in variable_files:
+            if len(glob.glob(os.path.join(savedmodel,f))) == 0:
+                ok = False
+                break
+    # trim if required
+    if trim and not ok:
+        print 'triming folder',savedmodel,'because of missing files'
+        shutil.rmtree(savedmodel)
+    # done, retutn
+    return ok
 
 
 def do_experiment_wrapper(args):
@@ -222,7 +262,15 @@ if __name__ == '__main__':
     # launch experiments
     try:
         pool.map(do_experiment_wrapper, args)
+        pool.close()
     except KeyboardInterrupt:
         print 'MULTIPROCESSING'
         print 'stopping multiprocessing due to a keyboard interrupt'
-        
+        pool.terminate()
+    except Exception, e:
+        print 'MULTIPROCESSING'
+        print 'got exception: %r, terminating the pool' % (e,)
+        pool.terminate()
+    finally:
+        pool.join()
+        print 'MULTIPROCESSING, join complete'
