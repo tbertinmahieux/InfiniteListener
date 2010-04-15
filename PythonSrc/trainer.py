@@ -23,6 +23,7 @@ import oracle_en
 import oracle_matfiles
 import features
 import model as MODEL
+import analyze_saved_model as ANALYZE
 
 
 def train(savedmodel, expdir='', pSize=8, usebars=2, keyInv=True,
@@ -58,6 +59,14 @@ def train(savedmodel, expdir='', pSize=8, usebars=2, keyInv=True,
     # create the StatLog object
     statlog = StatLog()
 
+    # count iteration
+    #       main   - iteration since this instance started
+    #     global   - iteration adding those from the savedmodel
+    # last_printed - for verbose purposes
+    main_iterations = 0
+    global_iterations = 0
+    last_printed_iter = 1
+
     # start from saved model
     if os.path.isdir(savedmodel):
         # load model
@@ -76,6 +85,9 @@ def train(savedmodel, expdir='', pSize=8, usebars=2, keyInv=True,
             exec_str = k + ' = oldparams["'+k+'"]'
             exec( exec_str )
             print 'from saved model,',k,'=',eval(k)
+        # get global_iterations
+        global_iterations,tmp1,tmp2 = ANALYZE.traceback_stats(savedmodel)
+        
     # initialized model from codebook
     elif os.path.isfile(savedmodel):
         codebook = load_codebook(savedmodel)
@@ -118,10 +130,6 @@ def train(savedmodel, expdir='', pSize=8, usebars=2, keyInv=True,
     starttime = time.time()
     last_save = starttime
 
-    # count iteration
-    main_iterations = 0
-    last_printed_iter = 1
-
     # for estimate of distance
     dist_estimate = deque()
     dist_estimate_len = 2000
@@ -131,11 +139,12 @@ def train(savedmodel, expdir='', pSize=8, usebars=2, keyInv=True,
         while True:
             # increment iterations
             main_iterations += 1
+            global_iterations += 1
             if main_iterations == int(np.ceil(last_printed_iter * 1.1)):
-                print main_iterations,'iterations, approx. avg dist:',np.average(dist_estimate)
+                print main_iterations,'/',global_iterations,'iterations (local/global), approx. avg dist:',np.average(dist_estimate)
                 last_printed_iter = main_iterations
             statlog.iteration()
-            if main_iterations > nIterations:
+            if global_iterations > nIterations:
                 raise StopIteration
             # get features from the oracle
             feats = oracle.next_track()
