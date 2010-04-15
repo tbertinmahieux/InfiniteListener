@@ -17,7 +17,7 @@ import scikits.ann as ann
 
 
 
-class Model():
+class Model:
     """
     Most simple model, has a codebook and updates by
     gradient descent using the online vector quantization algorithm.
