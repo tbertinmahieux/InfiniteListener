@@ -158,7 +158,7 @@ if __name__ == '__main__':
     # PREDICT ON EVERY MODEL FILT
     distsFILT = []
     patternsFILT = []
-    for f in all_to_test:
+    for f in all_to_testFILT:
         a,b,c,d = test_saved_model_folder(f,data,output,filt=True)
         dist,nPatterns,nIters,totalTime = a,b,c,d
         distsFILT.append(dist)
@@ -166,7 +166,7 @@ if __name__ == '__main__':
     # PREDICT ON EVERY MODEL NON FILT
     distsNONFILT = []
     patternsNONFILT = []
-    for f in all_to_test:
+    for f in all_to_testNONFILT:
         a,b,c,d = test_saved_model_folder(f,data,output,filt=False)
         dist,nPatterns,nIters,totalTime = a,b,c,d
         distsNONFILT.append(dist)
