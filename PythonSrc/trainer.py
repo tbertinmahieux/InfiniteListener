@@ -206,6 +206,7 @@ def train(savedmodel, expdir='', pSize=8, usebars=2, keyInv=True,
                                   crash=True)
         print 'saved to: ',savedir
         #quit
+        print 'exit_code is:',exit_code
         return exit_code
 
 
