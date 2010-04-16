@@ -263,14 +263,14 @@ if __name__ == '__main__':
     try:
         pool.map(do_experiment_wrapper, args)
         pool.close()
+        pool.join()
     except KeyboardInterrupt:
         print 'MULTIPROCESSING'
         print 'stopping multiprocessing due to a keyboard interrupt'
         pool.terminate()
+        pool.join()
     except Exception, e:
         print 'MULTIPROCESSING'
         print 'got exception: %r, terminating the pool' % (e,)
         pool.terminate()
-    finally:
         pool.join()
-        print 'MULTIPROCESSING, join complete'
