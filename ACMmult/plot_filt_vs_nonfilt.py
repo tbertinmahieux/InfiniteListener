@@ -111,7 +111,7 @@ if __name__ == '__main__':
     # GET SAVED MODELS FILT
     parentdir,tmp = os.path.split(savedmodelFILT)
     # traceback
-    tb = ANALYZE.traceback(savedmodel)
+    tb = ANALYZE.traceback(savedmodelFILT)
     # find everything in parent folder, then just folders
     all_in_folder = glob.glob(os.path.join(parentdir,'*'))
     all_in_folder = filter(lambda x: os.path.isdir(x), all_in_folder)
@@ -128,7 +128,7 @@ if __name__ == '__main__':
     # GET SAVED MODELS NON FILT
     parentdir,tmp = os.path.split(savedmodelNONFILT)
     # traceback
-    tb = ANALYZE.traceback(savedmodel)
+    tb = ANALYZE.traceback(savedmodelNONFILT)
     # find everything in parent folder, then just folders
     all_in_folder = glob.glob(os.path.join(parentdir,'*'))
     all_in_folder = filter(lambda x: os.path.isdir(x), all_in_folder)
