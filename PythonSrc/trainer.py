@@ -196,7 +196,10 @@ def train(savedmodel, expdir='', pSize=8, usebars=2, keyInv=True,
             print '*********************************************'
             print 'Stoping after', main_iterations - 1, 'iterations.'
         # EN oracle, try to stop/slow down threads
-        oracle_en._en_queue_size = 0
+        try:
+            oracle_en._en_queue_size = 0
+        except NameError:
+            pass # oracle_en not loaded on hog; I hate myself for doing that
         # save
         print 'saving...'
         savedir = save_experiment(expdir,model,starttime,statlog,params,
