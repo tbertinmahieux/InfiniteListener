@@ -116,7 +116,7 @@ if __name__ == '__main__':
     all_in_folder = glob.glob(os.path.join(parentdir,'*'))
     all_in_folder = filter(lambda x: os.path.isdir(x), all_in_folder)
     # keep those that have same origin
-    leaves = filter(lambda x: safe_traceback(x)[0]==tb[0],all_in_folder)
+    leaves = filter(lambda x: ANALYZE.traceback(x)[0]==tb[0],all_in_folder)
     # everything to test, matfile at the end
     all_to_testFILT = set()
     for f in tb:
@@ -133,7 +133,7 @@ if __name__ == '__main__':
     all_in_folder = glob.glob(os.path.join(parentdir,'*'))
     all_in_folder = filter(lambda x: os.path.isdir(x), all_in_folder)
     # keep those that have same origin
-    leaves = filter(lambda x: safe_traceback(x)[0]==tb[0],all_in_folder)
+    leaves = filter(lambda x: ANALYZE.traceback(x)[0]==tb[0],all_in_folder)
     # everything to test, matfile at the end
     all_to_testNONFILT = set()
     for f in tb:
