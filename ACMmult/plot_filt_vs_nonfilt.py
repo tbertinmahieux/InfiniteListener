@@ -181,12 +181,12 @@ if __name__ == '__main__':
         dists = np.array(distsNONFILT)
         patterns = np.array(patternsNONFILT)
         order = np.argsort(patterns)
-        dists = P.plot(patterns[order],dists[order])
+        distsNONFILT = P.plot(patterns[order],dists[order],'o-',label='non filt')
         # FILT
         dists = np.array(distsFILT)
         patterns = np.array(patternsFILT)
         order = np.argsort(patterns)
-        dists = P.plot(patterns[order],dists[order])
+        distsFILT = P.plot(patterns[order],dists[order],'x-',label='filt')
         # done, release, show
         P.title('FILT / NON FILT')
         P.hold(False)
