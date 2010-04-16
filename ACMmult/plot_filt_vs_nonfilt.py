@@ -171,6 +171,9 @@ if __name__ == '__main__':
         dist,nPatterns,nIters,totalTime = a,b,c,d
         distsNONFILT.append(dist)
         patternsNONFILT.append(nPatterns)
+    # delete data before plotting
+    del data
+    
 
     # plot
     if doplot:
