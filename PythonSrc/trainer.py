@@ -182,7 +182,7 @@ def train(savedmodel, expdir='', pSize=8, usebars=2, keyInv=True,
         exc_type, exc_value, exc_traceback = sys.exc_info()
         # normal stop or not? normal = StopIteration
         exit_code = 1
-        if str(exc_type) == "<type 'exceptions.StopIteration'>":
+        if str(exc_type) == "exceptions.StopIteration":
             exit_code = 0 # normal exit
         print "ERROR:", exc_type
         if str(exc_type) != "<type 'exceptions.KeyboardInterrupt'>":
