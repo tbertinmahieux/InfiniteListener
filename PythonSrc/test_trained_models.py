@@ -111,12 +111,12 @@ if __name__ == '__main__':
     savedmodel = os.path.abspath(sys.argv[1])
     matfilesdir = os.path.abspath(sys.argv[2])
     output = os.path.abspath(sys.argv[3])
-    print_write('saved model = '+ savedmodel,output)
-    print_write('matfiles dir = '+ matfilesdir,output)
-    print_write('output = '+output,output)
 
     # init output
     print_write('test results launched on '+time.ctime(),output,mode='w')
+    print_write('saved model = '+ savedmodel,output)
+    print_write('matfiles dir = '+ matfilesdir,output)
+    print_write('output = '+output,output)
 
     #******************************************************************
     # gather in a set all models to try
