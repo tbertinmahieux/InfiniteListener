@@ -200,7 +200,7 @@ def analyze_one_exp_dir(expdir,validdir,testdir):
     print 'best model:',best_model,' ( dist =',avg_dist,')'
 
     # return patternsize, codebook size, distortion errror, best saved model
-    return testdata.shape[1], model._codebook.shape[0], avg_dist, best_model
+    return testdata.shape[1]/12, model._codebook.shape[0], avg_dist, best_model
 
 
 
