@@ -12,7 +12,71 @@ import numpy as np
 import oracle_matfiles as ORACLE
 import analyze_saved_model as ANALYZE
 import model as MODEL
-import for_ron as RON
+
+
+
+def plot_from_file(filename):
+    """
+    Plot the bitrate curves from the data sevd to file.
+    Data must be between '#PLOTSTUFF' and '#PLOTDONE'
+    """
+    # import pylab
+    import pylab as P
+
+    # PARSE FILE
+    f = open(filename,'r')
+    # find beginning of data
+    line = f.next()
+    while line[:len('#PLOTSTUFF')] != '#PLOTSTUFF':
+        line = f.next()
+    bitrates = []
+    bitrate = []
+    # iterate over lines
+    while True:
+        line = f.next()
+        if line[:len('#PLOTDONE')] == '#PLOTDONE':
+            if len(bitrate) > 0:
+                bitrates.append( bitrate )
+            break
+        if line[:len('#BITRATE')] == '#BITRATE':
+            if len(bitrate) > 0:
+                bitrates.append( bitrate )
+            bitrate = []
+            continue
+        res = eval(line)
+        bitrate.append( res )
+    # close file
+    f.close()
+
+    # plotting symbols
+    psymbs = ['-','.-','.','x-','o-','<-','>-']
+
+    # create figure
+    P.figure()
+    P.hold(True)
+
+    # iterate over bitrates
+    idx = -1
+    for bitrate in bitrates:
+        idx += 1
+        # smaller psize / number of codes
+        min_psize = min(map(lambda x: x[0],bitrate))
+        min_ncode = min(map(lambda x: x[1],bitrate))
+        legend_str = 'psize='+str(min_psize)+', #codes='+str(min_ncode)
+        # psize and values
+        psizes = np.array(map(lambda x: x[0], bitrate))
+        dists = np.array(map(lambda x: x[2], bitrate))
+        order = np.argsort(psizes)
+        psizes = psizes[order]
+        dists = dists[order]
+        # plot
+        P.plot(psizes,dists,psymbs[idx],label=legend_str)
+        
+    # legend
+    P.legend()
+    # done, release, show
+    P.hold(False)
+    P.show()
 
 
 def same_bitrate_curve(psize1,ncodes1,psize2,ncodes2):
@@ -35,17 +99,45 @@ def same_bitrate_curve(psize1,ncodes1,psize2,ncodes2):
     if ncodes2 < ncodes1:
         return False
     # REAL JOB STARTS HERE
-    exponent = np.log(psize2) / np.log(psize1)
-    if abs(exponent - np.round(exponent)) > 1e-14:
+    exponent = np.log2(psize2) - np.log2(psize1)
+    if abs(exponent - np.round(exponent)) > 1e-10:
         return False
     exponent = int(np.round(exponent))
     # psize fits, now ncodes
     n1 = ncodes1
-    for k in range(exponent-1):
+    for k in range(exponent):
         n1 = n1 * n1
     if n1 == ncodes2:
         return True
     return False
+
+
+def check_saved_model_full(savedmodel,trim=True):
+    """
+    Returns True or False, check if a given saved model has all the
+    files that we expect from it.
+    If trim, remove that folder so we don't consider it later on.
+    """
+    ok = True
+    expected_files = ['model.p','params.p','stats.p']
+    variable_files = ['starttime_*.txt']
+    # expected files
+    for f in expected_files:
+        if not os.path.exists(os.path.join(savedmodel,f)):
+            ok = False
+            break
+    # variable files, files with *
+    if ok:
+        for f in variable_files:
+            if len(glob.glob(os.path.join(savedmodel,f))) == 0:
+                ok = False
+                break
+    # trim if required
+    if trim and not ok:
+        print 'triming folder',savedmodel,'because of missing files'
+        shutil.rmtree(savedmodel)
+    # done, retutn
+    return ok
 
 
 
@@ -58,19 +150,19 @@ def analyze_one_exp_dir(expdir,validdir,testdir):
     Returns numbers: patternsize, codebook size, distortion error, best saved model
     """
     # get all subdirs
-    alldirs = glob.glob(os.path.join(experiment_dir,'*'))
+    alldirs = glob.glob(os.path.join(expdir,'*'))
     if len(alldirs) > 0:
         alldirs = filter(lambda x: os.path.isdir(x), alldirs)
         alldirs = filter(lambda x: os.path.split(x)[-1][:4] == 'exp_',alldirs)
         # trim badly saved models
-        alldirs = filter(lambda x: RON.check_saved_model_full(x,False), alldirs)
+        alldirs = filter(lambda x: check_saved_model_full(x,False), alldirs)
     if len(alldirs) == 0:
         print 'no saved model found in:',expdir
         return None,None,None,None
     
     # get params
     savedmodel = np.sort(alldirs)[-1]
-    params = unpickle(os.path.join(savedmodel,'params.p'))
+    params = ANALYZE.unpickle(os.path.join(savedmodel,'params.p'))
 
     # load valid data
     oracle = ORACLE.OracleMatfiles(params,validdir,oneFullIter=True)
@@ -80,28 +172,35 @@ def analyze_one_exp_dir(expdir,validdir,testdir):
     assert validdata.shape[1] > 0,'no valid data??'
     
     # load test data
-    oracle = ORACLE.OracleMatfiles(params,testdir,oneFullIter=True)
-    testdata = [x for x in oracle]
-    testdata = filter(lambda x: x != None, testdata)
-    testdata = np.concatenate(testdata)
-    assert testdata.shape[1] > 0,'no valid data??'
+    if validdir != testdir:
+        oracle = ORACLE.OracleMatfiles(params,testdir,oneFullIter=True)
+        testdata = [x for x in oracle]
+        testdata = filter(lambda x: x != None, testdata)
+        testdata = np.concatenate(testdata)
+        assert testdata.shape[1] > 0,'no valid data??'
+    else:
+        testdata = validdata
 
     # test all subdirs with valid data, keep the best
     best_model = ''
     best_dist = np.inf
     for sm in alldirs:
         model = ANALYZE.unpickle(os.path.join(sm,'model.p'))
-        avg_dist = model.predicts(validdata)
+        codewords, dists = model.predicts(validdata)
+        avg_dist = np.average(dists)
         if avg_dist < best_dist:
             best_model = sm
+            best_dist = avg_dist
     assert best_model != '','no data found???'
     
     # test with test data
     model = ANALYZE.unpickle(os.path.join(best_model,'model.p'))
-    avg_dist = model.predicts(testdata)
+    codewords, dists = model.predicts(testdata)
+    avg_dist = np.average(dists)
+    print 'best model:',best_model,' ( dist =',avg_dist,')'
 
     # return patternsize, codebook size, distortion errror, best saved model
-    return testdata.shape[1], model._codebook.shape[1], avg_dist, best_model
+    return testdata.shape[1], model._codebook.shape[0], avg_dist, best_model
 
 
 
@@ -113,7 +212,8 @@ def die_with_usage():
     HELP MENU
     """
     print 'usage:'
-    print 'python plot_bitdistrate_curves.py <valid dir> <test dir> <output> <exp1> .... <expN>'
+    print '  python plot_bitdistrate_curves.py [FLAGS] <valid dir> <test dir> <output> <exp1> .... <expN>'
+    print '  python plot_bitdistrate_curves.py -plot output'
     print 'PARAMS:'
     print ' <valid dir>    contains matfiles of validation set'
     print '  <test dir>    contains matfiles of test set'
@@ -125,12 +225,25 @@ def die_with_usage():
 if __name__ == '__main__':
 
     # help menu
-    if len(sys.argv) < 5:
+    if len(sys.argv) < 3:
         die_with_usage()
 
     # flags
-
-
+    plotfile = ''
+    while True:
+        if len(sys.argv) < 2:
+            break
+        elif sys.argv[1] == '-plot':
+            plotfile = sys.argv[2]
+            sys.argv.pop(1)
+        else:
+            break
+        sys.argv.pop(1)
+    if plotfile != '':
+        print 'plotting from file:',plotfile
+        plot_from_file(plotfile)
+        sys.exit(0)
+        
     # params
     validdir = sys.argv[1]
     testdir = sys.argv[2]
@@ -145,8 +258,9 @@ if __name__ == '__main__':
     for d in expdirs:
         print 'doing exp dir:',d
         res = analyze_one_exp_dir(d,validdir,testdir)
-        if res != None,None,None,None:
+        if res != None and res[0] != None:
             results.append(res)
+    print 'we have',len(results),'results.'
 
     # print to file, debug
     f = open(output,'w')
@@ -154,7 +268,7 @@ if __name__ == '__main__':
 
     # organize the results
     bitrates = []
-    while len(results) == 0:
+    while len(results) > 0:
         # get one res
         res = results.pop()
         # check if it belongs to one set
@@ -174,24 +288,24 @@ if __name__ == '__main__':
     for bitrate in bitrates:
         f.write('********* ONE BITRATE **********\n')
         for res in bitrate:
-            fwrite('psize='+str(res[0]))
-            fwrite(', ncodes='+str(res[1]))
-            fwrite(', dist='+str(res[2]))
-            fwrite(', model='+res[3])
-            fwrite('\n')
+            f.write('psize='+str(res[0]))
+            f.write(', ncodes='+str(res[1]))
+            f.write(', dist='+str(res[2]))
+            f.write(', model='+res[3])
+            f.write('\n')
+
+    # now write stuff in an easy format to recreate the plot
+    f.write('#PLOTSTUFF\n')
+    for bitrate in bitrates:
+        f.write('#BITRATE\n')
+        for res in bitrate:
+            f.write(str(res[0])+','+str(res[1])+','+str(res[2])+'\n')
+    f.write('#PLOTDONE\n')
 
     # done with file, close output
     f.close()
 
-    ########################## PLOT #############################
-
-    # import, create figure
-    import pylab as P
-    P.figure()
-    P.hold(True)
+    # plot
+    plot_from_file(output)
 
 
-
-    # done, release, show
-    P.hold(False)
-    P.show()
