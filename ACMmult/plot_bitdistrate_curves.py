@@ -49,7 +49,7 @@ def plot_from_file(filename):
     f.close()
 
     # plotting symbols
-    psymbs = ['-','.-','.','x-','o-','<-','>-']
+    psymbs = ['-','--','-.',':','x-','o-','s-','+-','<-','>-']
 
     # create figure
     P.figure()
