@@ -199,6 +199,7 @@ show how to reproduce the features from a live stream of audio.
 \section{Introduction}
 JNMR with filterboost: \cite{Bertin-Mahieux2008}. 
 Chroma features \cite{Casey2006,Casey2008,Ellis2007}.
+Learn from harmonic data: \cite{Anglade2009}.
 EchoNest \cite{EchoNest}.
 Beat tracking \cite{Ellis2007b}.
 Information theory: \cite{Cover1991}.
@@ -246,6 +247,19 @@ but slow.
 
 \section{Learning Codebook}
 
+See Figure \ref{fig:encodesong}.
+
+\begin{figure}[thb]
+\begin{center}
+\includegraphics[width=.9\columnwidth]{song_encoded}
+\end{center}
+\caption{\small{Good Day Sunshine by \textit{The Beatles}.
+Original song and encoding with a $200$ entry codebook of 
+$2$ bar patterns.
+}}
+\label{fig:encodesong}
+\end{figure}
+
 \subsection{Data}
 Echo Nest API \cite{EchoNest} is great, but it is easy to reproduce
 the analysis using a beat tracker and chromas. The bar analysis is
@@ -260,8 +274,86 @@ of ... track per artist). Thus, our oracle chooses randomly from a set of
 $2$M? tracks, but it is not a limitation. Note that new tracks are added
 daily to the Echo Nest service.
 
+For EN, the average of artists having at least one song is ... For those
+artists, the average number of songs (upper bounded to $100$) is ...
+An average song has ... bars.
+
+
+The feature analysis used throughout this work is based on Echo Nest
+analyze API \cite{EchoNest}.  
+%
+For any song uploaded to their platform this analysis returns a chroma
+vector (length $12$) for every music event (called ``segment''), and a
+segmentation of the song into beats and bars. Beats may span or 
+subdivide segments; bars span multiple beats.
+%
+Averaging the per-segment chroma over beat times results in a
+beat-synchronous chroma feature representation similar to that used in
+\cite{Ellis2007a}.  Echo Nest chroma vectors are normalized to have the 
+largest value in each column equal to 1.
+
+% \begin{figure}[htb]
+% \begin{center}
+% \includegraphics[width=.9\columnwidth]{bar_size_freq}
+% \end{center}
+% \caption{\small{
+% Frequency of the different bar size in the training data.
+% }}
+% \label{fig:barsize}
+% \end{figure}
+
+Note that none of this information (segments, beats, bars)
+can be assumed perfectly accurate.
+%(\eg in \cite{Barrington2009a} authors obtain a better
+%song segmentation than the Echo Nest). 
+In practice, we have found them reasonable, 
+and given the size of the data set, any rare imperfections or noise
+can be diluted to irrelevance by the good examples.  
+We also believe that patch sizes based on a number of beats or bars are more
+meaningful than an arbitrary time length.
+
+
+\subsubsection{Beat-Chroma Patches} \label{ssec:beatpatch}
+
+We use the bar segmentation obtained from the Echo Nest analysis to
+break a song into a collection of beat-chroma ``patches'', typically
+one or two bars in length.
+Because the bar length is not guaranteed to be 4 beats, 
+depending on the meter of a particular
+song, we resample each patch to a fixed length of 4 beats
+per bar (except where noted).  However, the majority (82\%) of our training data
+consisted of bars that were 4 beats long, so this resampling 
+usually had no effect.  Most of the remaining bars (10\%) were 3 beats in
+length.
+The resulting patches consist of $12 \times 4$ or $12 \times 8$ matrices.
+
+Finally, we normalize the patches with respect to transposition by rotating
+the pattern matrix so that the first row contains the most
+energy. This can be seen in the example codeword of Figure ...
+Each patch within a song is normalized independently, so
+reconstruction of the original song requires knowledge of the
+rotation index (key) for each patch.
+
+The representation resulting from this process is invariant to both
+the key and meter of the original song.  This enables the study of
+broad harmonic patterns found throughout the data, without regard for
+the specific musical context.
+In the context of clustering this avoids problems such as obtaining separate
+clusters for every major triad for both duple and triple meters.
+
 \subsection{Vector Quantization}
-We build a codebook by...
+We use an online version of the vector quantization algorithm
+\cite{Gersho1991} to cluster the beat-chroma patches described in the
+previous section.
+For each sample from the data, the algorithm finds the closest cluster
+in the codebook and updates the cluster centroid (codeword) to be
+closer to the sample according to a learning rate $\ell$.
+The clusters are updated as each data point is seen, as opposed to
+once per iteration in the standard $k$-means algorithm.
+The details are explained in Algorithm \ref{algo:vq}.
+%
+As in standard $k$-means clustering, the codebook is initialized by
+choosing $K$ random points from our dataset.
 
 \begin{algorithm}
 %\caption{Pseudocode of Vector Quantization}
@@ -284,27 +376,66 @@ We build a codebook by...
 \end{algorithm}
 
 
-\subsection{Filtering}
+\subsection{Large Data Learning}
 One problem is the convergence of the learning algorithm. It is normal
 that an algorithm learns more from the first first example than from the
 millionth one. However, our algorithm should remain capable of learning
 from an original new sample, e.g. an outlier. We introduce filtering
 for that purpose.
 
-\subsection{Related and Future Work}
-Future work includes online NMF, GMM, neural networks.
-
-Train model restrained to given metadata, such as release year.
-Model new trends, for instance the increasing use of distortion
-since the $50$'s.
 
 \section{Applications}
-Encoding of new songs.
+We present applications of our particular encoding, i.e. representing
+a song as a set of chroma patches. Note that the framework in this
+paper could be use for other types of features or patches. For instance
+patches preserving timbral information, such as MFCC patches.
 
-Cover recognition? outlier detection?
+In \cite{Casey2006} authors show that such encoding can be used for
+cover recognition. In other work\footnote{in press; reference hidden
+to preserve submissions's anonymity}, authors show that harmonic codewords
+retain information about bar alignment and artist recognition.
 
+\subsection{Bitrate}
 
-\section{Conclusions}
+We focus on showing that our algorithm learns the encoding correctly.
+We study the distortion on new songs for different encoding rates.
+Since music is not a random signal and contains meaningful repetitions,
+longer codewords for a given bitrate should perform better. The downsize
+is that longer codewords mean more of them to keep the bitrate constant,
+and more codewords implies a longer learning. As we mentioned earlier,
+training on an ever increasing number of samples is challenging.
+
+See Figure \ref{fig:bitrates}.
+
+\begin{figure}[thb]
+\begin{center}
+\includegraphics[width=.9\columnwidth]{bitrates}
+\end{center}
+\caption{\small{Different bitrates blah blah blah.
+}}
+\label{fig:bitrates}
+\end{figure}
+
+\subsection{Filtering}
+We compare the learning of a codebook of size $100$, 2 bars represented
+as 8 beats, key invariance over patches. The filtering learning
+takes indeed more time as many samples are discarded.
+
+See Figure \ref{fig:filt}.
+
+\begin{figure}[thb]
+\begin{center}
+\includegraphics[width=.99\columnwidth]{filt_nonfilt}
+\end{center}
+\caption{\small{
+Learning curve with and without filtering. $100$ codewords learn for
+patterns spanning $2$ bars with $8$ beats. Learning dataset is the
+whole Echo Nest collection.
+}}
+\label{fig:filt}
+\end{figure}
+
+\section{Conclusion and Future Work}
 We have presented the framework and a first implementation of what
 we call the ``Infinite Listening Machine''. The algorithms learns from
 an infinite source of data in an online fashion. We have defined a
@@ -312,9 +443,15 @@ possible set of features and one algorithm that meats our requirements.
 We showed through some application that it is a viable learning scheme.
 Finally, we gave many directions for improvement and future works.
 
+Future work includes online NMF, GMM, neural networks.
+
+Train model restrained to given metadata, such as release year.
+Model new trends, for instance the increasing use of distortion
+since the $50$'s.
+
 %ACKNOWLEDGMENTS are optional
 %\section{Acknowledgments}
-%Thierry has a grant.
+%Thierry has a grant. Ron too.
 
 %
 % The following two commands are all you need in the
