@@ -247,6 +247,62 @@ tmp = []
 for k in range(1,5):
     tmp.append(eval( '(args'+str(int(k))+',argsd'+str(int(k))+')' ))
 experiment_args.append(tmp)
+# EXPERIMENT SET 4
+# redo the distortion rate experiment with more constant bitrates 2-4-8
+#1
+args1 = [os.path.join(outputDir,'set4exp1')]
+argsd1 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':4,'bars':1,'nCodes':2,'partialbar':1}
+args2 = [os.path.join(outputDir,'set4exp2')]
+argsd2 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':4,'bars':1,'nCodes':4,'partialbar':2}
+args3 = [os.path.join(outputDir,'set4exp3')]
+argsd3 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':4,'bars':1,'nCodes':16}
+args4 = [os.path.join(outputDir,'set4exp4')]
+argsd4 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':8,'bars':2,'nCodes':256}
+#2
+args5 = [os.path.join(outputDir,'set4exp5')]
+argsd5 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':4,'bars':1,'nCodes':4,'partialbar':1}
+args6 = [os.path.join(outputDir,'set4exp6')]
+argsd6 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':4,'bars':1,'nCodes':16,'partialbar':2}
+args7 = [os.path.join(outputDir,'set4exp7')]
+argsd7 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':4,'bars':1,'nCodes':256}
+args8 = [os.path.join(outputDir,'set4exp8')]
+argsd8 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':8,'bars':2,'nCodes':65536}
+#3
+args9 = [os.path.join(outputDir,'set4exp9')]
+argsd9 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':4,'bars':1,'nCodes':8,'partialbar':1}
+args10 = [os.path.join(outputDir,'set4exp10')]
+argsd10 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':4,'bars':1,'nCodes':64,'partialbar':2}
+args11 = [os.path.join(outputDir,'set4exp11')]
+argsd11 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':4,'bars':1,'nCodes':4096}
+#4
+args12 = [os.path.join(outputDir,'set4exp12')]
+argsd12 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':4,'bars':1,'nCodes':16,'partialbar':1}
+args13 = [os.path.join(outputDir,'set4exp13')]
+argsd13 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':4,'bars':1,'nCodes':256,'partialbar':2}
+args14 = [os.path.join(outputDir,'set4exp14')]
+argsd14 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':4,'bars':1,'nCodes':65536}
+# add to exp args
+tmp = []
+for k in range(1,15):
+    tmp.append(eval( '(args'+str(int(k))+',argsd'+str(int(k))+')' ))
+experiment_args.append(tmp)
+
+
+
 
 
 def die_with_usage():
