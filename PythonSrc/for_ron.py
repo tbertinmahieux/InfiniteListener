@@ -228,7 +228,25 @@ tmp = []
 for k in range(1,23):
     tmp.append(eval( '(args'+str(int(k))+',argsd'+str(int(k))+')' ))
 experiment_args.append(tmp)
-
+# EXPERIMENT SET 3
+# filt vs non filt on cowbell dataset
+args1 = [os.path.join(outputDir,'set3exp1')]
+argsd1 = {'mat_dir':featsDir,'keyInv':True,'songKeyInv':False,'nIter':1e7,
+          'beats':8,'bars':2,'nCodes':1000,'useModel':'VQ'}
+args2 = [os.path.join(outputDir,'set3exp2')]
+argsd2 = {'mat_dir':featsDir,'keyInv':True,'songKeyInv':False,'nIter':1e7,
+          'beats':8,'bars':2,'nCodes':1000,'useModel':'VQFILT'}
+args3 = [os.path.join(outputDir,'set3exp3')]
+argsd3 = {'mat_dir':featsDir,'keyInv':True,'songKeyInv':False,'nIter':1e7,
+          'beats':8,'bars':2,'nCodes':5000,'useModel':'VQ'}
+args4 = [os.path.join(outputDir,'set3exp4')]
+argsd4 = {'mat_dir':featsDir,'keyInv':True,'songKeyInv':False,'nIter':1e7,
+          'beats':8,'bars':2,'nCodes':5000,'useModel':'VQFILT'}
+# add to exp args
+tmp = []
+for k in range(1,5):
+    tmp.append(eval( '(args'+str(int(k))+',argsd'+str(int(k))+')' ))
+experiment_args.append(tmp)
 
 
 def die_with_usage():
