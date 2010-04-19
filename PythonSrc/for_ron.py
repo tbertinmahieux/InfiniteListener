@@ -39,7 +39,7 @@ assert outputDir != '','SET OUTPUT DIR TO SOMETHING!!!!'
 
 def do_experiment(experiment_dir,beats=0,bars=0,nCodes=0,nIter=1e7,
                   partialbar=0,keyInv=False,songKeyInv=True,lrate=1e-3,
-                  mat_dir=''):
+                  mat_dir='',useModel='VQ'):
     """
     Main function to run an experiment, train a model and save to dir.
     """
@@ -92,7 +92,7 @@ def do_experiment(experiment_dir,beats=0,bars=0,nCodes=0,nIter=1e7,
                            positive=True, do_resample=True,
                            partialbar=partialbar, lrate=lrate, nThreads=4,
                            oracle='MAT', artistsdb='',
-                           matdir=mat_dir, nIterations=nIter, useModel='VQ')
+                           matdir=mat_dir, nIterations=nIter, useModel=useModel)
 
     # write done file
     if ec == 0:
