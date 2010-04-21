@@ -256,21 +256,21 @@ def should_save(starttime,last_save):
             return True
         else:
             return False
-    # less than one hour, every 10 minutes
+    # less than one hour, every 30 minutes
     elif (currtime - starttime) / hours < 1:
-        if (currtime - last_save) / mins > 10:
+        if (currtime - last_save) / mins > 30:
             return True
         else:
             return False
-    # less than one day, every hour
+    # less than one day, every 4 hour
     elif (currtime - starttime) / days < 1:
-        if (currtime - last_save) / hours > 1:
+        if (currtime - last_save) / hours > 4:
             return True
         else:
             return False
-    # less than one week, every 6 hours
+    # less than one week, every 12 hours
     elif (currtime - starttime) / days < 7:
-        if (currtime - last_save) / hours > 6:
+        if (currtime - last_save) / hours > 12:
             return True
         else:
             return False
