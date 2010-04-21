@@ -212,7 +212,7 @@ if __name__ == '__main__':
         if len(sys.argv) < 3:
             break
         filt = False
-        comment = ''
+        comment = ' '
         if sys.argv[1] == '-plot':
             pass
         elif sys.argv[1] == '-plotfilt':
