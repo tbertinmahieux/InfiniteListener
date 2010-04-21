@@ -228,6 +228,7 @@ if __name__ == '__main__':
             comment = sys.argv[1]
             sys.argv.pop(1)
         res = analyze_one_batch_of_models(savedmodel, matfilesdir, output, filt=filt)
+        res = list(res)
         res.append(comment)
         plotdata.append(res)
 
