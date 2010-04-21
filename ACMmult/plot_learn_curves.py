@@ -52,7 +52,9 @@ def plot_from_file(filename):
                 curves.append( curve )
             curve = []
             continue
-        curve.append(eval(line))
+        curve.append(eval(line))     # nSamples
+        curve.append(eval(f.next())) # dists
+        curve.append(f.next())       # comment
     # close file
     f.close()
 
