@@ -237,8 +237,8 @@ if __name__ == '__main__':
     for res in plotdata:
         print_write('#PLOT',output)
         # nPatterns, dist, comment
-        print_write(str(res[0]),output)
-        print_write(str(res[1]),output)
+        print_write(str(res[0].tolist()),output)
+        print_write(str(res[1].tolist()),output)
         print_write(str(res[2]),output)
     print_write('#PLOTEND',output)
 
