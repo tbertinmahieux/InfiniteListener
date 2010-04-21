@@ -41,7 +41,7 @@ def plot_from_file(filename):
     curve = []
     # iterate over lines
     while True:
-        line = f.next()
+        line = f.next().strip()
         if line[:len('#PLOTEND')] == '#PLOTEND':
             if len(curve) > 0:
                 curves.append( curve )
