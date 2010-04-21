@@ -38,13 +38,20 @@ def stop_time(folder):
     Find the stop time in seconds of the savedmodel from the folder name.
     Returns stop time in seconds.
     """
+    # remove seperator if needed
+    if folder[-1] == os.path.sep:
+        folder = folder[:-1]
     # tail of folder name
     tail = os.path.split(folder)[-1]
     # remove exp_
     stime = tail[4:]
     # get time
     timeformat = "%Y_%m_%d_AT_%Hh%Mm%Ss"
-    res = time.strptime(stime,timeformat)
+    try:
+        res = time.strptime(stime,timeformat)
+    except ValueError:
+        print 'stime is:',stime,', folder is:',folder,', tail is:',tail
+        raise ValueError
     # return time in seconds
     return time.mktime(res)
 
