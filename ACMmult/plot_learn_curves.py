@@ -126,6 +126,9 @@ def analyze_one_batch_of_models(savedmodel, matfilesdir, output, filt=False):
     Main job, from a saved model, find other saved model in same dir,
     test them all, return plotting info (nSamples and dist)
     """
+    # hack
+    if savedmodel[-1] == os.path.sep:
+        savedmodel = savedmodel[:-1]
     # GET SAVED MODELS
     parentdir,tmp = os.path.split(savedmodel)
     # traceback
