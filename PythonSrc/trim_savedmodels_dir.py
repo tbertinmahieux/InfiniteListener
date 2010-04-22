@@ -66,6 +66,8 @@ if __name__ == '__main__':
 
     # last saved model
     savedmodel = os.path.realpath(sys.argv[1])
+    if savedmodel[-1] == os.path.sep:
+        savedmodel = savedmodel[:-1] # hack
     trimdir = os.path.dirname(savedmodel)
     print 'most recent saved model:',savedmodel
     print 'directory to trim:',trimdir
