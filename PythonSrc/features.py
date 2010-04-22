@@ -127,6 +127,28 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
     return feats
 
 
+def analysis_dict_to_matfile(analysis_dict,filename):
+    """
+    Takes an analysis dictionary and writes it as a matlab file
+    Computes chroma per beats and bars in function of beats
+    Add some info like duration.
+    Filename should end up with .mat, if not it will be added
+    At the end, we should have the same info as in cowbell matfiles.
+    """
+    if filename[-len('.mat'):] != '.mat':
+        filename = filename + '.mat'
+    # get chromas per beat and bars based on beats 
+    btchroma, barbts = create_beat_synchro_chromagram(analysis_dict)
+    # convert dict names, except barbeats
+    d = {'btchroma':btchroma,
+         'barbts':barbts,
+         'segstart':analysis_dict['segstart'], # probably useless info
+         'btstart':analysis_dict['beatstart'],
+         'duration':analysis_dict['duration'],
+         'barstart':analysis_dict['barstart']}
+    # write matfile
+    scipy.io.savemat(filename,d)
+
 
 def features_from_matfile(filename,pSize=8,usebars=2,keyInv=True,
                           songKeyInv=False,positive=True,do_resample=True,
