@@ -150,7 +150,9 @@ def analysis_dict_to_matfile(analysis_dict,filename):
     try:
         scipy.io.savemat(filename,d)
     except TypeError:
-        print 'cant save analysis_dict, probleme with features?'
+        print 'cant save analysis_dict, problem with features?'
+        if os.path.exists(filename):
+            os.remove(filename)
         
 
 def features_from_matfile(filename,pSize=8,usebars=2,keyInv=True,
