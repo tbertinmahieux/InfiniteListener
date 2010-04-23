@@ -42,7 +42,7 @@ def unpickle(filename):
             if not os.path.exists(matfile):
                 raise ValueError
             codebook = scipy.io.loadmat(matfile)['codebook']
-            model = MODEL.Model(codebook)
+            return MODEL.Model(codebook)
         else:
             raise ValueError
     f.close()
