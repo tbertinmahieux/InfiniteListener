@@ -29,8 +29,9 @@ def unpickle(filename):
     Unpickle from a filename
     """
     f = open(filename)
+    unpickler = pickle.Unpickler(f)
     try:
-        unpickler = pickle.Unpickler(f)
+        res = unpickler.load()
     except ValueError:
         # SUPER HACK to load model when numpy array suck!
         f.close()
@@ -44,7 +45,6 @@ def unpickle(filename):
             model = MODEL.Model(codebook)
         else:
             raise ValueError
-    res = unpickler.load()
     f.close()
     return res
 
