@@ -62,11 +62,15 @@ if __name__ == '__main__':
     print 'EN identifier =',identifier
     a,b,c,d,e = EXTRAS.get_our_analysis(identifier)
     segstart, chromas, beatstart, barstart, duration = a,b,c,d,e
+    if segstart == None:
+        print 'EN gave us None, must start again'
+        sys.exit(0)
     analysis_dict = {'segstart':segstart,'chromas':chromas,
                      'beatstart':beatstart,'barstart':barstart,
                      'duration':duration}
     del a,b,c,d,e,segstart,chromas,beatstart,barstart,duration
     print 'analysis retrieved from Echo Nest'
+    
 
     # features from online (positive=False to compare with old school method)
     online_feats = features.get_features(analysis_dict,pSize=8,usebars=2,
