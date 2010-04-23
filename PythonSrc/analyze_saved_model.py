@@ -13,8 +13,11 @@ import glob
 import sys
 import time
 import pickle
+import scipy
+import scipy.io
 
 import trainer
+import model as MODEL
 try:
     # caused problem for training using multiprocess, still don't know why
     from trainer import StatLog
@@ -26,7 +29,21 @@ def unpickle(filename):
     Unpickle from a filename
     """
     f = open(filename)
-    unpickler = pickle.Unpickler(f)
+    try:
+        unpickler = pickle.Unpickler(f)
+    except ValueError:
+        # SUPER HACK to load model when numpy array suck!
+        f.close()
+        path,tail = os.path.split(filename)
+        if tail == 'model.p':
+            print 'can load numpy array, load from matlab'
+            matfile = os.path.join(path,'codebook.mat')
+            if not os.path.exists(matfile):
+                raise ValueError
+            codebook = scipy.io.loadmat(matfile)['codebook']
+            model = MODEL.Model(codebook)
+        else:
+            raise ValueError
     res = unpickler.load()
     f.close()
     return res
