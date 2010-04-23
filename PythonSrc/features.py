@@ -147,8 +147,11 @@ def analysis_dict_to_matfile(analysis_dict,filename):
          'duration':analysis_dict['duration'],
          'barstart':analysis_dict['barstart']}
     # write matfile
-    scipy.io.savemat(filename,d)
-
+    try:
+        scipy.io.savemat(filename,d)
+    except TypeError:
+        print 'cant save analysis_dict, probleme with features?'
+        
 
 def features_from_matfile(filename,pSize=8,usebars=2,keyInv=True,
                           songKeyInv=False,positive=True,do_resample=True,
