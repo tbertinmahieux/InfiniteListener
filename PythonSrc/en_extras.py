@@ -105,6 +105,7 @@ def do_dict_call(url,filename=''):
     try:
         d = eval(data)
     except SyntaxError:
+        print 'syntaxerror, cant eval data'
         return None
     # return dictionary
     return d
@@ -359,29 +360,6 @@ def get_our_analysis(track_id,filename=''):
     Return them in order, or 5 None if one of them fails
     filename usefull for do_dict_call
     """
-    # OLD SLOW CODE
-    """
-    try:
-        # duration
-        duration = get_duration(track_id)
-        if duration == None:
-            return None,None,None,None,None
-        # beats
-        beatstart = get_beats(track_id)
-        if beatstart == None:
-            return None,None,None,None,None
-        # bars
-        barstart = get_bars(track_id)
-        if barstart == None:
-            return None,None,None,None,None
-        # segments
-        segstart, chromas = get_segments(track_id)
-        if segstart == None or chromas == None:
-            return None,None,None,None,None
-    except IOError:
-        print 'IOError on', time.ctime(),': check connection if happens often.'
-        return None,None,None,None,None
-    """
     # use with new call: alpha_get_analysis
     # build call
     url = 'http://developer.echonest.com/api/alpha_get_analysis?api_key='
@@ -391,7 +369,10 @@ def get_our_analysis(track_id,filename=''):
     analysis = do_dict_call(url,filename=filename)
     # success?
     try:
-        if (analysis==None) or (analysis['status'] != 'ok'):
+        if analysis==None:
+            return None,None,None,None,None
+        if analysis['status'] != 'ok':
+            print 'analysis status not ok, analysis:',analysis
             return None,None,None,None,None
         analysis = analysis['analysis']
         # duration
