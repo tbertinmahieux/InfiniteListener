@@ -153,6 +153,7 @@ def analysis_dict_to_matfile(analysis_dict,filename):
         print 'cant save analysis_dict, problem with features?'
         if os.path.exists(filename):
             os.remove(filename)
+            print 'remove problematic file:',filename
         
 
 def features_from_matfile(filename,pSize=8,usebars=2,keyInv=True,
