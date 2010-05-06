@@ -111,13 +111,13 @@ def _thread_en(artistsdb,filename=''):
         artist = waiting_artists.pop() # no thread concurrency here
 
         # get song
-        tids,tmp_titles,tmp_aids,tmp_artists = en_extras.search_tracks(artist,filename=filename)
-        if tids == None or len(tids) == 0:
+        sids, tmp_tids,tmp_titles,tmp_aids,tmp_artists = en_extras.search_tracks(artist,filename=filename)
+        if sids == None or len(sids) == 0:
             continue
-        trackid = tids[np.random.randint(len(tids))]
+        songid = sids[np.random.randint(len(sids))]
 
         # save EchoNest data to queue
-        segstart,chromas,beatstart,barstart,duration = en_extras.get_our_analysis(trackid,filename=filename)
+        segstart,chromas,beatstart,barstart,duration = en_extras.get_our_analysis(songid,filename=filename)
         if segstart == None:
             continue
         d = {'segstart':segstart,'chromas':chromas,
