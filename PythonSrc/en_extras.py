@@ -212,26 +212,31 @@ def search_tracks(artist,title='',max_results=100):
        tids, titles, aids, artists    4 lists! or None, None, None, None
 
     Not sure that addind a song title changes much the result...
-    This code relies on an alpha call to EchoNest API, it will
-    get deprecated!
+    This code has been updated to the Echo Nest Beta API
+    http://beta.developer.echonest.com/api/v4/song/search?api_key=YOUR_KEY&format=json&artist=U2&bucket=tracks&bucket=id:paulify&results=100
     """
     # build call
     url = 'http://developer.echonest.com/api/alpha_search_tracks?'
+    url = 'http://beta.developer.echonest.com/api/v4/song/search?'
     url += 'api_key=' + _api_dev_key
+    url += '&format=json'  # other format: xml
     # next inspired from fixurl
     artist = urllib.quote(urllib.unquote(artist).encode('utf8'),'=&?/')
     url +=  '&artist='+ artist
     if title != '':
         title = urllib.quote(urllib.unquote(title).encode('utf8'),'=&?/')
         url += '&title='+title
-    url += '&version=3'
+    url += '&bucket=tracks&bucket=id:paulify'
     url += '&results=' + str(int(max_results))
-    # call, get XML
+    # call, get json
     d = do_dict_call(url)
     # check success
-    if (d == None) or (not d['status'] == 'ok'):
+    if (d == None) or not d.has_key('response'):
         return None, None, None, None
-    results = d['results']
+    d = d['response']
+    if not d['status']['code'] == '0':
+        return None, None, None, None
+    results = d['songs']['song']
     if len(results) == 0:
         return None, None, None, None
     # get results info
@@ -241,10 +246,12 @@ def search_tracks(artist,title='',max_results=100):
     artists = []
     try:
         for res in results:
-            tids.append(res['trackID'])
+            if len(res['tracks']['track']) == 0:
+                continue
+            tids.append(res['tracks']['track'][0]['id'])
             titles.append(res['title'])
-            aids.append(res['artistID'])
-            artists.append(res['artist'])
+            aids.append(res['artist_id'])
+            artists.append(res['artist_name'])
     except KeyError:
         return None, None, None, None
     # done
