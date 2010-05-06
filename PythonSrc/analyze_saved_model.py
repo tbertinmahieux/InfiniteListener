@@ -24,6 +24,41 @@ try:
 except:
     pass
 
+
+def unpickle_model(filename):
+    """
+    Unpickle model, tries to deal with the problem of numpy arrays
+    """
+    f = open(filename)
+    unpickler = pickle.Unpickler(f)
+    try:
+        res = unpickler.load()
+    except ValueError:
+        f.close()
+        # get path and tail
+        path,tail = os.path.split(filename)
+        # do we have a no_numpy version
+        nonumpy = os.path.join(path,'model_nonumpy.p')
+        matfile = os.path.join(path,'codebook.mat')
+        # at least we have the matlab codebook?
+        if not os.path.exists(matfile):
+                raise ValueError
+        codebook = scipy.io.loadmat(matfile)['codebook']
+        # model with no numpy exists?
+        if os.path.exists(nonumpy):
+            # we should be fine, load model, and done
+            res = unpickle(nonumpy)
+            res._codebook = codebook
+            return res
+        else:
+            # assume it's a simple model and load matlab codebook
+            codebook = scipy.io.loadmat(matfile)['codebook']
+            return MODEL.Model(codebook)
+    # works normally
+    f.close()
+    return res
+
+
 def unpickle(filename):
     """
     Unpickle from a filename
@@ -37,12 +72,7 @@ def unpickle(filename):
         f.close()
         path,tail = os.path.split(filename)
         if tail == 'model.p':
-            print 'can load numpy array, load from matlab'
-            matfile = os.path.join(path,'codebook.mat')
-            if not os.path.exists(matfile):
-                raise ValueError
-            codebook = scipy.io.loadmat(matfile)['codebook']
-            return MODEL.Model(codebook)
+            return unpickle_model(filename)
         else:
             raise ValueError
     f.close()
