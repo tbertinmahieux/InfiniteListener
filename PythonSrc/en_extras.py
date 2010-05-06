@@ -216,7 +216,7 @@ def search_tracks(artist,title='',max_results=100,filename=''):
        - max_results, number of results (must be <= 100)
 
     RETURN:
-       tids, titles, aids, artists    4 lists! or None, None, None, None
+       sids, tids, titles, aids, artists    5 lists! or 5 None
 
     Not sure that addind a song title changes much the result...
     This code has been updated to the Echo Nest Beta API
@@ -239,14 +239,15 @@ def search_tracks(artist,title='',max_results=100,filename=''):
     d = do_dict_call(url,filename=filename)
     # check success
     if (d == None) or not d.has_key('response'):
-        return None, None, None, None
+        return None, None, None, None, None
     d = d['response']
     if not d['status']['code'] == '0':
-        return None, None, None, None
+        return None, None, None, None, None
     results = d['songs']['song']
     if len(results) == 0:
-        return None, None, None, None
+        return None, None, None, None, None
     # get results info
+    sids = []
     tids = []
     titles = []
     aids = []
@@ -255,14 +256,15 @@ def search_tracks(artist,title='',max_results=100,filename=''):
         for res in results:
             if len(res['tracks']['track']) == 0:
                 continue
+            sids.append(res['id'])
             tids.append(res['tracks']['track'][0]['id'])
             titles.append(res['title'])
             aids.append(res['artist_id'])
             artists.append(res['artist_name'])
     except KeyError:
-        return None, None, None, None
+        return None, None, None, None, None
     # done
-    return tids, titles, aids, artists
+    return sids, tids, titles, aids, artists
 
     
 
