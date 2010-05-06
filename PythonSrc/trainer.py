@@ -298,6 +298,12 @@ def save_experiment(expdir,model,starttime,statlog,params,crash=False):
     f = open(os.path.join(savedir,'model.p'),'w')
     pickle.dump(model,f)
     f.close()
+    # save model without numpy
+    model2 = copy.deepcopy(model)
+    model2._codebook = None
+    f = open(os.path.join(savedir,'model_nonumpy.p'),'w')
+    pickle.dump(model2,f)
+    f.close()
     # save stats
     f = open(os.path.join(savedir,'stats.p'),'w')
     pickle.dump(statlog,f)
