@@ -111,7 +111,7 @@ def _thread_en(artistsdb,filename=''):
         artist = waiting_artists.pop() # no thread concurrency here
 
         # get song
-        tids,tmp_titles,tmp_aids,tmp_artists = en_extras.search_tracks(artist)
+        tids,tmp_titles,tmp_aids,tmp_artists = en_extras.search_tracks(artist,filename=filename)
         if tids == None or len(tids) == 0:
             continue
         trackid = tids[np.random.randint(len(tids))]
