@@ -15,6 +15,7 @@ import os
 import sys
 import time
 import copy
+import string
 import xml
 from xml.dom import minidom
 import urllib
@@ -51,6 +52,7 @@ def do_dict_call(url,filename=''):
     """
     Calls EchoNest with a given command, expect the string
     representation of a python dictionary.
+    (= JSON format)
     Used by alpha API calls like search_tracks
     Returns dictionary, or None if major problem
 
@@ -94,7 +96,12 @@ def do_dict_call(url,filename=''):
     # read the line (hope there is only one...)
     # use to do (should still work): data = f.readline()
     try:
-        data = f.next()
+        #data = f.next()
+        lines = f.readlines()
+        data = ''
+        for l in lines:
+            data += l
+        data = string.replace(data,'\n','')
     except StopIteration:
         print 'en_extras, data cant be read (next) when downloading dict'
         f.close()
@@ -198,7 +205,7 @@ def get_audio(artist_id,max_results=15):
     
 
 
-def search_tracks(artist,title='',max_results=100):
+def search_tracks(artist,title='',max_results=100,filename=''):
     """
     Search for songs that match a query.
     Query based on artist and title (one of the two or both).
@@ -229,7 +236,7 @@ def search_tracks(artist,title='',max_results=100):
     url += '&bucket=tracks&bucket=id:paulify'
     url += '&results=' + str(int(max_results))
     # call, get json
-    d = do_dict_call(url)
+    d = do_dict_call(url,filename=filename)
     # check success
     if (d == None) or not d.has_key('response'):
         return None, None, None, None
@@ -355,9 +362,9 @@ def get_segments(track_id):
     return segstart, chromas
 
 
-def get_our_analysis(track_id,filename=''):
+def get_our_analysis(song_id,filename=''):
     """
-    Get the analysis we need from a given track ID:
+    Get the analysis we need from a given song ID:
     - segment starts
     - segment chromas
     - beatstart
@@ -366,22 +373,34 @@ def get_our_analysis(track_id,filename=''):
 
     Return them in order, or 5 None if one of them fails
     filename usefull for do_dict_call
+
+    The trackID method is deprecated, song ID start with SO, not TR
     """
-    # use with new call: alpha_get_analysis
+    # test if we still call it with tracks
+    if song_id[:2] == 'TR' or song_id[:2] == 'tr':
+        print 'WARNING: deprecated'
+        print 'get our analysis must be called with song id, not track id'
+        return None,None,None,None,None
+    # use with new call profile in song API
     # build call
-    url = 'http://developer.echonest.com/api/alpha_get_analysis?api_key='
+    url = 'http://beta.developer.echonest.com/api/v4/song/profile?api_key='
     url += _api_dev_key
-    url += '&trackID=' + track_id
-    # call
-    analysis = do_dict_call(url,filename=filename)
+    url += '&id=' + song_id
+    url += '&format=json'
+    url += '&bucket=audio_summary&bucket=id:paulify'
+    # call, get json
+    song = do_dict_call(url,filename=filename)
+    # get the analysis url
+    song = song['response']
+    if len(song['songs']['song']) == 0:
+        return None,None,None,None,None
+    analysis_url = song['songs']['song'][0]['audio_summary']['analysis_url']
+    # get the analysis
+    analysis = do_dict_call(analysis_url)
     # success?
     try:
         if analysis==None:
             return None,None,None,None,None
-        if analysis['status'] != 'ok':
-            print 'analysis status not ok, analysis:',analysis
-            return None,None,None,None,None
-        analysis = analysis['analysis']
         # duration
         duration = analysis['track']['duration']
         # bars
