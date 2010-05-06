@@ -52,7 +52,6 @@ def unpickle_model(filename):
             return res
         else:
             # assume it's a simple model and load matlab codebook
-            codebook = scipy.io.loadmat(matfile)['codebook']
             return MODEL.Model(codebook)
     # works normally
     f.close()
