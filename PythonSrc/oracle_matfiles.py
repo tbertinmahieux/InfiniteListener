@@ -78,7 +78,9 @@ class OracleMatfiles:
             # we predict on every offset, return features with the best offset based on the model
             best_dist = np.inf
             best_feats = None
-            realSize = min(self._pSize,self._partialbar)
+            realSize = self._pSize
+            if self._partialbar > 0:
+                realSize = self._partialbar
             for offset in range(realSize):
                 # get features
                 feats = features.features_from_matfile(matfile,
