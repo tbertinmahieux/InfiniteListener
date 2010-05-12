@@ -34,7 +34,7 @@ import analyze_saved_model as ANALYZE
 def train(savedmodel, expdir='', pSize=8, usebars=2, keyInv=True,
           songKeyInv=False, positive=True, do_resample=True, partialbar=0,
           lrate=1e-5, nThreads=4, oracle='EN', artistsdb='', matdir='',
-          nIterations=1e7, useModel='VQ'):
+          nIterations=1e7, useModel='VQ', autobar=False):
     """
     Performs training
     Grab track data from oracle
@@ -118,7 +118,8 @@ def train(savedmodel, expdir='', pSize=8, usebars=2, keyInv=True,
               'partialbar':partialbar, 'lrate':lrate,
               'nThreads':nThreads, 'oracle':oracle,
               'artistsdb':artistsdb, 'matdir':matdir,
-              'nIterations':nIterations, 'useModel':useModel}
+              'nIterations':nIterations, 'useModel':useModel,
+              'autobar':autobar}
 
     # creates the experiment folder
     if not os.path.isdir(expdir):
@@ -154,10 +155,14 @@ def train(savedmodel, expdir='', pSize=8, usebars=2, keyInv=True,
             if global_iterations > nIterations:
                 raise StopIteration
             # get features from the oracle
-            feats = oracle.next_track()
+            if not autobar:
+                feats = oracle.next_track()
+            else:
+                assert(oracle='MAT','autobar implemented only for matfiles oracle')
+                feats = oracle.next_track(auto_bar=model)
+            # check features, remove empty patterns            
             if feats == None:
                 continue
-            # remove empty patterns
             feats = feats[np.nonzero(np.sum(feats,axis=1))]
             if feats.shape[0] == 0:
                 continue
@@ -374,6 +379,7 @@ def die_with_usage():
     print ' -oraclemat d      matfiles oracle, d: matfiles dir'
     print ' -nIters n         maximum number of iterations'
     print ' -useModel N       model name, VQ (default), VQFILT'
+    print ' -autobar          trains with self-adjusting bar offset, only matfiles oracle'
     print ' -profile f        use profiler, output to f, limits iters to 100'
     print ''
     print 'typical command to initialize from codebook:'
@@ -406,6 +412,7 @@ if __name__ == '__main__':
     matdir = ''
     nIterations = 1e7
     useModel = 'VQ'
+    autobar = False
     profile = ''
     while True:
         if sys.argv[1] == '-expdir':
@@ -461,6 +468,9 @@ if __name__ == '__main__':
             useModel = sys.argv[2]
             sys.argv.pop(1)
             print 'use model =', useModel
+        elif sys.argv[1] == '-autobar':
+            autobar = True
+            print 'autobar =', autobar
         elif sys.argv[1] == '-profile':
             profile = sys.argv[2]
             nIterations = 100
@@ -484,12 +494,13 @@ if __name__ == '__main__':
               keyInv=keyInv,songKeyInv=songKeyInv, positive=positive,
               do_resample=do_resample, partialbar=partialbar, lrate=lrate,
               nThreads=nThreads, oracle=oracle, artistsdb=artistsdb,
-              matdir=matdir, nIterations=nIterations, useModel=useModel)
+              matdir=matdir, nIterations=nIterations, useModel=useModel,
+              autobar=autobar)
 
     else:
         import cProfile
         cProfile.run(\
-            'train(savedmodel, expdir=expdir, pSize=pSize,usebars=usebars, keyInv=keyInv,songKeyInv=songKeyInv, positive=positive, do_resample=do_resample, partialbar=partialbar, lrate=lrate, nThreads=nThreads, oracle=oracle, artistsdb=artistsdb, matdir=matdir, nIterations=nIterations, useModel=useModel)',
+            'train(savedmodel, expdir=expdir, pSize=pSize,usebars=usebars, keyInv=keyInv,songKeyInv=songKeyInv, positive=positive, do_resample=do_resample, partialbar=partialbar, lrate=lrate, nThreads=nThreads, oracle=oracle, artistsdb=artistsdb, matdir=matdir, nIterations=nIterations, useModel=useModel, autobar=autobar)',
             filename=profile)
         # load and print stats
         stats = pstats.Stats(profile)
