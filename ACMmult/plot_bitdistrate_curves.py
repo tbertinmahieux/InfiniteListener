@@ -15,7 +15,7 @@ import model as MODEL
 
 
 
-def plot_from_file(filename):
+def plot_from_file(*argc):
     """
     Plot the bitrate curves from the data sevd to file.
     Data must be between '#PLOTSTUFF' and '#PLOTDONE'
@@ -23,54 +23,82 @@ def plot_from_file(filename):
     # import pylab
     import pylab as P
 
-    # PARSE FILE
-    f = open(filename,'r')
-    # find beginning of data
-    line = f.next()
-    while line[:len('#PLOTSTUFF')] != '#PLOTSTUFF':
-        line = f.next()
-    bitrates = []
-    bitrate = []
-    # iterate over lines
-    while True:
-        line = f.next()
-        if line[:len('#PLOTDONE')] == '#PLOTDONE':
-            if len(bitrate) > 0:
-                bitrates.append( bitrate )
-            break
-        if line[:len('#BITRATE')] == '#BITRATE':
-            if len(bitrate) > 0:
-                bitrates.append( bitrate )
-            bitrate = []
-            continue
-        res = eval(line)
-        bitrate.append( res )
-    # close file
-    f.close()
-
     # plotting symbols
+    psymbidx = 0
     psymbs = ['-','--','-.',':','x-','o-','s-','+-','<-','>-']
+
+    # colors
+    coloridx = 0
+    colors = ['b','g','r','k','y','m','c']
 
     # create figure
     P.figure()
     P.hold(True)
 
-    # iterate over bitrates
-    idx = -1
-    for bitrate in bitrates:
-        idx += 1
-        # smaller psize / number of codes
-        min_psize = min(map(lambda x: x[0],bitrate))
-        min_ncode = min(map(lambda x: x[1],bitrate))
-        legend_str = 'psize='+str(min_psize)+', #codes='+str(min_ncode)
-        # psize and values
-        psizes = np.array(map(lambda x: x[0], bitrate))
-        dists = np.array(map(lambda x: x[2], bitrate))
-        order = np.argsort(psizes)
-        psizes = psizes[order]
-        dists = dists[order]
-        # plot
-        P.plot(psizes,dists,psymbs[idx],label=legend_str)
+    filenameidx = 0
+    while True:
+        if filenameidx >= len(argc):
+            break
+        filename = argc[filenameidx]
+        comment = ''
+        filenameidx += 1
+        if filenameidx  < len(argc):
+            if not os.path.exists(argc[filenameidx]):
+                comment = argc[filenameidx]
+                filenameidx += 1
+        # PARSE FILE
+        f = open(filename,'r')
+        # find beginning of data
+        line = f.next()
+        while line[:len('#PLOTSTUFF')] != '#PLOTSTUFF':
+            line = f.next()
+        bitrates = []
+        bitrate = []
+        # iterate over lines
+        while True:
+            line = f.next()
+            if line[:len('#PLOTDONE')] == '#PLOTDONE':
+                if len(bitrate) > 0:
+                    bitrates.append( bitrate )
+                break
+            if line[:len('#BITRATE')] == '#BITRATE':
+                if len(bitrate) > 0:
+                    bitrates.append( bitrate )
+                bitrate = []
+                continue
+            res = eval(line)
+            bitrate.append( res )
+        # close file
+        f.close()
+
+
+        # color
+        color = colors[coloridx]
+        coloridx += 1
+
+        # iterate over bitrates
+        idx = -1
+        for bitrate in bitrates:
+            idx += 1
+            # smaller psize / number of codes
+            min_psize = min(map(lambda x: x[0],bitrate))
+            min_ncode = min(map(lambda x: x[1],bitrate))
+            legend_str = 'psize='+str(min_psize)+', #codes='+str(min_ncode)
+            if comment != '':
+                legend_str += ' ' + comment
+            # psize and values
+            psizes = np.array(map(lambda x: x[0], bitrate))
+            dists = np.array(map(lambda x: x[2], bitrate))
+            order = np.argsort(psizes)
+            psizes = psizes[order]
+            dists = dists[order]
+            # psymb
+            psymb = color + psymbs[psymbidx]
+            psymbidx += 1
+            # plot
+            P.plot(psizes,dists,psymb,label=legend_str)
+
+
         
     # legend
     P.legend()
@@ -213,7 +241,7 @@ def die_with_usage():
     """
     print 'usage:'
     print '  python plot_bitdistrate_curves.py [FLAGS] <valid dir> <test dir> <output> <exp1> .... <expN>'
-    print '  python plot_bitdistrate_curves.py -plot output'
+    print '  python plot_bitdistrate_curves.py -plot output (comment) output (comment) ...'
     print 'PARAMS:'
     print ' <valid dir>    contains matfiles of validation set'
     print '  <test dir>    contains matfiles of test set'
@@ -229,19 +257,19 @@ if __name__ == '__main__':
         die_with_usage()
 
     # flags
-    plotfile = ''
+    plotfiles = ''
     while True:
         if len(sys.argv) < 2:
             break
         elif sys.argv[1] == '-plot':
-            plotfile = sys.argv[2]
-            sys.argv.pop(1)
+            plotfiles = sys.argv[2:]
+            break
         else:
             break
         sys.argv.pop(1)
-    if plotfile != '':
-        print 'plotting from file:',plotfile
-        plot_from_file(plotfile)
+    if plotfiles != '':
+        print 'plotting from file:',plotfiles
+        plot_from_file(*plotfiles)
         sys.exit(0)
         
     # params
