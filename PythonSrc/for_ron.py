@@ -39,7 +39,7 @@ assert outputDir != '','SET OUTPUT DIR TO SOMETHING!!!!'
 
 def do_experiment(experiment_dir,beats=0,bars=0,nCodes=0,nIter=1e7,
                   partialbar=0,keyInv=False,songKeyInv=True,lrate=1e-3,
-                  mat_dir='',useModel='VQ'):
+                  mat_dir='',useModel='VQ',autobar):
     """
     Main function to run an experiment, train a model and save to dir.
     """
@@ -92,7 +92,8 @@ def do_experiment(experiment_dir,beats=0,bars=0,nCodes=0,nIter=1e7,
                            positive=True, do_resample=True,
                            partialbar=partialbar, lrate=lrate, nThreads=4,
                            oracle='MAT', artistsdb='',
-                           matdir=mat_dir, nIterations=nIter, useModel=useModel)
+                           matdir=mat_dir, nIterations=nIter, useModel=useModel,
+                           autobar=autobar)
 
     # write done file
     if ec == 0:
@@ -348,6 +349,59 @@ argsd13 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
 args14 = [os.path.join(outputDir,'set5exp14')]
 argsd14 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
           'beats':4,'bars':0,'nCodes':65536}
+# add to exp args
+tmp = []
+for k in range(1,15):
+    tmp.append(eval( '(args'+str(int(k))+',argsd'+str(int(k))+')' ))
+experiment_args.append(tmp)
+# EXPERIMENT SET 6
+# redo exp4 with no bars and autobar, or exp5 with autobar!
+#1
+args1 = [os.path.join(outputDir,'set6exp1')]
+argsd1 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':1,'bars':0,'nCodes':2,'autobar':True}
+args2 = [os.path.join(outputDir,'set6exp2')]
+argsd2 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':2,'bars':0,'nCodes':4,'autobar':True}
+args3 = [os.path.join(outputDir,'set6exp3')]
+argsd3 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':4,'bars':0,'nCodes':16,'autobar':True}
+args4 = [os.path.join(outputDir,'set6exp4')]
+argsd4 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':8,'bars':0,'nCodes':256,'autobar':True}
+#2
+args5 = [os.path.join(outputDir,'set6exp5')]
+argsd5 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':1,'bars':0,'nCodes':4,'autobar':True}
+args6 = [os.path.join(outputDir,'set6exp6')]
+argsd6 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':2,'bars':0,'nCodes':16,'autobar':True}
+args7 = [os.path.join(outputDir,'set6exp7')]
+argsd7 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':4,'bars':0,'nCodes':256,'autobar':True}
+args8 = [os.path.join(outputDir,'set6exp8')]
+argsd8 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':8,'bars':0,'nCodes':65536,'autobar':True}
+#3
+args9 = [os.path.join(outputDir,'set6exp9')]
+argsd9 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':1,'bars':0,'nCodes':8,'autobar':True}
+args10 = [os.path.join(outputDir,'set6exp10')]
+argsd10 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':2,'bars':0,'nCodes':64,'autobar':True}
+args11 = [os.path.join(outputDir,'set6exp11')]
+argsd11 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':4,'bars':0,'nCodes':4096,'autobar':True}
+#4
+args12 = [os.path.join(outputDir,'set6exp12')]
+argsd12 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':1,'bars':0,'nCodes':16,'autobar':True}
+args13 = [os.path.join(outputDir,'set6exp13')]
+argsd13 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':2,'bars':0,'nCodes':256,'autobar':True}
+args14 = [os.path.join(outputDir,'set6exp14')]
+argsd14 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':4,'bars':0,'nCodes':65536,'autobar':True}
 # add to exp args
 tmp = []
 for k in range(1,15):
