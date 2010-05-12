@@ -95,7 +95,7 @@ class OracleMatfiles:
                 # predicts
                 tmp,avg_dist = auto_bar.predicts(feats)
                 d = np.average(avg_dist)
-                if d < np.inf:
+                if d < best_dist:
                     best_dist = d
                     best_feats = feats
             # done, return best features
