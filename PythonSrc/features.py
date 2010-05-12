@@ -16,9 +16,6 @@ import scipy.io
 import scipy.signal
 import numpy as np
 
-import model as MODEL
-
-
 
 def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
                  positive=True,do_resample=True,partialbar=0, offset=0,
@@ -134,12 +131,6 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
         # reform features, by splitting the big matrix, flattening, concatenating
         nDivs = feats.shape[1] / realSize
         feats = np.concatenate([c.flatten().reshape(1,12*realSize) for c in np.split(feats,nDivs,axis=1)],axis=0)
-
-    # TO DO, or TEMP, or.... WORK IN PROGRESS
-    if model != None:
-        print 'refacturing features so it fits the model, slow!!!'
-        print 'might not best be done here, lets implement offset first'
-        raise NotImplementedError
 
     # done, return features
     return feats
