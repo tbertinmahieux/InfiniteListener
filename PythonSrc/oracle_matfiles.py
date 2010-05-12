@@ -49,7 +49,7 @@ class OracleMatfiles:
         self._fileidx = 0
 
 
-    def next_track(self):
+    def next_track(self,auto_bar=None):
         """
         Returns features for a random matlab file, or None if some error.
         If only one iter over the data, raise StopIteration at the end.
@@ -64,14 +64,41 @@ class OracleMatfiles:
             matfile = self._matfiles[self._fileidx]
             self._fileidx += 1
         # return features
-        return features.features_from_matfile(matfile,
-                                              pSize=self._pSize,
-                                              usebars=self._usebars,
-                                              keyInv=self._keyInv,
-                                              songKeyInv=self._songKeyInv,
-                                              positive=self._positive,
-                                              do_resample=self._do_resample,
-                                              partialbar=self._partialbar)
+        if auto_bar == None:
+            return features.features_from_matfile(matfile,
+                                                  pSize=self._pSize,
+                                                  usebars=self._usebars,
+                                                  keyInv=self._keyInv,
+                                                  songKeyInv=self._songKeyInv,
+                                                  positive=self._positive,
+                                                  do_resample=self._do_resample,
+                                                  partialbar=self._partialbar)
+        else:
+            # we assume auto_bar contains a model
+            # we predict on every offset, return features with the best offset based on the model
+            best_dist = np.inf
+            best_feats = None
+            realSize = min(self._pSize,self._partialbar)
+            for offset in range(realSize):
+                # get features
+                feats = features.features_from_matfile(matfile,
+                                                       pSize=self._pSize,
+                                                       usebars=self._usebars,
+                                                       keyInv=self._keyInv,
+                                                       songKeyInv=self._songKeyInv,
+                                                       positive=self._positive,
+                                                       do_resample=self._do_resample,
+                                                       partialbar=self._partialbar,
+                                                       offset=offset)
+                # predicts
+                tmp,avg_dist = auto_bar.predicts(feats)
+                d = np.average(avg_dist)
+                if d < np.inf:
+                    best_dist = d
+                    best_feats = feats
+            # done, return best features
+            return best_feats
+
 
     def tracksGiven(self):
         """
