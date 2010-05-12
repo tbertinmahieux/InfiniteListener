@@ -122,8 +122,9 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
     if positive:
         feats[np.where(feats<0)] = 0
 
-    # offset
+    # offset (SLOW)
     if offset > 0:
+        assert(offset < realSize,'offset too large! must be < to regular pattern length')
         # reform features as one big matrix, 12 x something
         feats = np.concatenate([c.reshape(12,realSize) for c in feats],axis=1)
         # remove the offset, and the end
@@ -175,7 +176,7 @@ def analysis_dict_to_matfile(analysis_dict,filename):
 
 def features_from_matfile(filename,pSize=8,usebars=2,keyInv=True,
                           songKeyInv=False,positive=True,do_resample=True,
-                          partialbar=0):
+                          partialbar=0,offset=0):
     """
     Function to help the transition from the BostonHackDay project.
     Loads a matlab file containing beat features.
@@ -207,7 +208,8 @@ def features_from_matfile(filename,pSize=8,usebars=2,keyInv=True,
     return get_features(None,pSize=pSize,usebars=usebars,
                         keyInv=keyInv,songKeyInv=songKeyInv,
                         positive=positive,do_resample=do_resample,
-                        partialbar=partialbar,btchroma_barbts=analysis)
+                        partialbar=partialbar,offset=offset,
+                        btchroma_barbts=analysis)
 
 
 def create_beat_synchro_chromagram(analysis_dict):
