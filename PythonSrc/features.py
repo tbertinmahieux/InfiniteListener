@@ -16,12 +16,13 @@ import scipy.io
 import scipy.signal
 import numpy as np
 
+import model as MODEL
 
 
 
 def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
-                 positive=True,do_resample=True,partialbar=0,
-                 btchroma_barbts=None):
+                 positive=True,do_resample=True,partialbar=0, offset=0,
+                 btchroma_barbts=None,model=None):
     """
     Main function, similar to those in demos.py for BostonHackDay
     Receives a dictionary containing:
@@ -62,8 +63,6 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
     else:
         btchroma, barbts = btchroma_barbts
         barbts = barbts.flatten()
-    #assert not np.isnan(btchroma).any(),'features: btchroma have NaN'
-    #assert not np.isnan(barbts).any(),'features: barbts have NaN'
     if np.isnan(btchroma).any():
         return None
 
@@ -122,6 +121,24 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
     # remove negative numbers
     if positive:
         feats[np.where(feats<0)] = 0
+
+    # offset
+    if offset > 0:
+        # reform features as one big matrix, 12 x something
+        feats = np.concatenate([c.reshape(12,realSize) for c in feats],axis=1)
+        # remove the offset, and the end
+        feats = feats[:,offset:-(realSize-offset)]
+        if feats.shape[1] == 0:
+            return None
+        # reform features, by splitting the big matrix, flattening, concatenating
+        nDivs = feats.shape[1] / realSize
+        feats = np.concatenate([c.flatten().reshape(1,12*realSize) for c in np.split(feats,nDivs,axis=1)],axis=0)
+
+    # TO DO, or TEMP, or.... WORK IN PROGRESS
+    if model != None:
+        print 'refacturing features so it fits the model, slow!!!'
+        print 'might not best be done here, lets implement offset first'
+        raise NotImplementedError
 
     # done, return features
     return feats
