@@ -90,6 +90,8 @@ class OracleMatfiles:
                                                        do_resample=self._do_resample,
                                                        partialbar=self._partialbar,
                                                        offset=offset)
+                if feats == None:
+                    continue
                 # predicts
                 tmp,avg_dist = auto_bar.predicts(feats)
                 d = np.average(avg_dist)
