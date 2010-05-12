@@ -148,7 +148,7 @@ def train(savedmodel, expdir='', pSize=8, usebars=2, keyInv=True,
             # increment iterations
             main_iterations += 1
             global_iterations += 1
-            if main_iterations == int(np.ceil(last_printed_iter * 1.1)):
+            if main_iterations == int(np.ceil(last_printed_iter * 1.1)) and len(dist_estimate) > 0:
                 print main_iterations,'/',global_iterations,'iterations (local/global), approx. avg dist:',np.average(dist_estimate)
                 last_printed_iter = main_iterations
             statlog.iteration()
