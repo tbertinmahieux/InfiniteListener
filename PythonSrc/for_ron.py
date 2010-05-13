@@ -33,7 +33,7 @@ featsDir = os.path.expanduser('~/projects/ismir10-patterns/beatFeats')
 #outputDir= os.path.expanduser('tmpexps')
 #outputDir = os.path.expanduser('~/projects/ismir10-patterns/experiments')
 #outputDir = os.path.expanduser('~/tmp_output_dir')
-outputDir = ''
+outputDir = os.path.expanduser('~/projects/fromthierry/newexperiments')
 assert outputDir != '','SET OUTPUT DIR TO SOMETHING!!!!'
 
 
