@@ -47,6 +47,8 @@ class OracleMatfiles:
         # one iteration?
         self._oneFullIter = oneFullIter
         self._fileidx = 0
+        # autobar
+        self._autobar = None
 
 
     def next_track(self,auto_bar=None):
@@ -103,6 +105,16 @@ class OracleMatfiles:
             # done, return best features
             return best_feats
 
+    def use_autobar_in_iterator(self,model):
+        """
+        When we want a model to use the autobar function
+        and the iterator syntax.
+        By setting the model here, every time we call next, autobar
+        is used with the given model.
+        To change the model, call back this function.
+        To stop that behavior, pass None as an argument.
+        """
+        self._autobar = model
 
     def tracksGiven(self):
         """
@@ -124,7 +136,7 @@ class OracleMatfiles:
         Can be used only if oneFulliter is True
         """
         assert self._oneFullIter,'cant use this oracle as an iterator unless we do only one pass on the data, set oneFullIter=True at creation.'
-        return self.next_track()
+        return self.next_track(auto_bar=self._autobar)
 
 
 
