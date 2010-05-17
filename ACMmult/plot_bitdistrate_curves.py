@@ -235,8 +235,10 @@ def analyze_one_exp_dir(expdir,validdir,testdir,autobar=False):
 
     if testdir == validdir:
         # we're done
+        # test with test data
+        model = ANALYZE.unpickle(os.path.join(best_model,'model.p'))
         # return patternsize, codebook size, distortion errror, best saved model
-        return validdata.shape[1]/12, best_model._codebook.shape[0], best_dist, best_model
+        return validdata.shape[1]/12, model._codebook.shape[0], best_dist, best_model
     
     # test with test data
     model = ANALYZE.unpickle(os.path.join(best_model,'model.p'))
