@@ -169,7 +169,7 @@ def check_saved_model_full(savedmodel,trim=True):
 
 
 
-def analyze_one_exp_dir(expdir,validdir,testdir):
+def analyze_one_exp_dir(expdir,validdir,testdir,autobar=False):
     """
     Analyze one experiment dir.
     This directory contains many subdirectory, for all the saved models.
@@ -194,6 +194,8 @@ def analyze_one_exp_dir(expdir,validdir,testdir):
 
     # load valid data
     oracle = ORACLE.OracleMatfiles(params,validdir,oneFullIter=True)
+    if autobar:
+        oracle.use_autobar_in_iterator(savedmodel)
     validdata = [x for x in oracle]
     validdata = filter(lambda x: x != None, validdata)
     validdata = np.concatenate(validdata)
@@ -202,6 +204,8 @@ def analyze_one_exp_dir(expdir,validdir,testdir):
     # load test data
     if validdir != testdir:
         oracle = ORACLE.OracleMatfiles(params,testdir,oneFullIter=True)
+        if autobar:
+            oracle.use_autobar_in_iterator(savedmodel)
         testdata = [x for x in oracle]
         testdata = filter(lambda x: x != None, testdata)
         testdata = np.concatenate(testdata)
@@ -242,6 +246,9 @@ def die_with_usage():
     print 'usage:'
     print '  python plot_bitdistrate_curves.py [FLAGS] <valid dir> <test dir> <output> <exp1> .... <expN>'
     print '  python plot_bitdistrate_curves.py -plot output (comment) output (comment) ...'
+    print 'FLAGS:'
+    print '       -plot    see above'
+    print '    -autobar    measure result on the optimal bar alignment'
     print 'PARAMS:'
     print ' <valid dir>    contains matfiles of validation set'
     print '  <test dir>    contains matfiles of test set'
@@ -257,6 +264,7 @@ if __name__ == '__main__':
         die_with_usage()
 
     # flags
+    autobar = False
     plotfiles = ''
     while True:
         if len(sys.argv) < 2:
@@ -264,6 +272,8 @@ if __name__ == '__main__':
         elif sys.argv[1] == '-plot':
             plotfiles = sys.argv[2:]
             break
+        elif sys.argv[1] == '-autobar':
+            autobar = True
         else:
             break
         sys.argv.pop(1)
@@ -285,7 +295,7 @@ if __name__ == '__main__':
     results = []
     for d in expdirs:
         print 'doing exp dir:',d
-        res = analyze_one_exp_dir(d,validdir,testdir)
+        res = analyze_one_exp_dir(d,validdir,testdir,autobar=autobar)
         if res != None and res[0] != None:
             results.append(res)
     print 'we have',len(results),'results.'
