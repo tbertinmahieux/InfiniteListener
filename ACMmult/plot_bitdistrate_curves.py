@@ -193,40 +193,61 @@ def analyze_one_exp_dir(expdir,validdir,testdir,autobar=False):
     params = ANALYZE.unpickle(os.path.join(savedmodel,'params.p'))
 
     # load valid data
-    oracle = ORACLE.OracleMatfiles(params,validdir,oneFullIter=True)
-    if autobar:
-        oracle.use_autobar_in_iterator(savedmodel)
-    validdata = [x for x in oracle]
-    validdata = filter(lambda x: x != None, validdata)
-    validdata = np.concatenate(validdata)
-    assert validdata.shape[1] > 0,'no valid data??'
+    if not autobar:
+        oracle = ORACLE.OracleMatfiles(params,validdir,oneFullIter=True)
+        #if autobar:
+        #    oracle.use_autobar_in_iterator(savedmodel)
+        validdata = [x for x in oracle]
+        validdata = filter(lambda x: x != None, validdata)
+        validdata = np.concatenate(validdata)
+        assert validdata.shape[1] > 0,'no valid data??'
     
     # load test data
-    if validdir != testdir:
-        oracle = ORACLE.OracleMatfiles(params,testdir,oneFullIter=True)
-        if autobar:
-            oracle.use_autobar_in_iterator(savedmodel)
-        testdata = [x for x in oracle]
-        testdata = filter(lambda x: x != None, testdata)
-        testdata = np.concatenate(testdata)
-        assert testdata.shape[1] > 0,'no valid data??'
-    else:
-        testdata = validdata
+    if not autobar:
+        if validdir != testdir:
+            oracle = ORACLE.OracleMatfiles(params,testdir,oneFullIter=True)
+            testdata = [x for x in oracle]
+            testdata = filter(lambda x: x != None, testdata)
+            testdata = np.concatenate(testdata)
+            assert testdata.shape[1] > 0,'no valid data??'
+        else:
+            testdata = validdata
 
     # test all subdirs with valid data, keep the best
     best_model = ''
     best_dist = np.inf
     for sm in alldirs:
         model = ANALYZE.unpickle(os.path.join(sm,'model.p'))
+        # IF AUTOBAR LOAD DATA NOW
+        oracle = ORACLE.OracleMatfiles(params,validdir,oneFullIter=True)
+        oracle.use_autobar_in_iterator(model)
+        validdata = [x for x in oracle]
+        validdata = filter(lambda x: x != None, validdata)
+        validdata = np.concatenate(validdata)
+        assert validdata.shape[1] > 0,'no valid data??'
+        ####
         codewords, dists = model.predicts(validdata)
         avg_dist = np.average(dists)
         if avg_dist < best_dist:
             best_model = sm
             best_dist = avg_dist
     assert best_model != '','no data found???'
+
+    if testdir == validdir:
+        # we're done
+        # return patternsize, codebook size, distortion errror, best saved model
+        return validdata.shape[1]/12, best_model._codebook.shape[0], best_dist, best_model
     
     # test with test data
     model = ANALYZE.unpickle(os.path.join(best_model,'model.p'))
+    # IF AUTOBAR LOAD DATA NOW
+    oracle = ORACLE.OracleMatfiles(params,testdir,oneFullIter=True)
+    oracle.use_autobar_in_iterator(model)
+    testdata = [x for x in oracle]
+    testdata = filter(lambda x: x != None, testdata)
+    testdata = np.concatenate(testdata)
+    assert testdata.shape[1] > 0,'no valid data??'
+    ####
     codewords, dists = model.predicts(testdata)
     avg_dist = np.average(dists)
     print 'best model:',best_model,' ( dist =',avg_dist,')'
