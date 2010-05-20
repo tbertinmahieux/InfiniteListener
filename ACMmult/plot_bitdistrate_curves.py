@@ -169,7 +169,7 @@ def check_saved_model_full(savedmodel,trim=True):
 
 
 
-def analyze_one_exp_dir(expdir,validdir,testdir,autobar=False):
+def analyze_one_exp_dir(expdir,validdir,testdir,autobar=False,most_recent=False):
     """
     Analyze one experiment dir.
     This directory contains many subdirectory, for all the saved models.
@@ -191,6 +191,10 @@ def analyze_one_exp_dir(expdir,validdir,testdir,autobar=False):
     # get params
     savedmodel = np.sort(alldirs)[-1]
     params = ANALYZE.unpickle(os.path.join(savedmodel,'params.p'))
+
+    # if test only one model, the most recent
+    if most_recent:
+        alldirs = [savedmodel]
 
     # load valid data
     if not autobar:
@@ -273,6 +277,7 @@ def die_with_usage():
     print 'FLAGS:'
     print '       -plot    see above'
     print '    -autobar    measure result on the optimal bar alignment'
+    print ' -mostrecent    only test most recent experiment save'
     print 'PARAMS:'
     print ' <valid dir>    contains matfiles of validation set'
     print '  <test dir>    contains matfiles of test set'
@@ -289,6 +294,7 @@ if __name__ == '__main__':
 
     # flags
     autobar = False
+    mostrecent = False
     plotfiles = ''
     while True:
         if len(sys.argv) < 2:
@@ -298,6 +304,8 @@ if __name__ == '__main__':
             break
         elif sys.argv[1] == '-autobar':
             autobar = True
+        elif sys.argv[1] == '-mostrecent':
+            mostrecent = True
         else:
             break
         sys.argv.pop(1)
@@ -319,7 +327,7 @@ if __name__ == '__main__':
     results = []
     for d in expdirs:
         print 'doing exp dir:',d
-        res = analyze_one_exp_dir(d,validdir,testdir,autobar=autobar)
+        res = analyze_one_exp_dir(d,validdir,testdir,autobar=autobar,most_recent=mostrecent)
         if res != None and res[0] != None:
             results.append(res)
     print 'we have',len(results),'results.'
