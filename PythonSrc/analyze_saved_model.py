@@ -73,7 +73,7 @@ def unpickle(filename):
         if tail == 'model.p':
             return unpickle_model(filename)
         else:
-            raise ValueError('model.p not found')
+            raise ValueError(msg)
     f.close()
     return res
 
