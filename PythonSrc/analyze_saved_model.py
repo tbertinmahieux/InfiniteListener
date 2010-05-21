@@ -33,7 +33,7 @@ def unpickle_model(filename):
     unpickler = pickle.Unpickler(f)
     try:
         res = unpickler.load()
-    except ValueError:
+    except ValueError,msg:
         f.close()
         # get path and tail
         path,tail = os.path.split(filename)
@@ -42,7 +42,7 @@ def unpickle_model(filename):
         matfile = os.path.join(path,'codebook.mat')
         # at least we have the matlab codebook?
         if not os.path.exists(matfile):
-                raise ValueError
+                raise ValueError(msg+'... and codebook.mat does not exist')
         codebook = scipy.io.loadmat(matfile)['codebook']
         # model with no numpy exists?
         if os.path.exists(nonumpy):
@@ -66,14 +66,14 @@ def unpickle(filename):
     unpickler = pickle.Unpickler(f)
     try:
         res = unpickler.load()
-    except ValueError:
+    except ValueError,msg:
         # SUPER HACK to load model when numpy array suck!
         f.close()
         path,tail = os.path.split(filename)
         if tail == 'model.p':
             return unpickle_model(filename)
         else:
-            raise ValueError
+            raise ValueError(msg+'... and model.p not found')
     f.close()
     return res
 
