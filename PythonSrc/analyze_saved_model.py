@@ -42,7 +42,7 @@ def unpickle_model(filename):
         matfile = os.path.join(path,'codebook.mat')
         # at least we have the matlab codebook?
         if not os.path.exists(matfile):
-                raise ValueError(msg+'... and codebook.mat does not exist')
+                raise ValueError('codebook.mat does not exist')
         codebook = scipy.io.loadmat(matfile)['codebook']
         # model with no numpy exists?
         if os.path.exists(nonumpy):
@@ -73,7 +73,7 @@ def unpickle(filename):
         if tail == 'model.p':
             return unpickle_model(filename)
         else:
-            raise ValueError(msg+'... and model.p not found')
+            raise ValueError('model.p not found')
     f.close()
     return res
 
