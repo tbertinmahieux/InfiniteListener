@@ -47,6 +47,9 @@ class OracleMatfiles:
         # one iteration?
         self._oneFullIter = oneFullIter
         self._fileidx = 0
+        # rand offset
+        self._randoffset = False
+        if params.has_key('randoffset'):self._randoffset = params['randoffset']
         # autobar
         self._autobar = None
 
@@ -65,6 +68,10 @@ class OracleMatfiles:
                 raise StopIteration
             matfile = self._matfiles[self._fileidx]
             self._fileidx += 1
+        # offset
+        offset = 0
+        if self._randoffset:
+            offset = np.random.randint(4)
         # return features
         if auto_bar == None:
             return features.features_from_matfile(matfile,
@@ -74,7 +81,8 @@ class OracleMatfiles:
                                                   songKeyInv=self._songKeyInv,
                                                   positive=self._positive,
                                                   do_resample=self._do_resample,
-                                                  partialbar=self._partialbar)
+                                                  partialbar=self._partialbar,
+                                                  offset=offset)
         else:
             # we assume auto_bar contains a model
             # we predict on every offset, return features with the best offset based on the model
