@@ -304,11 +304,14 @@ def save_experiment(expdir,model,starttime,statlog,params,crash=False):
     pickle.dump(model,f)
     f.close()
     # save model without numpy
-    model2 = copy.deepcopy(model)
-    model2._codebook = None
+    #model2 = copy.deepcopy(model) # causes problem, no idea why
+                                   # hack around, keep codebook, remove it, save it, add cb back
+    codebook = model._codebook
+    model._codebook = None
     f = open(os.path.join(savedir,'model_nonumpy.p'),'w')
-    pickle.dump(model2,f)
+    pickle.dump(model,f)
     f.close()
+    model._codebook = codebook
     # save stats
     f = open(os.path.join(savedir,'stats.p'),'w')
     pickle.dump(statlog,f)
