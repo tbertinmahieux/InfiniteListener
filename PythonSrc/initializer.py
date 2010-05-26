@@ -26,7 +26,7 @@ import oracle_matfiles
 
 def initialize(nCodes,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
                positive=True,do_resample=True,partialbar=0,nThreads=4,
-               oracle='EN',artistsdb='',matdir=''):
+               oracle='EN',artistsdb='',matdir='',randoffset=False):
     """
     Function to initialize a codebook, return the codebook as numpy array.
     """
@@ -37,7 +37,8 @@ def initialize(nCodes,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
               'songKeyInv':songKeyInv, 'positive':positive,
               'do_resample':do_resample, 'partialbar':partialbar,
               'nThreads':nThreads, 'oracle':oracle,
-              'artistsdb':artistsdb, 'matdir':matdir}
+              'artistsdb':artistsdb, 'matdir':matdir,
+              'randoffset':randoffset}
 
 
     # create codebook
@@ -110,6 +111,7 @@ def die_with_usage():
     print ' -artistsdb db     SQLlite database containing artist names'
     print '                   used by EchoNest oracle'
     print ' -oraclemat d      matfiles oracle, d: matfiles dir'
+    print ' -randoffset       uses a random offset for each track ranging from 0 to 3'
     print ''
     print 'typical command to initialize from codebook:'
     print '  python -O initializer.py -pSize 8 -usebars 2 -artistsdb artists28March.db ~/experiment_dir/newexp/codebook.mat'
@@ -141,6 +143,7 @@ if __name__ == '__main__' :
     oracle = 'EN'
     artistsdb = ''
     matdir = ''
+    randoffset = False
     while True:
         if sys.argv[1] == '-pSize':
             pSize = int(sys.argv[2])
@@ -179,6 +182,9 @@ if __name__ == '__main__' :
             matdir = sys.argv[2]
             sys.argv.pop(1)
             print 'oracle =',oracle,', matfiles dir =',matdir
+        elif sys.argv[1] == '-randoffset':
+            randoffset = True
+            print 'randoffset =', randoffset
         else:
             break
         sys.argv.pop(1)
@@ -193,7 +199,7 @@ if __name__ == '__main__' :
                           songKeyInv=songKeyInv,positive=positive,
                           do_resample=do_resample,partialbar=partialbar,
                           nThreads=nThreads,oracle=oracle,artistsdb=artistsdb,
-                          matdir=matdir)
+                          matdir=matdir,randoffset=randoffset)
 
     # save codebook
     scipy.io.savemat(filename,{'codebook':codebook})
