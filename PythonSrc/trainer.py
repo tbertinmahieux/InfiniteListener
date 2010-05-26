@@ -34,7 +34,7 @@ import analyze_saved_model as ANALYZE
 def train(savedmodel, expdir='', pSize=8, usebars=2, keyInv=True,
           songKeyInv=False, positive=True, do_resample=True, partialbar=0,
           lrate=1e-5, nThreads=4, oracle='EN', artistsdb='', matdir='',
-          nIterations=1e7, useModel='VQ', autobar=False):
+          nIterations=1e7, useModel='VQ', autobar=False, randoffset=False):
     """
     Performs training
     Grab track data from oracle
@@ -119,7 +119,7 @@ def train(savedmodel, expdir='', pSize=8, usebars=2, keyInv=True,
               'nThreads':nThreads, 'oracle':oracle,
               'artistsdb':artistsdb, 'matdir':matdir,
               'nIterations':nIterations, 'useModel':useModel,
-              'autobar':autobar}
+              'autobar':autobar,'randoffset':randoffset}
 
     # creates the experiment folder
     if not os.path.isdir(expdir):
@@ -380,6 +380,7 @@ def die_with_usage():
     print ' -nIters n         maximum number of iterations'
     print ' -useModel N       model name, VQ (default), VQFILT'
     print ' -autobar          trains with self-adjusting bar offset, only matfiles oracle'
+    print ' -randoffset       uses a random offset for each track ranging from 0 to 3 inclusive'
     print ' -profile f        use profiler, output to f, limits iters to 100'
     print ''
     print 'typical command to initialize from codebook:'
@@ -413,6 +414,7 @@ if __name__ == '__main__':
     nIterations = 1e7
     useModel = 'VQ'
     autobar = False
+    randoffset = False
     profile = ''
     while True:
         if sys.argv[1] == '-expdir':
@@ -471,6 +473,9 @@ if __name__ == '__main__':
         elif sys.argv[1] == '-autobar':
             autobar = True
             print 'autobar =', autobar
+        elif sys.argv[1] == '-randoffset':
+            randoffset = True
+            print 'randoffset =', randoffset
         elif sys.argv[1] == '-profile':
             profile = sys.argv[2]
             nIterations = 100
@@ -495,12 +500,12 @@ if __name__ == '__main__':
               do_resample=do_resample, partialbar=partialbar, lrate=lrate,
               nThreads=nThreads, oracle=oracle, artistsdb=artistsdb,
               matdir=matdir, nIterations=nIterations, useModel=useModel,
-              autobar=autobar)
+              autobar=autobar, randoffset=randoffset)
 
     else:
         import cProfile
         cProfile.run(\
-            'train(savedmodel, expdir=expdir, pSize=pSize,usebars=usebars, keyInv=keyInv,songKeyInv=songKeyInv, positive=positive, do_resample=do_resample, partialbar=partialbar, lrate=lrate, nThreads=nThreads, oracle=oracle, artistsdb=artistsdb, matdir=matdir, nIterations=nIterations, useModel=useModel, autobar=autobar)',
+            'train(savedmodel, expdir=expdir, pSize=pSize,usebars=usebars, keyInv=keyInv,songKeyInv=songKeyInv, positive=positive, do_resample=do_resample, partialbar=partialbar, lrate=lrate, nThreads=nThreads, oracle=oracle, artistsdb=artistsdb, matdir=matdir, nIterations=nIterations, useModel=useModel, autobar=autobar,randoffset=randoffset)',
             filename=profile)
         # load and print stats
         stats = pstats.Stats(profile)
