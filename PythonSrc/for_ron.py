@@ -39,7 +39,7 @@ assert outputDir != '','SET OUTPUT DIR TO SOMETHING!!!!'
 
 def do_experiment(experiment_dir,beats=0,bars=0,nCodes=0,nIter=1e7,
                   partialbar=0,keyInv=False,songKeyInv=True,lrate=1e-3,
-                  mat_dir='',useModel='VQ',autobar=False):
+                  mat_dir='',useModel='VQ',autobar=False,randoffset=False):
     """
     Main function to run an experiment, train a model and save to dir.
     """
@@ -80,7 +80,7 @@ def do_experiment(experiment_dir,beats=0,bars=0,nCodes=0,nIter=1e7,
                                           positive=True, do_resample=True,
                                           partialbar=partialbar, nThreads=4,
                                           oracle='MAT', artistsdb='',
-                                          matdir=mat_dir)
+                                          matdir=mat_dir,randoffset=randoffset)
         codebook_fname = os.path.join(experiment_dir,'codebook.mat')
         scipy.io.savemat(codebook_fname,{'codebook':codebook})
         print 'after initialization, codebook saved to:',codebook_fname
@@ -93,7 +93,7 @@ def do_experiment(experiment_dir,beats=0,bars=0,nCodes=0,nIter=1e7,
                            partialbar=partialbar, lrate=lrate, nThreads=4,
                            oracle='MAT', artistsdb='',
                            matdir=mat_dir, nIterations=nIter, useModel=useModel,
-                           autobar=autobar)
+                           autobar=autobar,randoffset=randoffset)
 
     # write done file
     if ec == 0:
@@ -405,6 +405,53 @@ argsd14 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
 # add to exp args
 tmp = []
 for k in range(1,15):
+    tmp.append(eval( '(args'+str(int(k))+',argsd'+str(int(k))+')' ))
+experiment_args.append(tmp)
+# EXPERIMENT SET 7
+# part of exp 5 with random offset (so no bars, random offset)
+#1
+args1 = [os.path.join(outputDir,'set7exp1')]
+argsd1 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':1,'bars':0,'nCodes':2,'randoffset':True}
+args2 = [os.path.join(outputDir,'set7exp2')]
+argsd2 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':2,'bars':0,'nCodes':4,'randoffset':True}
+args3 = [os.path.join(outputDir,'set7exp3')]
+argsd3 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':4,'bars':0,'nCodes':16,'randoffset':True}
+args4 = [os.path.join(outputDir,'set7exp4')]
+argsd4 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':8,'bars':0,'nCodes':256,'randoffset':True}
+#2
+args5 = [os.path.join(outputDir,'set7exp5')]
+argsd5 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':1,'bars':0,'nCodes':4,'randoffset':True}
+args6 = [os.path.join(outputDir,'set7exp6')]
+argsd6 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':2,'bars':0,'nCodes':16,'randoffset':True}
+args7 = [os.path.join(outputDir,'set7exp7')]
+argsd7 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':4,'bars':0,'nCodes':256,'randoffset':True}
+#3
+args8 = [os.path.join(outputDir,'set7exp8')]
+argsd8 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':1,'bars':0,'nCodes':8,'randoffset':True}
+args9 = [os.path.join(outputDir,'set7exp9')]
+argsd9 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':2,'bars':0,'nCodes':64,'randoffset':True}
+args10 = [os.path.join(outputDir,'set7exp10')]
+argsd10 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':4,'bars':0,'nCodes':4096,'randoffset':True}
+#4
+args11 = [os.path.join(outputDir,'set7exp11')]
+argsd11 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':1,'bars':0,'nCodes':16,'randoffset':True}
+args12 = [os.path.join(outputDir,'set7exp12')]
+argsd12 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':2,'bars':0,'nCodes':256,'randoffset':True}
+# add to exp args
+tmp = []
+for k in range(1,13):
     tmp.append(eval( '(args'+str(int(k))+',argsd'+str(int(k))+')' ))
 experiment_args.append(tmp)
 
