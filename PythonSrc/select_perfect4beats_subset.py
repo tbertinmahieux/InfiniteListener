@@ -137,6 +137,8 @@ if __name__ == '__main__' :
             relf = relpath(f,start=startdir)
         newf = os.path.join(newdir,relf)
         # copy file
-        os.makedirs(os.path.dirname(newf))
+        dname = os.path.dirname(newf)
+        if not os.path.exists(dname):
+            os.makedirs(dname)
         shutil.copyfile(f,newf)
     print 'done'
