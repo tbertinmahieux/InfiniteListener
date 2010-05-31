@@ -35,8 +35,9 @@ def is_perfect_4(path):
         if (np.diff(barbts) == 4).all():
             return True
     except IndexError:
-        print 'problem, weird barbts in file:',path
-        print 'barbts = ',barbts
+        #print 'problem, weird barbts in file:',path
+        #print 'barbts = ',barbts
+        pass
     return False
 
 
