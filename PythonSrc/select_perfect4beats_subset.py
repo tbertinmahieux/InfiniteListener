@@ -25,7 +25,11 @@ def is_perfect_4(path):
     # load matfile
     mat = scipy.io.loadmat(path)
     # get bars in term of beats
-    barbts = mat['barbts']
+    try:
+        barbts = mat['barbts']
+    except KeyError:
+        print 'probelm, no barbts in file:',path
+        return False
     # test diff
     if (np.diff(barbts) == 4).all():
         return True
