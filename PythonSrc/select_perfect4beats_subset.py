@@ -25,11 +25,11 @@ def relpath(path, start='.'):
     """
     if not path:
         raise ValueError("no path specified")
-    start_list = abspath(start).split(sep)
-    path_list = abspath(path).split(sep)
+    start_list = os.path.abspath(start).split(sep)
+    path_list = os.path.abspath(path).split(sep)
     if start_list[0].lower() != path_list[0].lower():
-        unc_path, rest = splitunc(path)
-        unc_start, rest = splitunc(start)
+        unc_path, rest = os.path.splitunc(path)
+        unc_start, rest = os.path.splitunc(start)
         if bool(unc_path) ^ bool(unc_start):
             raise ValueError("Cannot mix UNC and non-UNC paths (%s and %s)" % (path, start))
         else:
@@ -43,8 +43,8 @@ def relpath(path, start='.'):
 
     rel_list = [pardir] * (len(start_list)-i) + path_list[i:]
     if not rel_list:
-        return curdir
-    return join(*rel_list)
+        return '.'
+    return os.path.join(*rel_list)
 
 
 
