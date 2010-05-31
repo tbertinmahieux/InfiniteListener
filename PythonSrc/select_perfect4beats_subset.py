@@ -25,8 +25,8 @@ def relpath(path, start='.'):
     """
     if not path:
         raise ValueError("no path specified")
-    start_list = os.path.abspath(start).split(sep)
-    path_list = os.path.abspath(path).split(sep)
+    start_list = os.path.abspath(start).split(os.path.sep)
+    path_list = os.path.abspath(path).split(os.path.sep)
     if start_list[0].lower() != path_list[0].lower():
         unc_path, rest = os.path.splitunc(path)
         unc_start, rest = os.path.splitunc(start)
