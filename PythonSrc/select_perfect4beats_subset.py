@@ -16,7 +16,7 @@ import shutil
 
 
 
-def relpath(path, start=curdir):
+def relpath(path, start='.'):
     """
     Taken from source code in python 2.6
     Useful on boar (python 2.5)
