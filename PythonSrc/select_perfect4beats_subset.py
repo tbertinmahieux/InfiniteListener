@@ -41,7 +41,7 @@ def relpath(path, start='.'):
     else:
         i += 1
 
-    rel_list = [pardir] * (len(start_list)-i) + path_list[i:]
+    rel_list = [os.path.pardir] * (len(start_list)-i) + path_list[i:]
     if not rel_list:
         return '.'
     return os.path.join(*rel_list)
