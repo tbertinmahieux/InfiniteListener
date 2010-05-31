@@ -28,11 +28,15 @@ def is_perfect_4(path):
     try:
         barbts = mat['barbts']
     except KeyError:
-        print 'probelm, no barbts in file:',path
+        print 'problem, no barbts in file:',path
         return False
     # test diff
-    if (np.diff(barbts) == 4).all():
-        return True
+    try:
+        if (np.diff(barbts) == 4).all():
+            return True
+    except IndexError:
+        print 'problem, weird barbts in file:',path
+        print 'barbts = ',barbts
     return False
 
 
