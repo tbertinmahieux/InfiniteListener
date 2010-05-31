@@ -85,13 +85,14 @@ class OracleMatfiles:
                                                   offset=offset)
         else:
             # we assume auto_bar contains a model
-            # we predict on every offset, return features with the best offset based on the model
+            # we predict on every offset until 4, return features with the best offset based on the model
             best_dist = np.inf
             best_feats = None
             realSize = self._pSize
             if self._partialbar > 0:
                 realSize = self._partialbar
-            for offset in range(realSize):
+            # we go only until 4
+            for offset in range(min(realSize,4)):
                 # get features
                 feats = features.features_from_matfile(matfile,
                                                        pSize=self._pSize,
