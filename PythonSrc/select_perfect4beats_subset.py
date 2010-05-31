@@ -16,6 +16,38 @@ import shutil
 
 
 
+def relpath(path, start=curdir):
+    """
+    Taken from source code in python 2.6
+    Useful on boar (python 2.5)
+    http://mail.python.org/pipermail/python-list/2009-August/1215220.html
+    Return a relative version of a path
+    """
+    if not path:
+        raise ValueError("no path specified")
+    start_list = abspath(start).split(sep)
+    path_list = abspath(path).split(sep)
+    if start_list[0].lower() != path_list[0].lower():
+        unc_path, rest = splitunc(path)
+        unc_start, rest = splitunc(start)
+        if bool(unc_path) ^ bool(unc_start):
+            raise ValueError("Cannot mix UNC and non-UNC paths (%s and %s)" % (path, start))
+        else:
+            raise ValueError("path is on drive %s, start on drive %s" % (path_list[0],start_list[0]))
+    # Work out how much of the filepath is shared by start and path.
+    for i in range(min(len(start_list), len(path_list))):
+        if start_list[i].lower() != path_list[i].lower():
+            break
+    else:
+        i += 1
+
+    rel_list = [pardir] * (len(start_list)-i) + path_list[i:]
+    if not rel_list:
+        return curdir
+    return join(*rel_list)
+
+
+
 def is_perfect_4(path):
     """
     Returns True if the path is a matfile representing a song in with perfect
@@ -99,7 +131,10 @@ if __name__ == '__main__' :
     # copying them, preserving the relative naming
     print 'copying files...'
     for f in goodfiles:
-        relf = os.path.relpath(f,start=startdir)
+        try:
+            relf = os.path.relpath(f,start=startdir)
+        except AttributeError:
+            relf = relpath(f,start=startdir)
         newf = os.path.join(newdir,relf)
         # copy file
         shutil(f,newf)
