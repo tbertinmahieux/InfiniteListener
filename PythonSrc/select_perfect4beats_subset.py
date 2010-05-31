@@ -7,6 +7,7 @@ This should improve the analysis.
 
 import sys
 import os
+import os.path
 import scipy
 import scipy.io
 import numpy as np
