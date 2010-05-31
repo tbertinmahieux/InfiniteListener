@@ -137,5 +137,5 @@ if __name__ == '__main__' :
             relf = relpath(f,start=startdir)
         newf = os.path.join(newdir,relf)
         # copy file
-        shutil(f,newf)
+        shutil.copyfile(f,newf)
     print 'done'
