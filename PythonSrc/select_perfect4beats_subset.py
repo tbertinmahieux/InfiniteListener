@@ -41,7 +41,7 @@ def find_all_songs(startdir):
     # for each song, check perfect 4
     goodfiles = filter(lambda x: is_perfect_4(x),allfiles)
     # done, return
-    return goodfiles
+    return goodfiles,allfiles
 
 
 def die_with_usage():
@@ -79,11 +79,11 @@ if __name__ == '__main__' :
         print 'copying them to dir:',newdir
         
     # get list of perfect 4 files
-    goodfiles = find_all_songs(startdir)
+    goodfiles,allfiles = find_all_songs(startdir)
 
     # dryrun?
     if dryrun:
-        print 'found',len(goodfiles),' appropriate files'
+        print 'found',len(goodfiles),' appropriate files out of',len(allfiles)
         sys.exit(0)
 
     # copying them, preserving the relative naming
