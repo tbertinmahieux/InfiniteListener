@@ -454,6 +454,53 @@ tmp = []
 for k in range(1,13):
     tmp.append(eval( '(args'+str(int(k))+',argsd'+str(int(k))+')' ))
 experiment_args.append(tmp)
+# EXPERIMENT SET 8
+# train one codebook per beat size (1 to 12) with same bitrate, no bars
+#1
+args1 = [os.path.join(outputDir,'set8exp1')]
+argsd1 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':1,'bars':0,'nCodes':2}
+args2 = [os.path.join(outputDir,'set8exp2')]
+argsd2 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':2,'bars':0,'nCodes':4}
+args3 = [os.path.join(outputDir,'set8exp3')]
+argsd3 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':3,'bars':0,'nCodes':8 }
+args4 = [os.path.join(outputDir,'set8exp4')]
+argsd4 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':4,'bars':0,'nCodes':16 }
+#2
+args5 = [os.path.join(outputDir,'set8exp5')]
+argsd5 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':5,'bars':0,'nCodes':32
+args6 = [os.path.join(outputDir,'set8exp6')]
+argsd6 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':6,'bars':0,'nCodes':64}
+args7 = [os.path.join(outputDir,'set8exp7')]
+argsd7 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':7,'bars':0,'nCodes':128}
+args8 = [os.path.join(outputDir,'set8exp8')]
+argsd8 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':8,'bars':0,'nCodes':256  }
+#3
+args9 = [os.path.join(outputDir,'set8exp9')]
+argsd9 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':9,'bars':0,'nCodes':512
+args10 = [os.path.join(outputDir,'set8exp10')]
+argsd10 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':10'bars':0,'nCodes':1024
+args11 = [os.path.join(outputDir,'set8exp11')]
+argsd11 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':11'bars':0,'nCodes':2048}
+args12 = [os.path.join(outputDir,'set8exp12')]
+argsd12 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':12'bars':0,'nCodes':4096
+# add to exp args
+tmp = []
+for k in range(1,13):
+    tmp.append(eval( '(args'+str(int(k))+',argsd'+str(int(k))+')' ))
+experiment_args.append(tmp)
+
 
 
 def die_with_usage():
