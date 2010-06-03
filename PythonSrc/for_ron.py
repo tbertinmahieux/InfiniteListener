@@ -488,13 +488,13 @@ argsd9 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
           'beats':9,'bars':0,'nCodes':512}
 args10 = [os.path.join(outputDir,'set8exp10')]
 argsd10 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
-          'beats':10'bars':0,'nCodes':1024}
+          'beats':10,'bars':0,'nCodes':1024}
 args11 = [os.path.join(outputDir,'set8exp11')]
 argsd11 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
-          'beats':11'bars':0,'nCodes':2048}
+          'beats':11,'bars':0,'nCodes':2048}
 args12 = [os.path.join(outputDir,'set8exp12')]
 argsd12 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
-          'beats':12'bars':0,'nCodes':4096}
+          'beats':12,'bars':0,'nCodes':4096}
 # add to exp args
 tmp = []
 for k in range(1,13):
