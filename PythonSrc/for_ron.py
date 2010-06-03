@@ -32,7 +32,7 @@ featsDir = os.path.expanduser('~/projects/ismir10-patterns/beatFeats')
 #testFeatsDir = os.path.expanduser('~/projects/ismir10-patterns/uspop_mat')
 #outputDir= os.path.expanduser('tmpexps')
 #outputDir = os.path.expanduser('~/projects/ismir10-patterns/experiments')
-#outputDir = os.path.expanduser('~/tmp_output_dir')
+#outputDir = '/proj/hog7/cowbell43k/InfiniteListener/Experiments/'
 outputDir = os.path.expanduser('~/projects/fromthierry/newexperiments')
 assert outputDir != '','SET OUTPUT DIR TO SOMETHING!!!!'
 
@@ -465,14 +465,14 @@ argsd2 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
           'beats':2,'bars':0,'nCodes':4}
 args3 = [os.path.join(outputDir,'set8exp3')]
 argsd3 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
-          'beats':3,'bars':0,'nCodes':8 }
+          'beats':3,'bars':0,'nCodes':8}
 args4 = [os.path.join(outputDir,'set8exp4')]
 argsd4 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
-          'beats':4,'bars':0,'nCodes':16 }
+          'beats':4,'bars':0,'nCodes':16}
 #2
 args5 = [os.path.join(outputDir,'set8exp5')]
 argsd5 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
-          'beats':5,'bars':0,'nCodes':32
+          'beats':5,'bars':0,'nCodes':32}
 args6 = [os.path.join(outputDir,'set8exp6')]
 argsd6 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
           'beats':6,'bars':0,'nCodes':64}
@@ -481,20 +481,20 @@ argsd7 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
           'beats':7,'bars':0,'nCodes':128}
 args8 = [os.path.join(outputDir,'set8exp8')]
 argsd8 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
-          'beats':8,'bars':0,'nCodes':256  }
+          'beats':8,'bars':0,'nCodes':256}
 #3
 args9 = [os.path.join(outputDir,'set8exp9')]
 argsd9 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
-          'beats':9,'bars':0,'nCodes':512
+          'beats':9,'bars':0,'nCodes':512}
 args10 = [os.path.join(outputDir,'set8exp10')]
 argsd10 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
-          'beats':10'bars':0,'nCodes':1024
+          'beats':10'bars':0,'nCodes':1024}
 args11 = [os.path.join(outputDir,'set8exp11')]
 argsd11 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
           'beats':11'bars':0,'nCodes':2048}
 args12 = [os.path.join(outputDir,'set8exp12')]
 argsd12 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
-          'beats':12'bars':0,'nCodes':4096
+          'beats':12'bars':0,'nCodes':4096}
 # add to exp args
 tmp = []
 for k in range(1,13):
