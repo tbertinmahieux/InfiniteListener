@@ -13,6 +13,16 @@ import numpy as np
 import scipy
 import scipy.io as SIO
 
+import model as MODEL # for distance measures
+import features as FEATURES
+
+
+def avg_square_eucl_dist(data,dictionary):
+    """
+    Most common distortion. Data is one line, dictionary is many rows
+    """
+    dists = MODEL.euclidean_dist_batch(data,dictionary)
+    return dists * dists / dictionary.shape[1]
 
 class dict_lib():
     """
@@ -32,6 +42,10 @@ class dict_lib():
         # sort dicts by beat size (primary) and # codes (secondary)
         self._dicts = sorted(self._dicts, key=lambda d : d.shape[0]) # secondary
         self._dicts = sorted(self._dicts, key=lambda d : d.shape[1]) # primary
+
+    def __getitem__(self,idx):
+        """ return the dictionary given by the index, no check if it exists """
+        return self._dicts[idx]
 
     def __str__(self):
         """ string representation of the object """
@@ -66,34 +80,38 @@ def encode(beatchromas,dictlib,distfun):
     It takes one vector (from the song) and a dictionary, returns one value
     per dictionary codeword = average value per 'pixel'
     (e.g. avgeraged squared euclidean dist)
+    RETURN
+      dicts (in order), codes (in order), dist (total distortion)
+      So, to compose the encoding, append the codes of the dicts given by (dicts and codes)
     """
-    songlen = beatchromas.shape[1]
+    songlen = beatchromas.shape[1]+1 # +1 for algo convenience
     # create song-wise info
-    lowest_scores = np.inf(songlen)         # what is the lowest score at that point
+    lowest_scores = np.ones(songlen) * np.inf # what is the lowest score at that point
     lowest_scores[0] = 0
-    dict_indices = np.ones(songlen) * -1    # which dict brought us here
-    code_indices = np.ones(songlen) * -1    # which code in the dict brought us here
-    patch_sizes = np.ones(songlen) * -1     # length of the patch that brought us here
+    dict_indices = np.ones(songlen) * -1      # which dict brought us here
+    code_indices = np.ones(songlen) * -1      # which code in the dict brought us here
+    patch_sizes = np.ones(songlen) * -1       # length of the patch that brought us here
 
     # iterate over beats
     for beat_idx in range(songlen):
         # iterate over dictionaries
-        d = -1
+        didx = -1
         for d in dictlib:
             # dictionary index
             didx += 1
             # dictionary patch length
             d_p_len = d.shape[1] / 12
             # too large?
-            if beat_idx + d_p_len > songlen:
+            if beat_idx + d_p_len >= songlen:
                 continue
             # get the data of the song starting from beat_idx
             data = beatchromas[:,beat_idx:beat_idx+d_p_len].flatten()
             # compute the distances for each codeword
             avg_dists = distfun(data,d)
             # find lowest one
-            codeidx = np.argsort(avg_dists)
+            codeidx = np.argmin(avg_dists)
             dist = avg_dists[codeidx] * 12 * d_p_len
+            dist += lowest_scores[beat_idx] # add previous step score
             # is it the best?
             if lowest_scores[beat_idx+d_p_len] > dist:
                 lowest_scores[beat_idx+d_p_len] = dist
@@ -106,19 +124,20 @@ def encode(beatchromas,dictlib,distfun):
     beat_idx = songlen - 1
     # backtrace until reaches beat index 0
     while True:
-        assert(beat_idx>=0,'error in backtracing')
+        assert beat_idx>=0,'error in backtracing'
         if beat_idx == 0:
             break
         dicts.append(dict_indices[beat_idx])
-        dicts.append(code_indices[beat_idx])
+        codes.append(code_indices[beat_idx])
         beat_idx -= patch_sizes[beat_idx]
     # reverse
     dicts = np.flipud(np.array(dicts))
     codes = np.flipud(np.array(codes))
     # total distortion
-    dist = lowest_score[songlen-1]
+    dist = lowest_scores[songlen-1]
     # return stuff....
-    raise NotImplementedError
+    return dicts, codes, dist
+
 
 
 
@@ -151,7 +170,7 @@ def die_with_usage():
 if __name__ == '__main__':
 
     # help menu
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         die_with_usage()
 
     # flags
@@ -169,4 +188,18 @@ if __name__ == '__main__':
     # print dictlib info
     print dictlib
 
-            
+    # load the matfile, get the beatchromas
+    matfile = sys.argv[1]
+    mat = SIO.loadmat(matfile)
+    btchroma = mat['btchroma']
+    btchroma = FEATURES.keyinvariance(btchroma)
+
+    # launch, with stupid eucliden distortion
+    dicts,codes,score = encode(btchroma,dictlib,avg_square_eucl_dist)
+
+    # display
+    print 'total distortion=',score
+    for k in range(len(dicts)):
+        didx = int(dicts[k])
+        cidx = int(codes[k])
+        print 'dict',didx,'patch size',dictlib[didx].shape[1]/12,', code=',cidx
