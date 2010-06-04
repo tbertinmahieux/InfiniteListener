@@ -58,6 +58,50 @@ class dict_lib():
         return self._dicts[self._iterpos - 1]
 
 
+def encode(beatchromas,dictlib,distfun):
+    """
+    beatchromas is a matrix 12 x N, e.g. one chroma per beat
+    dictlib is an instance of dict_lib, contains many dictionaries
+    distfun is a distortion function, or any additive function to minimize.
+    It takes one vector (from the song) and a dictionary, returns one value
+    per dictionary codeword = average value per 'pixel'
+    (e.g. avgeraged squared euclidean dist)
+    """
+    songlen = beatchromas.shape[1]
+    # create song-wise info
+    lowest_scores = np.inf(songlen)         # what is the lowest score at that point
+    lowest_scores[0] = 0
+    dict_indices = np.ones(songlen) * -1    # which dict brought us here
+    code_indices = np.ones(songlen) * -1    # which code in the dict brought us here
+
+    # iterate over beats
+    for beat_idx in range(songlen):
+        # iterate over dictionaries
+        d = -1
+        for d in dictlib:
+            # dictionary index
+            didx += 1
+            # dictionary patch length
+            d_p_len = d.shape[1] / 12
+            # too large?
+            if beat_idx + d_p_len > songlen:
+                continue
+            # get the data of the song starting from beat_idx
+            data = beatchromas[:,beat_idx:beat_idx+d_p_len].flatten()
+            # compute the distances for each codeword
+            avg_dists = distfun(data,d)
+            # find lowest one
+            codeidx = np.argsort(avg_dists)
+            dist = avg_dists[codeidx] * 12 * d_p_len
+            # is it the best?
+            if lowest_scores[beat_idx+d_p_len] > dist:
+                lowest_scores[beat_idx+d_p_len] = dist
+                dict_indices[beat_idx+d_p_len] = didx
+                code_indices[beat_idx+d_p_len] = codeidx
+    # encoding done, backtracing
+    raise NotImplementedError
+
+
 
 def load_dict_dir(dirpath,dictlib=None):
     """
@@ -81,7 +125,7 @@ def load_dict_dir(dirpath,dictlib=None):
     
 def die_with_usage():
     """ HELP MENU. """
-    print 'python multidict_encode.py -dictdir <dir> <song beat feats>'
+    print 'python multidict_encode.py -dictdir <dir> <song matfile>'
     sys.exit(0)
 
 
