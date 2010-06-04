@@ -54,7 +54,7 @@ def is_perfect_4(path):
     4 beats bars
     Real job done here!
     """
-    assert(path[-4:]=='.mat','path should be a MATFILE')
+    assert path[-4:]=='.mat','path should be a MATFILE'
     # load matfile
     mat = scipy.io.loadmat(path)
     # get bars in term of beats
