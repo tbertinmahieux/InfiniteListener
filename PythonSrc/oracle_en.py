@@ -199,7 +199,7 @@ class OracleEN:
         self._partialbar = 0
         if params.has_key('partialbar'):self._partialbar = params['partialbar']
         if params.has_key('randoffset'):
-            assert(not params['randoffset'],'randoffset not implemented for EN oracle')
+            assert not params['randoffset'],'randoffset not implemented for EN oracle'
         # start a number of EN threads
         nThreads = params['nThreads']
         assert nThreads > 0,'you need at least one thread'
