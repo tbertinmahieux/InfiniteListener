@@ -73,6 +73,7 @@ def encode(beatchromas,dictlib,distfun):
     lowest_scores[0] = 0
     dict_indices = np.ones(songlen) * -1    # which dict brought us here
     code_indices = np.ones(songlen) * -1    # which code in the dict brought us here
+    patch_sizes = np.ones(songlen) * -1     # length of the patch that brought us here
 
     # iterate over beats
     for beat_idx in range(songlen):
@@ -98,7 +99,25 @@ def encode(beatchromas,dictlib,distfun):
                 lowest_scores[beat_idx+d_p_len] = dist
                 dict_indices[beat_idx+d_p_len] = didx
                 code_indices[beat_idx+d_p_len] = codeidx
+                patch_sizes[beat_idx+d_p_len] = d_p_len
     # encoding done, backtracing
+    dicts = []
+    codes = []
+    beat_idx = songlen - 1
+    # backtrace until reaches beat index 0
+    while True:
+        assert(beat_idx>=0,'error in backtracing')
+        if beat_idx == 0:
+            break
+        dicts.append(dict_indices[beat_idx])
+        dicts.append(code_indices[beat_idx])
+        beat_idx -= patch_sizes[beat_idx]
+    # reverse
+    dicts = np.flipud(np.array(dicts))
+    codes = np.flipud(np.array(codes))
+    # total distortion
+    dist = lowest_score[songlen-1]
+    # return stuff....
     raise NotImplementedError
 
 
