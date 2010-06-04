@@ -121,7 +121,7 @@ def get_features(analysis_dict,pSize=8,usebars=2,keyInv=True,songKeyInv=False,
 
     # offset (SLOW)
     if offset > 0:
-        assert(offset < realSize,'offset too large! must be < to regular pattern length')
+        assert offset < realSize,'offset too large! must be < to regular pattern length'
         # reform features as one big matrix, 12 x something
         feats = np.concatenate([c.reshape(12,realSize) for c in feats],axis=1)
         # remove the offset, and the end
