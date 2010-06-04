@@ -160,6 +160,34 @@ def load_dict_dir(dirpath,dictlib=None):
     # done, return dict_lib instance
     return dictlib
 
+
+def build_encoding(dictlib,dicts,codes):
+    """
+    Builds an actual matrix 12 x #beats of the encoded song, to be compared to btchroma
+    """
+    # compute song len
+    songlen = 0
+    for didx in dicts:
+        songlen += dictlib[int(didx)].shape[1]/12
+    # init matrix
+    btchroma = np.zeros([12,songlen])
+    # fill it
+    beat_idx = 0
+    for d in range(len(dicts)):
+        didx = int(dicts[d])
+        cidx = int(codes[d])
+        d_p_len = dictlib[didx].shape[1]/12
+        # get actual code, reshape
+        c = dictlib[didx][cidx].reshape(12,d_p_len)
+        # fill
+        btchroma[:,beat_idx:beat_idx+d_p_len] = c
+        # update beat idx
+        beat_idx += d_p_len
+    assert beat_idx == songlen , 'wrong update of ebat_idx somewhere...'
+    # done, return
+    return btchroma
+
+
     
 def die_with_usage():
     """ HELP MENU. """
@@ -203,3 +231,20 @@ if __name__ == '__main__':
         didx = int(dicts[k])
         cidx = int(codes[k])
         print 'dict',didx,'patch size',dictlib[didx].shape[1]/12,', code=',cidx
+
+    # build encoding
+    btchroma_encoded = build_encoding(dictlib,dicts,codes)
+
+    # print
+    import pylab as P
+    pparams = {'interpolation':'nearest','origin':'lower','cmap':P.cm.gray_r,'aspect':'auto'}
+    P.subplot(2,1,1)
+    P.imshow(btchroma,**pparams)
+    P.subplot(2,1,2)
+    P.imshow(btchroma_encoded,**pparams)
+    # add lines
+    beat_idx = 0
+    for didx in dicts:
+        beat_idx += dictlib[int(didx)].shape[1]/12
+        P.axvline(x=beat_idx-.5,ymin=0,ymax=12,color='r')
+    P.show()
