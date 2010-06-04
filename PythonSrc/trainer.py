@@ -158,7 +158,7 @@ def train(savedmodel, expdir='', pSize=8, usebars=2, keyInv=True,
             if not autobar:
                 feats = oracle.next_track()
             else:
-                assert(oracle=='MAT','autobar implemented only for matfiles oracle')
+                assert oracle=='MAT','autobar implemented only for matfiles oracle'
                 feats = oracle.next_track(auto_bar=model)
             # check features, remove empty patterns            
             if feats == None:
