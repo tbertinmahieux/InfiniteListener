@@ -500,6 +500,26 @@ tmp = []
 for k in range(1,13):
     tmp.append(eval( '(args'+str(int(k))+',argsd'+str(int(k))+')' ))
 experiment_args.append(tmp)
+# EXPERIMENT SET 9
+# train one codebook per beat size (1 to 4) with same bitrate, no bars
+#1
+args1 = [os.path.join(outputDir,'set9exp1')]
+argsd1 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':1,'bars':0,'nCodes':8}
+args2 = [os.path.join(outputDir,'set9exp2')]
+argsd2 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':2,'bars':0,'nCodes':64}
+args3 = [os.path.join(outputDir,'set9exp3')]
+argsd3 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':3,'bars':0,'nCodes':512}
+args4 = [os.path.join(outputDir,'set9exp4')]
+argsd4 = {'mat_dir':featsDir,'keyInv':False,'songKeyInv':True,'nIter':1e6,
+          'beats':4,'bars':0,'nCodes':4096}
+# add to exp args
+tmp = []
+for k in range(1,5):
+    tmp.append(eval( '(args'+str(int(k))+',argsd'+str(int(k))+')' ))
+experiment_args.append(tmp)
 
 
 
