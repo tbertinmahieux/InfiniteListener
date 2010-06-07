@@ -43,6 +43,19 @@ class dict_lib():
         self._dicts = sorted(self._dicts, key=lambda d : d.shape[0]) # secondary
         self._dicts = sorted(self._dicts, key=lambda d : d.shape[1]) # primary
 
+    def subset(self,indices):
+        """
+        Return a new dict_lib instance containing the dictionaries
+        specified by indices. The dictionaries are shallow copied.
+        """
+        # create new instance
+        dl = dict_lib()
+        # fill it with specified dictionaries
+        for k in indices:
+            dl.add_dict( self[k] )
+        # return new instance
+        return dl
+
     def __getitem__(self,idx):
         """ return the dictionary given by the index, no check if it exists """
         return self._dicts[idx]
@@ -55,7 +68,7 @@ class dict_lib():
             s += str(d.shape[0]) + " codewords\n"
         return s
 
-    def __size__(self):
+    def __len__(self):
         """ returns the number of dictionaries"""
         return len(self._dicts)
 
@@ -246,5 +259,5 @@ if __name__ == '__main__':
     beat_idx = 0
     for didx in dicts:
         beat_idx += dictlib[int(didx)].shape[1]/12
-        P.axvline(x=beat_idx-.5,ymin=0,ymax=12,color='r')
+        P.axvline(x=beat_idx-.5,ymin=0,ymax=1,color='r')
     P.show()
