@@ -367,3 +367,51 @@ def keyinvariance(pattern,retRoll=False):
         return np.roll(pattern,pattern.shape[0]-max_r,axis=0)
     roll = pattern.shape[0]-max_r
     return np.roll(pattern,roll,axis=0),roll
+
+
+
+def filename_to_beatfeat_mat(filename,savefile=''):
+    """
+    Take any song (typical formats, wav or mp3 work)
+    Get the echonest data
+    Save the echonest data into a matfile
+    Matfile is same path as the filename, extension changes, unless
+    savefile path is specified
+    NOTE TO SELF: taken from tzanetakis_utils.py file
+    """
+    # skip if output exists
+    if savefile == '':
+        savefile = filename+'.mat'
+    if savefile[-4:] != '.mat':
+        savefile += '.mat' # because scipy.io.savemat will add it
+    if os.path.exists(savefile):
+        print 'file ' + savefile + ' exists, we skip'
+        return
+    # get EN features
+    pitches, segstart, btstart, barstart, dur = get_en_feats(filename)
+    # warp it!
+    # see get_echo_nest_metadata.get_beat_synchronous_chromagram()
+    segchroma = pitches.T
+    warpmat = get_time_warp_matrix(segstart, btstart, dur)
+    btchroma = np.dot(warpmat, segchroma)
+    # Renormalize.
+    btchroma = (btchroma.T / btchroma.max(axis=1)).T
+    # get the start time of bars
+    # result for track: 'TR0002Q11C3FA8332D'
+    #    barstart.shape = (98,)
+    barbts = np.zeros(barstart.shape)
+    # get the first (only?) beat the starts at the same time as the bar
+    for n, x in enumerate(barstart):
+        barbts[n] = np.nonzero((btstart - x) == 0)[0][0]
+    # save to matlab file, see:
+    # get_echo_nest_metadata.convert_matfile_to_beat_synchronous_chromagram()
+
+    # write file, need to create directories? dangerous but efficient...
+    directory = os.path.dirname(savefile)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    sp.io.savemat(savefile, dict(btchroma=btchroma.T,
+                                 barbts=barbts,       segstart=segstart,
+                                 btstart=btstart,     barstart=barstart,
+                                 duration=dur))
+
