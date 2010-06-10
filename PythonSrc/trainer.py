@@ -127,6 +127,8 @@ def train(savedmodel, expdir='', pSize=8, usebars=2, keyInv=True,
         os.mkdir(expdir)
 
     # create oracle
+    if autobar:
+        assert oracle=='MAT','autobar implemented only for matfiles oracle'
     if oracle == 'EN':
         oracle = oracle_en.OracleEN(params,artistsdb)
     elif oracle == 'MAT':
@@ -158,7 +160,6 @@ def train(savedmodel, expdir='', pSize=8, usebars=2, keyInv=True,
             if not autobar:
                 feats = oracle.next_track()
             else:
-                assert oracle=='MAT','autobar implemented only for matfiles oracle'
                 feats = oracle.next_track(auto_bar=model)
             # check features, remove empty patterns            
             if feats == None:
