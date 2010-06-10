@@ -114,7 +114,7 @@ def die_with_usage():
     print ' -randoffset       uses a random offset for each track ranging from 0 to 3'
     print ''
     print 'typical command to initialize from codebook:'
-    print '  python -O initializer.py -pSize 8 -usebars 2 -artistsdb artists28March.db ~/experiment_dir/newexp/codebook.mat'
+    print '  python -O initializer.py -pSize 8 -usebars 2 -artistsdb artists28March.db 100 ~/experiment_dir/newexp/codebook.mat'
     sys.exit(0)
 
 
