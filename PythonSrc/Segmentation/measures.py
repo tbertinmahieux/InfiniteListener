@@ -30,7 +30,7 @@ def pairwise_precision(startbref,stopbref,startbcand,stopbcand):
     # get last beat
     lastb = stopbref[-1]
     # get all cuts for the intersection
-    cuts_inter = np.unique([0] + startbref + startbcand + [lastb])
+    cuts_inter = np.unique([0] + list(startbref) + list(startbcand) + [lastb])
     # get number of pairs
     npairs_inter = count_similar_pairs(cuts_inter)
     # get all cuts for just the candidate
@@ -52,7 +52,7 @@ def pairwise_recall(startbref,stopbref,startbcand,stopbcand):
     # get last beat
     lastb = stopbref[-1]
     # get all cuts for the intersection
-    cuts_inter = np.unique([0] + startbref + startbcand + [lastb])
+    cuts_inter = np.unique([0] + list(startbref) + list(startbcand) + [lastb])
     # get number of pairs
     npairs_inter = count_similar_pairs(cuts_inter)
     # get all cuts for just the reference
@@ -76,7 +76,7 @@ def pairwise_prec_rec_f(startbref,stopbref,startbcand,stopbcand):
     # get last beat
     lastb = stopbref[-1]
     # get all cuts for the intersection
-    cuts_inter = np.unique([0] + startbref + startbcand + [lastb])
+    cuts_inter = np.unique([0] + list(startbref) + list(startbcand) + [lastb])
     # get number of pairs
     npairs_inter = count_similar_pairs(cuts_inter)
     # get all cuts for just the candidate
