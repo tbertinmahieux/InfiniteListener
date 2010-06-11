@@ -14,7 +14,11 @@ import numpy as np
 import scipy
 import scipy.io as SIO
 
-import features as FEATURES
+try:
+    import features as FEATURES
+except ImportError:
+    sys.path.append( os.path.abspath('..') )
+    import features as FEATURES
 import multidict_encode as ENCODE
 import measures as MEASURES
 
@@ -138,7 +142,7 @@ if __name__ == '__main__':
         if labfile != '':
             startbref, stopbref, labels = read_lab_file(labfile)
             startbcand = np.unique([0] + map(lambda x:x-1,possible_cuts))
-            stopbcand = np.unique(possible_cuts + [btchroma.shape[1]])
+            stopbcand = np.unique(list(possible_cuts) + [btchroma.shape[1]-1])
             prec,rec,fval = MEASURES.pairwise_prec_rec_f(startbref,stopbref,
                                                          startbcand,stopbcand)
             print 'prec =',prec,', rec =',rec,', fval =',fval
