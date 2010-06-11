@@ -143,9 +143,9 @@ if __name__ == '__main__':
             startbref, stopbref, labels = read_lab_file(labfile)
             startbcand = np.unique([0] + map(lambda x:x-1,possible_cuts))
             stopbcand = np.unique(list(possible_cuts) + [btchroma.shape[1]-1])
-            prec,rec,fval = MEASURES.pairwise_prec_rec_f(startbref,stopbref,
-                                                         startbcand,stopbcand)
-            print 'prec =',prec,', rec =',rec,', fval =',fval
+            prec,rec,fval,So,Su = MEASURES.prec_rec_f_So_Su(startbref,stopbref,
+                                                            startbcand,stopbcand)
+            print 'prec =',prec,', rec =',rec,', fval =',fval,', So =',So,', Su =',Su
     # iteration done, print
     if len(possible_cuts) > 0:
         print 'remaining possible cuts:',possible_cuts
