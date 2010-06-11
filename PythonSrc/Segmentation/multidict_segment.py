@@ -8,7 +8,7 @@ Tries to use our multi dictionaries to find a segmentation.
 
 
 
-
+import os
 import sys
 import numpy as np
 import scipy
@@ -16,6 +16,32 @@ import scipy.io as SIO
 
 import features as FEATURES
 import multidict_encode as ENCODE
+import measures as MEASURES
+
+
+def read_lab_file(fnIn):
+    """
+    Read a segmentation file, based on EN beats
+    RETURN
+    startbeats, stopbeats, labels
+    """
+    startbeats = []
+    stopbeats = []
+    labels = []
+    # open file, iterate over lines, close file
+    f = open(fnIn,'r')
+    for line in f.readlines():
+        if line == "" or line.strip() == "":
+            continue
+        line = line.strip()
+        stubs = filter(lambda x: x != "", line.split('\t'))
+        assert len(stubs) >= 3, 'weird line'
+        startbeats.append( int (stubs[0]) )
+        stopbeats.append( int (stubs[1]) )
+        labels.append( stubs[2] )
+    f.close()
+    # done, return
+    return startbeats, stopbeats, labels
 
 
 def get_cuts(dictlib,dicts):
@@ -78,6 +104,11 @@ if __name__ == '__main__':
     # get the longest dictionary
     longest_p_len = dictlib[len(dictlib)-1].shape[1]/12
 
+    # check if lab file exists for segmentation
+    labfile = ''
+    if os.path.exists(matfile + '.lab'):
+        labfile = matfile + '.lab'
+
     # iterate with dictionaries of size 1,2,3 + larger size
     possible_cuts = set()
     count_cuts = np.zeros(btchroma.shape[1])
@@ -103,6 +134,14 @@ if __name__ == '__main__':
         else:
             possible_cuts = possible_cuts.intersection(set(cuts))
         print 'number of remaining cuts:',len(possible_cuts)
+        # get measures on segmentation
+        if labfile != '':
+            startbref, stopbref, labels = read_lab_file(labfile)
+            startbcand = np.unique([0] + map(lambda x:x-1,possible_cuts))
+            stopbcand = np.unique(possible_cuts + [btchroma.shape[1]])
+            prec,rec,fval = MEASURES.pairwise_prec_rec_f(startbref,stopbref,
+                                                         startbcand,stopbcand)
+            print 'prec =',prec,', rec =',rec,', fval =',fval
     # iteration done, print
     if len(possible_cuts) > 0:
         print 'remaining possible cuts:',possible_cuts
