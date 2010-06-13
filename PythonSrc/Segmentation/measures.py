@@ -30,11 +30,11 @@ def pairwise_precision(startbref,stopbref,startbcand,stopbcand):
     # get last beat
     lastb = stopbref[-1]
     # get all cuts for the intersection
-    cuts_inter = np.unique([0] + list(startbref) + list(startbcand) + [lastb])
+    cuts_inter = lit(np.unique([0] + list(startbref) + list(startbcand) + [lastb]))
     # get number of pairs
     npairs_inter = count_similar_pairs(cuts_inter)
     # get all cuts for just the candidate
-    cuts_cand = np.unique([0] + startbcand + [lastb])
+    cuts_cand = list(np.unique([0] + startbcand + [lastb]))
     # get number of pairs
     npairs_cand = count_similar_pairs(cuts_cand)
     # return pairwise precision
@@ -52,11 +52,11 @@ def pairwise_recall(startbref,stopbref,startbcand,stopbcand):
     # get last beat
     lastb = stopbref[-1]
     # get all cuts for the intersection
-    cuts_inter = np.unique([0] + list(startbref) + list(startbcand) + [lastb])
+    cuts_inter = list(np.unique([0] + list(startbref) + list(startbcand) + [lastb]))
     # get number of pairs
     npairs_inter = count_similar_pairs(cuts_inter)
     # get all cuts for just the reference
-    cuts_ref = np.unique([0] + startbref + [lastb])
+    cuts_ref = list(np.unique([0] + startbref + [lastb]))
     # get number of pairs
     npairs_ref = count_similar_pairs(cuts_ref)
     # return pairwise recall
@@ -76,21 +76,23 @@ def pairwise_prec_rec_f(startbref,stopbref,startbcand,stopbcand):
     # get last beat
     lastb = stopbref[-1]
     # get all cuts for the intersection
-    cuts_inter = np.unique([0] + list(startbref) + list(startbcand) + [lastb])
+    cuts_inter = list(np.unique([0] + list(startbref) + list(startbcand) + [lastb]))
     # get number of pairs
     npairs_inter = count_similar_pairs(cuts_inter)
     # get all cuts for just the candidate
-    cuts_cand = np.unique([0] + startbcand + [lastb])
+    cuts_cand = list(np.unique([0] + startbcand + [lastb]))
     # get number of pairs
     npairs_cand = count_similar_pairs(cuts_cand)
     # compute pairwise precision
     prec =  npairs_inter * 1. / npairs_cand
+    assert prec < 1. + 1e-10, 'precision > 1'
     # get all cuts for just the reference
-    cuts_ref = np.unique([0] + startbref + [lastb])
+    cuts_ref = list(np.unique([0] + startbref + [lastb]))
     # get number of pairs
     npairs_ref = count_similar_pairs(cuts_ref)
     # compute pairwise recall
     rec = npairs_inter * 1. / npairs_ref
+    assert rec < 1. + 1e-10, 'recall > 1'
     # compute f-value
     fval = 2 * prec * rec / (prec + rec)
     # return all 3 values
