@@ -92,7 +92,7 @@ def get_fingerprint_feats_per_beat(btstart,duration,maxes,maxessecs):
             continue
         # create subsets, with seconds instead of beats
         submaxes = maxes[:,m_idxs]
-        submaxes[0,:] = np.array(maxessecs)[m_idxs]
+        submaxes[0,:] = np.array(maxessecs)[m_idxs] - bstart
         res.append(submaxes)
     # done, return res
     assert len(res) == btstart.shape[1],'wrong number of feats per beat'
