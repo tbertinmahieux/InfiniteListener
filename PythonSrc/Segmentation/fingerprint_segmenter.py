@@ -363,6 +363,12 @@ def siplca_testalldata(datadir,resfile):
                 print 'siplca ValueError:',msg
                 print 'skipping song',wavfile
                 continue
+            except KeyboardInterrupt:
+                raise KeyboardInterrupt
+            except:
+                print 'unexpected error:',sys.exc_info()[0]
+                print 'skipping song',wavfile
+                continue
             # write to resfile
             fOut = open(resfile,'a')
             fOut.write(wavfile + '\t' + str(prec) + '\t' + str(rec) +'\t')
