@@ -356,7 +356,7 @@ def siplca_testalldata(datadir,resfile):
         fIn.close()
         # do file
         if not isdone:
-            prec,rec,f,So,Su = siplca_method(wavfile,niter=2)
+            prec,rec,f,So,Su = siplca_method(wavfile)
             # write to resfile
             fOut = open(resfile,'a')
             fOut.write(wavfile + '\t' + str(prec) + '\t' + str(rec) +'\t')
