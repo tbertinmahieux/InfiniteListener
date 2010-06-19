@@ -381,6 +381,11 @@ def siplca_testalldata(datadir,resfile):
         allSu += float(results[5])
         cnt += 1.
     fIn.close()
+    allprec /= cnt
+    allrec /= cnt
+    allf /= cnt
+    allSo /= cnt
+    allSu /= cnt
     print 'average prec =',allprec,', rec =',allrec,', f =',allf,', So =',allSo,', Su =',allSu    
 
 
