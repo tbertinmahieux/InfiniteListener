@@ -14,18 +14,18 @@ import numpy as np
 import math
 
 import dummy_segmenter as DUMMY
-#import simmatrix as SIMMAT
 from fingerprint import get_landmarks as LANDMARKS
 rondir = 'ronwsiplca'
 from ronwsiplca import segmenter as SEGMENTER
 mlab = LANDMARKS.mlab
-mlab.addpath(rondir)
-mlab.addpath( os.path.join(rondir, 'coversongs') )
-
+mlab.addpath(os.path.abspath(rondir))
+assert os.path.exists(os.path.join(rondir,'coversongs')),'coversongs directory not found'
+mlab.addpath( os.path.abspath(os.path.join(rondir, 'coversongs/') ))
+import measures as MEASURES
 
 _enfeats_dir = os.path.expanduser('~/Columbia/InfiniteListener/beatles_enbeatfeats')
 _audio_dir = os.path.expanduser('~/Columbia/InfiniteListener/beatles_audio')
-
+_seglab_dir = os.path.expanduser('~/Columbia/InfiniteListener/beatles_seglab')
 
 def maxes_beattimes_segs_from_audiofile(wavfile):
     """
@@ -265,11 +265,11 @@ def siplca_method(wavfile,rank=4,win=60,plotiter=10,printiter=10,niter=200):
     x,fs = mlab.wavread(wavfile,nout=2)
     feats,beats = mlab.chrombeatftrs(x,fs,400,1,1,nout=2)
     # get the fingerprints
-    print 'compute landmarks'
+    print 'compute landmarks,',beats.shape[1],'beats found'
     L,S,T,maxes = LANDMARKS.find_landmarks_from_wav(wavfile)
     maxessecs = get_actual_times(maxes)
     # transform them into per beats features
-    print 'get features per beat'
+    print 'get features per beat,',len(maxessecs),'landmarks found'
     beatfeats = get_fingerprint_feats_per_beat(beats,np.max(maxessecs)+.1,
                                                maxes,maxessecs)
     databeat = np.zeros([256,len(beatfeats)])
@@ -279,8 +279,10 @@ def siplca_method(wavfile,rank=4,win=60,plotiter=10,printiter=10,niter=200):
             continue
         for k in range(bf.shape[1]):
             databeat[int(bf[1,k]-1),bf_idx] += 1
-    # launch siplca
-    print 'launch siplca'
+    # launch siplca,
+    print 'number of empty rows:',np.shape(np.where(databeat.sum(1)==0))[1],', removed...'
+    databeat = databeat[np.where(databeat.sum(1)>0)[0],:]
+    print 'launch siplca on',wavfile,', databeat.shape=',databeat.shape
     np.random.seed(123)
     V = databeat.copy()
     V/=V.sum()
@@ -288,13 +290,98 @@ def siplca_method(wavfile,rank=4,win=60,plotiter=10,printiter=10,niter=200):
                                                           plotiter=plotiter,
                                                           printiter=printiter,
                                                           niter=niter)
-    print 'labels:',labels
-    print 'segfun:',segfun
-
-
+    #res = SEGMENTER.convert_labels_to_segments(labels, beats[0])
+    # transform labels output to actuall startbeat and stopbeat
+    startbeats = [0]
+    stopbeats = []
+    currlabel = labels[0]
+    for k in range(1,len(labels)):
+        if labels[k] != currlabel:
+            currlabel = labels[k]
+            startbeats.append(k)
+            stopbeats.append(k-1)
+    stopbeats.append(len(labels)-1)
+    # get groundtruth
+    relwavfile = os.path.relpath(wavfile,start=_audio_dir)
+    labfile = os.path.join(_seglab_dir,relwavfile[:-4]+'.lab')
+    segstarts = []
+    fIn = open(labfile,'r')
+    for line in fIn.readlines():
+        if line == '' or line.strip() == '':
+            continue
+        segstarts.append( float(line.strip().split('\t')[0]) )
+    fIn.close()
+    refstartbeats = []
+    for ss in segstarts: # slow...!
+        for k in range(beats.shape[1]-1):
+            if beats[0,k] <= ss and beats[0,k+1] > ss:
+                refstartbeats.append(k)
+                break
+        if ss > beats[0,-1]:
+            refstartbeats.append(beats.shape[1]-1)
+        elif ss < beats[0,0]:
+            refstartbeats.append(0)
+    refstopbeats = list(np.array(refstartbeats[1:]) - 1) + [beats.shape[1]-1]
     # measure error
-    raise NotImplementedError
+    prec,rec,f,So,Su = MEASURES.prec_rec_f_So_Su(refstartbeats,
+                                                 refstopbeats,
+                                                 startbeats,
+                                                 stopbeats)
+    print 'prec =',prec,', rec =',rec,', f =',f,', So =',So,', Su =',Su
+    return prec,rec,f,So,Su
 
+
+def siplca_testalldata(datadir,resfile):
+    """
+    Test the whole Beatles dataset using siplca method
+    """
+    allwavs = DUMMY.get_all_files(datadir,pattern='*.wav')
+    allwavs = map(lambda x: os.path.abspath(x), allwavs)
+    np.random.shuffle(allwavs)
+    print len(allwavs),'wavfiles found'
+    if not os.path.exists(resfile):
+        fOut = open(resfile,'w')
+        fOut.close()
+    # iterate over wavs
+    for wavfile in allwavs:
+        # check if result exists
+        isdone = False
+        fIn = open(resfile,'r')
+        for line in fIn.readlines():
+            if line == '' or line.strip() == '':
+                continue
+            if line.strip().split("\t")[0] == wavfile:
+                isdone = True
+            break
+        fIn.close()
+        # do file
+        if not isdone:
+            prec,rec,f,So,Su = siplca_method(wavfile,niter=2)
+            # write to resfile
+            fOut = open(resfile,'a')
+            fOut.write(wavfile + '\t' + str(prec) + '\t' + str(rec) +'\t')
+            fOut.write(str(f) + '\t' + str(So) + '\t' + str(Su) + '\n')
+            fOut.close()
+    # all files done, report results
+    allprec = 0
+    allrec = 0
+    allf = 0
+    allSo = 0
+    allSu = 0
+    cnt = 0
+    fIn = open(resfile,'r')
+    for line in fIn.readlines():
+        if line == '' or line.strip() == '':
+            continue
+        results = line.strip().split("\t")
+        allprec += float(results[1])
+        allrec += float(results[2])
+        allf += float(results[3])
+        allSo += float(results[4])
+        allSu += float(results[5])
+        cnt += 1.
+    fIn.close()
+    print 'average prec =',allprec,', rec =',allrec,', f =',allf,', So =',allSo,', Su =',allSu    
 
 
 def die_with_usage():
