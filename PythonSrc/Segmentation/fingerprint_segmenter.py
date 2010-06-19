@@ -321,6 +321,7 @@ def siplca_method(wavfile,rank=4,win=60,plotiter=10,printiter=10,niter=200):
             refstartbeats.append(beats.shape[1]-1)
         elif ss < beats[0,0]:
             refstartbeats.append(0)
+    refstartbeats = list(np.unique(refstartbeats))
     refstopbeats = list(np.array(refstartbeats[1:]) - 1) + [beats.shape[1]-1]
     # measure error
     prec,rec,f,So,Su = MEASURES.prec_rec_f_So_Su(refstartbeats,
@@ -356,7 +357,12 @@ def siplca_testalldata(datadir,resfile):
         fIn.close()
         # do file
         if not isdone:
-            prec,rec,f,So,Su = siplca_method(wavfile)
+            try:
+                prec,rec,f,So,Su = siplca_method(wavfile)
+            except ValueError, msg:
+                print 'siplca ValueError:',msg
+                print 'skipping song',wavfile
+                continue
             # write to resfile
             fOut = open(resfile,'a')
             fOut.write(wavfile + '\t' + str(prec) + '\t' + str(rec) +'\t')
