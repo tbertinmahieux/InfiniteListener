@@ -282,6 +282,7 @@ def siplca_method(wavfile,rank=4,win=60,plotiter=10,printiter=10,niter=200):
     # launch siplca,
     print 'number of empty rows:',np.shape(np.where(databeat.sum(1)==0))[1],', removed...'
     databeat = databeat[np.where(databeat.sum(1)>0)[0],:]
+    databeat += 1e-16
     print 'launch siplca on',wavfile,', databeat.shape=',databeat.shape
     np.random.seed(123)
     V = databeat.copy()
@@ -353,7 +354,7 @@ def siplca_testalldata(datadir,resfile):
                 continue
             if line.strip().split("\t")[0] == wavfile:
                 isdone = True
-            break
+                break
         fIn.close()
         # do file
         if not isdone:
