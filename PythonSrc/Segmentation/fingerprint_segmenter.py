@@ -263,6 +263,8 @@ def siplca_method(wavfile,rank=4,win=60,plotiter=10,printiter=10,niter=200):
     # compute beats
     print 'compute beats'
     x,fs = mlab.wavread(wavfile,nout=2)
+    x = np.average(x,axis=1)
+    assert x.shape[0] > 2,'bad signal averaging'
     feats,beats = mlab.chrombeatftrs(x,fs,400,1,1,nout=2)
     # get the fingerprints
     print 'compute landmarks,',beats.shape[1],'beats found'
