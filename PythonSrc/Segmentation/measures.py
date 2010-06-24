@@ -133,15 +133,15 @@ def entropy_So_Su(startbref,stopbref,startbcand,stopbcand):
     # compute number of segments (a -> ground truth, e -> candidate)
     Na = len(startbref)
     Ne = len(startbcand)
-    # get belonging of eahc beat to a segment in both ref and cand
+    # get belonging of each beat to a segment in both ref and cand
     beat_per_a_seg = np.zeros(lastb+1)
     for k in range(len(startbref)):
         beat_per_a_seg[startbref[k]:stopbref[k]+1] = k
     beat_per_e_seg = np.zeros(lastb+1)
     for k in range(len(startbcand)):
         beat_per_e_seg[startbcand[k]:stopbcand[k]+1] = k
-    # computes n_ij, number of frames that belong simultaneously to segment i of ref
-    # and j of candidate
+    # computes n_ij, number of frames that belong simultaneously to segment i
+    # of ref and j of candidate
     Nij = np.zeros([Na,Ne])
     for k in range(lastb+1):
         Nij[ beat_per_a_seg[k], beat_per_e_seg[k] ] += 1
@@ -171,6 +171,7 @@ def entropy_So_Su(startbref,stopbref,startbcand,stopbcand):
     So = 1 - Hea / np.log2( Ne )
     Su = 1 - Hae / np.log2( Na )
     # done, return
+    #raise NotImplementedError # check Ron's implementation
     return So, Su
 
 
