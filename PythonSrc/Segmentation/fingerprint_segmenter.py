@@ -252,7 +252,7 @@ def plot_maxes_beats_segs(maxes,maxessecs,btstart,labfile=''):
     
 
 
-def siplca_method(wavfile,rank=4,win=60,plotiter=10,printiter=10,niter=200):
+def siplca_method(wavfile,rank=4,win=60,plotiter=10,printiter=10,niter=200,fullspec=False):
     """
     Compute beats using Dan's code
     Get the fingerprints
@@ -269,21 +269,41 @@ def siplca_method(wavfile,rank=4,win=60,plotiter=10,printiter=10,niter=200):
     # get the fingerprints
     print 'compute landmarks,',beats.shape[1],'beats found'
     L,S,T,maxes = LANDMARKS.find_landmarks_from_wav(wavfile)
-    maxessecs = get_actual_times(maxes)
-    # transform them into per beats features
-    print 'get features per beat,',len(maxessecs),'landmarks found'
-    beatfeats = get_fingerprint_feats_per_beat(beats,np.max(maxessecs)+.1,
-                                               maxes,maxessecs)
-    databeat = np.zeros([256,len(beatfeats)])
-    for bf_idx in range(len(beatfeats)):
-        bf = beatfeats[bf_idx]
-        if bf.shape[1] == 0:
-            continue
-        for k in range(bf.shape[1]):
-            databeat[int(bf[1,k]-1),bf_idx] += 1
+    # LANDMARKS
+    if not fullspec:
+        # transform them into per beats features
+        print 'get features per beat,',len(maxessecs),'landmarks found'
+        maxessecs = get_actual_times(maxes)
+        beatfeats = get_fingerprint_feats_per_beat(beats,np.max(maxessecs)+.1,
+                                                   maxes,maxessecs)
+        databeat = np.zeros([256,len(beatfeats)])
+        for bf_idx in range(len(beatfeats)):
+            bf = beatfeats[bf_idx]
+            if bf.shape[1] == 0:
+                continue
+            for k in range(bf.shape[1]):
+                databeat[int(bf[1,k]-1),bf_idx] += 1
+        print 'number of empty rows:',np.shape(np.where(databeat.sum(1)==0))[1],', removed...'
+        databeat = databeat[np.where(databeat.sum(1)>0)[0],:]
+    # FULL SPECTROGRAM
+    else:
+        # get time for each pos of the spectrogram, then beat for each pos
+        fakemaxes = np.zeros([2,S.shape[1]])
+        fakemaxes[0,:] = np.array(range(S.shape[1])).reshape(1,S.shape[1])
+        times = get_actual_times(fakemaxes)
+        # fill in databeat
+        beats = np.array(beats)[0]
+        databeat = np.zeros([S.shape[0],beats.shape[0]])
+        for k in range(S.shape[1]):
+            t = times[k]
+            bs = np.where(beats > t)[0]
+            if bs.shape[0] == 0: # last beat
+                b = databeat.shape[1] - 1
+            else:
+                b = max(0,bs[0]-1)
+            databeat[:,b] += S[:,k]
+        print 'full spec, max value:',databeat.max(),', shape =',databeat.shape
     # launch siplca,
-    print 'number of empty rows:',np.shape(np.where(databeat.sum(1)==0))[1],', removed...'
-    databeat = databeat[np.where(databeat.sum(1)>0)[0],:]
     databeat += 1e-16
     print 'launch siplca on',wavfile,', databeat.shape=',databeat.shape
     np.random.seed(123)
@@ -335,7 +355,7 @@ def siplca_method(wavfile,rank=4,win=60,plotiter=10,printiter=10,niter=200):
     return prec,rec,f,So,Su
 
 
-def siplca_testalldata(datadir,resfile):
+def siplca_testalldata(datadir,resfile,fullspec=False):
     """
     Test the whole Beatles dataset using siplca method
     """
@@ -361,7 +381,7 @@ def siplca_testalldata(datadir,resfile):
         # do file
         if not isdone:
             try:
-                prec,rec,f,So,Su = siplca_method(wavfile)
+                prec,rec,f,So,Su = siplca_method(wavfile,fullspec=fullspec)
             except ValueError, msg:
                 print 'siplca ValueError:',msg
                 print 'skipping song',wavfile
