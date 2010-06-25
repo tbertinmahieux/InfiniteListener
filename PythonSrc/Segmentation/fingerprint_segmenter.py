@@ -272,8 +272,8 @@ def siplca_method(wavfile,rank=4,win=60,plotiter=10,printiter=10,niter=200,fulls
     # LANDMARKS
     if not fullspec:
         # transform them into per beats features
-        print 'get features per beat,',len(maxessecs),'landmarks found'
         maxessecs = get_actual_times(maxes)
+        print 'get features per beat,',len(maxessecs),'landmarks found'
         beatfeats = get_fingerprint_feats_per_beat(beats,np.max(maxessecs)+.1,
                                                    maxes,maxessecs)
         databeat = np.zeros([256,len(beatfeats)])
@@ -292,16 +292,17 @@ def siplca_method(wavfile,rank=4,win=60,plotiter=10,printiter=10,niter=200,fulls
         fakemaxes[0,:] = np.array(range(S.shape[1])).reshape(1,S.shape[1])
         times = get_actual_times(fakemaxes)
         # fill in databeat
-        beats = np.array(beats)[0]
-        databeat = np.zeros([S.shape[0],beats.shape[0]])
+        #beats = np.array(beats)[0]
+        databeat = np.zeros([S.shape[0],beats.shape[1]])
         for k in range(S.shape[1]):
             t = times[k]
-            bs = np.where(beats > t)[0]
+            bs = np.where(np.array(beats)[0] > t)[0]
             if bs.shape[0] == 0: # last beat
                 b = databeat.shape[1] - 1
             else:
                 b = max(0,bs[0]-1)
             databeat[:,b] += S[:,k]
+        databeat -= databeat.min()
         print 'full spec, max value:',databeat.max(),', shape =',databeat.shape
     # launch siplca,
     databeat += 1e-16
