@@ -301,7 +301,7 @@ def siplca_method(wavfile,rank=4,win=60,plotiter=10,printiter=10,niter=200,fulls
                 b = databeat.shape[1] - 1
             else:
                 b = max(0,bs[0]-1)
-            databeat[:,b] += S[:,k]
+            databeat[:,b] += np.exp(S[:,k]) # remove the log for NMF
         databeat -= databeat.min()
         print 'full spec, max value:',databeat.max(),', shape =',databeat.shape
     # launch siplca,
