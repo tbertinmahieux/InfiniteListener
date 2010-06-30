@@ -73,8 +73,35 @@ def plot_simmat(data,winsize=1,overlap=0,dist=euclidean_dist,labfile=''):
             P.scatter(0,pos,s=point_size,c='r',marker='o')
         P.hold(False)
     P.show()
+    # plot first derivative
+    P.figure()
+    simmat_diff = np.diff(simmat)
+    simmat_diff = simmat_diff * simmat_diff
+    P.imshow(simmat_diff,**args2)
+    # we have labfile?
+    if labfile != '':
+        P.hold(True)
+        startbeats,stopbeats,labels = DUMMY.read_lab_file(labfile)
+        for sb in startbeats:
+            pos = int((sb - winsize) / (winsize - overlap)) + 1 - 1
+            assert pos <= simmat.shape[1],'wrong pos for lab data'
+            point_size = 30
+            P.scatter(pos,pos,s=point_size,c='r',marker='o')
+            P.scatter(pos,0,s=point_size,c='r',marker='o')
+            P.scatter(0,pos,s=point_size,c='r',marker='o')
+        P.hold(False)
+    P.show()
     # done, return simmat
     return simmat
 
 
-    
+def gaussian_segmenter(simmat,theta,threshold):
+    """
+    Segment a similarity matrix based on a gaussian like filter
+    [+1 -1; -1 +1]
+    theta controls the variance, threshold controls how to decide if
+    it a new segment or not
+    """
+    import scipy.ndimage as IMAGE
+
+    raise NotImplementedError

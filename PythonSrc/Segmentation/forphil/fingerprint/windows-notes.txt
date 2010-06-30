@@ -1,0 +1,36 @@
+From: Rob Macrae
+Date: Mon, May 25, 2009 at 7:46 AM
+To: dpwe@ee.columbia.edu
+
+[...]
+
+I recently wanted to get your matlab audio landmarking algorithm
+working on a windows machine and thought I'd let you know of the traps
+and fixes that were involved so you can let others know.
+
+Firstly I had a problem with myls which I just replaced with a dir,
+then struct2cell then (1,:) as I was working with offline files.
+
+In mp3read and mp3info: The paths to mpg123.exe and mp3info.exe had to
+be complete global paths. The same applies to the mp3 folder (despite
+being included in Matlabs saved paths).
+
+Also, Matlab 2004 doesn't have the 'first' flag for the unique method
+(used in match_query.m) and so this will need to be replaced. Here I 
+offer an alternative firstUnique.m that gets the same results:
+
+function [B,M] = firstUnique(A)
+% B is the unique elements in A
+% M indexes the first instance of each so B = A(M)
+B = unique(A);
+M = zeros(size(B));
+for ib = 1:length(B)
+    M(ib) = min(find(A==B(ib)));
+end
+
+Thanks
+Robert Macrae
+
+Research Student
+Centre for Digital Music at Queen Mary University
+(and temporary) intern in the Multimedia Research Group at Telefonica I&D

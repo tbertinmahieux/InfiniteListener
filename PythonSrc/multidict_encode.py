@@ -240,10 +240,10 @@ if __name__ == '__main__':
 
     # display
     print 'total distortion=',score
-    for k in range(len(dicts)):
-        didx = int(dicts[k])
-        cidx = int(codes[k])
-        print 'dict',didx,'patch size',dictlib[didx].shape[1]/12,', code=',cidx
+    #for k in range(len(dicts)):
+    #    didx = int(dicts[k])
+    #    cidx = int(codes[k])
+    #    print 'dict',didx,'patch size',dictlib[didx].shape[1]/12,', code=',cidx
 
     # build encoding
     btchroma_encoded = build_encoding(dictlib,dicts,codes)
