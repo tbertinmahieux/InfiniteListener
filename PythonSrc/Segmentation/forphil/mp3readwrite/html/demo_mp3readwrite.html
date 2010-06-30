@@ -1,0 +1,233 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      --><title>MP3 reading and writing</title><meta name="generator" content="MATLAB 7.10"><meta name="date" content="2010-04-09"><meta name="m-file" content="demo_mp3readwrite"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><h1>MP3 reading and writing</h1><!--introduction--><p>These function, mp3read and mp3write, aim to exactly duplicate the operation of wavread and wavwrite for accessing soundfiles, except the soundfiles are in Mpeg-Audio layer 3 (MP3) compressed format.  All the hard work is done by external binaries written by others: mp3info to query the format of existing mp3 files, mpg123 to decode mp3 files, and lame to encode audio files. Binaries for these files are widely available (and may be included in this distribution).</p><p>These functions were originally developed for access to very large mp3 files (i.e. many hours long), and so avoid creating the entire uncompressed audio stream if possible.  mp3read allows you to specify the range of frames you want to read (as a second argument), and mp3read will construct an mpg123 command that skips blocks to decode only the part of the file that is required.  This can be much quicker (and require less memory/temporary disk) than decoding the whole file.</p><p>mpg123 also provides for "on the fly" downsampling at conversion to mono, which are supported as extra options in mp3read.</p><p>mpg123 can read MP3s across the network.  This is supported if the FILE argument is a URL (e.g. beginning 'http://...').</p><p>mp3info sometimes gets the file size wrong (as returned by the mp3read(...'size') syntax).  I'm not sure when this happens exactly, but it's probably a result of VBR files. In the worst case, figuring the number of samples in such a file requires scanning through the whole file, and mp3info doesn't usually do this.</p><p>For more information, including advice on handling MP4 files, see <a href="http://labrosa.ee.columbia.edu/matlab/mp3read.html">http://labrosa.ee.columbia.edu/matlab/mp3read.html</a></p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Example usage</a></li><li><a href="#2">Delay, size, and alignment</a></li><li><a href="#3">External binaries</a></li><li><a href="#4">Installation</a></li></ul></div><h2>Example usage<a name="1"></a></h2><p>Here, we read a wav file in, then write it out as an MP3, then read the resulting MP3 back in, and compare it to the original file.</p><pre class="codeinput"><span class="comment">% Read an audio waveform</span>
+[d,sr] = wavread(<span class="string">'piano.wav'</span>);
+<span class="comment">% Save to mp3 (default settings)</span>
+mp3write(d,sr,<span class="string">'piano.mp3'</span>);
+<span class="comment">% Read it back again</span>
+[d2,sr] = mp3read(<span class="string">'piano.mp3'</span>);
+<span class="comment">% mp3 encoding involves some extra padding at each end; we attempt</span>
+<span class="comment">% to cut it off at the start, but can't do that at the end, because</span>
+<span class="comment">% mp3read doesn't know how long the original was.  But we do, so..</span>
+<span class="comment">% Chop it down to be the same length as the original</span>
+d2 = d2(1:length(d),:);
+<span class="comment">% What is the SNR (distortion)?</span>
+ddiff = d - d2;
+disp([<span class="string">'SNR is '</span>,num2str(10*log10(sum(d(:).^2)/sum(ddiff(:).^2))),<span class="string">' dB'</span>]);
+<span class="comment">% Do they look similar?</span>
+subplot(211)
+specgram(d(:,1),1024,sr);
+subplot(212)
+plot(1:5000,d(10000+(1:5000),1),1:5000,d2(10000+(1:5000)));
+<span class="comment">% Yes, pretty close</span>
+<span class="comment">%</span>
+<span class="comment">% NB: lame followed by mpg123 causes a little attenuation; you</span>
+<span class="comment">% can get a better match by scaling up the read-back waveform:</span>
+ddiff = d - 1.052*d2;
+disp([<span class="string">'SNR is '</span>,num2str(10*log10(sum(d(:).^2)/sum(ddiff(:).^2))),<span class="string">' dB'</span>]);
+</pre><pre class="codeoutput">Warning: popenw not available, writing temporary file
+SNR is 22.632 dB
+SNR is 24.8699 dB
+</pre><img vspace="5" hspace="5" src="demo_mp3readwrite_01.png" alt=""> <h2>Delay, size, and alignment<a name="2"></a></h2><p>In mid-2006 I noticed that mp3read followed by mp3write followed by mp3read effectively delayed the waveform by 2257 samples (at 44 kHz). So I introduced code to discard the first 2257 samples to ensure that the waveforms remained time aligned. As best I could understand, mpg123 (v 0.5.9) was including the "warm-up" samples from the synthesis filterbank which are more properly discarded.</p><p>Then in late 2009 I noticed that some chord recognition code, which used mp3read to read files which were then segmented on the basis of some hand-marked timings, suddenly started getting much poorer results. It turned out that I had upgraded my version of mpg123 to v 1.9.0, and the warm-up samples had been fixed in this version. So my code was discarding 2257 <b>good</b> samples, and the data was skewed 51ms early relative to the hand labels.</p><p>Hence, the current version of mp3read does not discard any samples by default -- appropriate for the recent versions of mpg123 included here. But if you know you're running an old, v 0.5.9, mpg123, you should edit the mp3read.m source to set the flag MPG123059 = 1.</p><p>Note also that the 'size' function relies on the number of blocks reported by mp3info.  However, many mp3 files include additional information about the size of the file in the so-called Xing header, embedded in the first frame, which can specify that a certain number of samples from start and end should additionally be dropped.  mp3info doesn't read that, and there's no way for my code to probe it except by running mpg123.  Hence, the results of mp3read(fn,'size') may sometimes overestimate the length of the actual vector you'll get if you read the whole file.</p><h2>External binaries<a name="3"></a></h2><p>The m files rely on three external binaries, each of which is available for Linux, Mac OS X, or Windows:</p><p><b>mpg123</b> is a high-performance mp3 decoder.  Its home page is <a href="http://www.mpg123.de/">http://www.mpg123.de/</a> .</p><p><b>mp3info</b> is a utility to read technical information on an mp3 file. Its home page is <a href="http://www.ibiblio.org/mp3info/">http://www.ibiblio.org/mp3info/</a> .</p><p><b>lame</b> is an open-source MP3 encoder.  Its homepage is <a href="http://lame.sourceforge.net/">http://lame.sourceforge.net/</a> .</p><p>The various authors of these packages are gratefully acknowledged for doing all the hard work to make these Matlab functions possible.</p><h2>Installation<a name="4"></a></h2><p>The two routines, mp3read.m and mp3write.m, will look for their binaries (mpg123 and mp3info for mp3read; lame for mp3write) in the same directory where they are installed.  Binaries for different architectures are distinguished by their extension, which is the standard Matlab computer code e.g. ".mac" for Mac PPC OS X, ".glnx86" for i386-linux.  The exception is Windows, where the binaries have the extension ".exe".</p><p>Temporary files will be written to (a) a directory taken from the environment variable TMPDIR (b) /tmp if it exists, or (c) the current directory.  This can easily be changed by editing the m files.</p><pre class="codeinput"><span class="comment">% Last updated: $Date: 2009/03/15 18:29:58 $</span>
+<span class="comment">% Dan Ellis &lt;dpwe@ee.columbia.edu&gt;</span>
+</pre><p class="footer"><br>
+      Published with MATLAB&reg; 7.10<br></p></div><!--
+##### SOURCE BEGIN #####
+%% MP3 reading and writing
+%
+% These function, mp3read and mp3write, aim to exactly duplicate 
+% the operation of wavread and wavwrite for accessing soundfiles, 
+% except the soundfiles are in Mpeg-Audio layer 3 (MP3) compressed 
+% format.  All the hard work is done by external binaries written 
+% by others: mp3info to query the format of existing mp3 files, 
+% mpg123 to decode mp3 files, and lame to encode audio files.
+% Binaries for these files are widely available (and may be
+% included in this distribution).  
+%
+% These functions were originally developed for access to very 
+% large mp3 files (i.e. many hours long), and so avoid creating 
+% the entire uncompressed audio stream if possible.  mp3read 
+% allows you to specify the range of frames you want to read 
+% (as a second argument), and mp3read will construct an mpg123 
+% command that skips blocks to decode only the part of the file 
+% that is required.  This can be much quicker (and require less 
+% memory/temporary disk) than decoding the whole file.
+%
+% mpg123 also provides for "on the fly" downsampling at conversion 
+% to mono, which are supported as extra options in mp3read.
+%
+% mpg123 can read MP3s across the network.  This is supported 
+% if the FILE argument is a URL (e.g. beginning 'http://...').
+%
+% mp3info sometimes gets the file size wrong (as returned by the
+% mp3read(...'size') syntax).  I'm not sure when this happens
+% exactly, but it's probably a result of VBR files. In the worst
+% case, figuring the number of samples in such a file requires
+% scanning through the whole file, and mp3info doesn't usually do
+% this. 
+%
+% For more information, including advice on handling MP4 files, 
+% see http://labrosa.ee.columbia.edu/matlab/mp3read.html
+
+%% Example usage
+% Here, we read a wav file in, then write it out as an MP3, then 
+% read the resulting MP3 back in, and compare it to the original 
+% file.
+
+% Read an audio waveform
+[d,sr] = wavread('piano.wav');
+% Save to mp3 (default settings)
+mp3write(d,sr,'piano.mp3');
+% Read it back again
+[d2,sr] = mp3read('piano.mp3');
+% mp3 encoding involves some extra padding at each end; we attempt 
+% to cut it off at the start, but can't do that at the end, because 
+% mp3read doesn't know how long the original was.  But we do, so..
+% Chop it down to be the same length as the original
+d2 = d2(1:length(d),:);
+% What is the SNR (distortion)?
+ddiff = d - d2;
+disp(['SNR is ',num2str(10*log10(sum(d(:).^2)/sum(ddiff(:).^2))),' dB']);
+% Do they look similar?
+subplot(211)
+specgram(d(:,1),1024,sr);
+subplot(212)
+plot(1:5000,d(10000+(1:5000),1),1:5000,d2(10000+(1:5000)));
+% Yes, pretty close
+%
+% NB: lame followed by mpg123 causes a little attenuation; you 
+% can get a better match by scaling up the read-back waveform:
+ddiff = d - 1.052*d2;
+disp(['SNR is ',num2str(10*log10(sum(d(:).^2)/sum(ddiff(:).^2))),' dB']);
+
+%% Delay, size, and alignment
+%
+% In mid-2006 I noticed that mp3read followed by mp3write followed by
+% mp3read effectively delayed the waveform by 2257 samples (at 44
+% kHz). So I introduced code to discard the first 2257 samples to ensure
+% that the waveforms remained time aligned. As best I could understand,
+% mpg123 (v 0.5.9) was including the "warm-up" samples from the
+% synthesis filterbank which are more properly discarded.
+%
+% Then in late 2009 I noticed that some chord recognition code, which
+% used mp3read to read files which were then segmented on the basis of
+% some hand-marked timings, suddenly started getting much poorer
+% results. It turned out that I had upgraded my version of mpg123 to v
+% 1.9.0, and the warm-up samples had been fixed in this version. So my
+% code was discarding 2257 *good* samples, and the data was skewed 51ms
+% early relative to the hand labels.
+%
+% Hence, the current version of mp3read does not
+% discard any samples by default REPLACE_WITH_DASH_DASH appropriate for the recent versions
+% of mpg123 included here. But if you know you're running an old, v
+% 0.5.9, mpg123, you should edit the mp3read.m source to set the flag
+% MPG123059 = 1.
+% 
+% Note also that the 'size' function relies on the number of 
+% blocks reported by mp3info.  However, many mp3 files include 
+% additional information about the size of the file in the
+% so-called Xing header, embedded in the first frame, which can 
+% specify that a certain number of samples from start and end 
+% should additionally be dropped.  mp3info doesn't read that, 
+% and there's no way for my code to probe it except by running 
+% mpg123.  Hence, the results of mp3read(fn,'size') may sometimes 
+% overestimate the length of the actual vector you'll get if 
+% you read the whole file.
+
+%% External binaries
+% The m files rely on three external binaries, each of which is
+% available for Linux, Mac OS X, or Windows:
+%
+% *mpg123* is a high-performance mp3 decoder.  Its home page is
+% http://www.mpg123.de/ .  
+%
+% *mp3info* is a utility to read technical information on an mp3
+% file. Its home page is http://www.ibiblio.org/mp3info/ .  
+%
+% *lame* is an open-source MP3 encoder.  Its homepage is
+% http://lame.sourceforge.net/ .
+%
+% The various authors of these packages are gratefully acknowledged 
+% for doing all the hard work to make these Matlab functions possible.
+
+%% Installation
+% The two routines, mp3read.m and mp3write.m, will look for their 
+% binaries (mpg123 and mp3info for mp3read; lame for mp3write) in 
+% the same directory where they are installed.  Binaries for
+% different architectures are distinguished by their extension, 
+% which is the standard Matlab computer code e.g. ".mac" for Mac
+% PPC OS X, ".glnx86" for i386-linux.  The exception is Windows,
+% where the binaries have the extension ".exe".  
+%
+% Temporary files 
+% will be written to (a) a directory taken from the environment 
+% variable TMPDIR (b) /tmp if it exists, or (c) the current 
+% directory.  This can easily be changed by editing the m files.
+
+% Last updated: $Date: 2009/03/15 18:29:58 $
+% Dan Ellis <dpwe@ee.columbia.edu>
+
+##### SOURCE END #####
+--></body></html>
